@@ -1,0 +1,12 @@
+# zetaone docker-compose
+name: zetaone
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../src:/app/src

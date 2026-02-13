@@ -1,0 +1,10 @@
+# zetaone dependencies
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+alembic
+psycopg2-binary
+python-dotenv
+pyyaml
+loguru

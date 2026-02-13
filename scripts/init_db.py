@@ -1,0 +1,2 @@
+# zetaone database initialization
+# Placeholder
