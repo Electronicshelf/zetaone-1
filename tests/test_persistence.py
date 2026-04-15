@@ -1,6 +1,6 @@
 """
 Integration test for database persistence.
-Requires PostgreSQL at DATABASE_URL (default: postgresql://localhost:5432/zetaone).
+Requires PostgreSQL at DATABASE_URL (default: postgresql://localhost:5432/zataone).
 Run with: pytest tests/test_persistence.py -v -s
 """
 
@@ -9,24 +9,24 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, MagicMock
 
-# Ensure src is first for correct zetaone import
+# Ensure src is first for correct zataone import
 src = Path(__file__).resolve().parent.parent / "src"
 if str(src) not in sys.path:
     sys.path.insert(0, str(src))
 
 import pytest
 
-from zetaone.core.pipeline import CompliancePipeline
-from zetaone.storage import database as db
-from zetaone.storage.database import create_all_tables, SessionLocal, get_session_factory
-from zetaone.models.asset import Asset
-from zetaone.models.signal import Signal
-from zetaone.models.verdict import Verdict
+from zataone.core.pipeline import CompliancePipeline
+from zataone.storage import database as db
+from zataone.storage.database import create_all_tables, SessionLocal, get_session_factory
+from zataone.models.asset import Asset
+from zataone.models.signal import Signal
+from zataone.models.verdict import Verdict
 
 
 def test_persistence():
     """Run pipeline and verify compliance graph is persisted to database."""
-    from zetaone.extractors.registry import ExtractorRegistry
+    from zataone.extractors.registry import ExtractorRegistry
 
     try:
         create_all_tables()

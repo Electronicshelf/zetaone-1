@@ -1,3 +1,3 @@
 #!/bin/bash
-# zetaone development runner
+# zataone development runner
 # Placeholder

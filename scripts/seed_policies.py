@@ -1,2 +1,2 @@
-# zetaone policy seeding
+# zataone policy seeding
 # Placeholder

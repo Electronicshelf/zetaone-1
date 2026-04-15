@@ -1,14 +1,14 @@
-# ZetaOne
+# ZataOne
 
 **Deterministic, evidence-first AI compliance platform for enterprise regulatory enforcement.**
 
-ZetaOne provides a scalable architecture for validating content against configurable policies—from single-domain checks to global multi-modal compliance. AI models act as sensors that extract signals; policies make deterministic, auditable decisions.
+ZataOne provides a scalable architecture for validating content against configurable policies—from single-domain checks to global multi-modal compliance. AI models act as sensors that extract signals; policies make deterministic, auditable decisions.
 
 ---
 
 ## Overview
 
-ZetaOne is designed for organizations that need:
+ZataOne is designed for organizations that need:
 
 - **Legally defensible decisions** — Deterministic evaluation with complete audit trails
 - **Evidence-first design** — Every violation links to traceable source content
@@ -78,8 +78,8 @@ Expansion is configuration-only:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/zetaone.git
-cd zetaone
+git clone https://github.com/Salmanportal/ZetaOna.git
+cd ZetaOna
 
 # Create virtual environment
 python -m venv .venv
@@ -89,14 +89,14 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 
 # Run the API
-uvicorn zetaone.main:app --reload --port 8000
+uvicorn zataone.main:app --reload --port 8000
 ```
 
 ### Verify
 
 ```bash
 curl http://localhost:8000/health
-# {"status":"ok","service":"zetaone"}
+# {"status":"ok","service":"zataone"}
 ```
 
 ### API Endpoints
@@ -104,9 +104,15 @@ curl http://localhost:8000/health
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
-| POST | `/assets` | Run compliance check on an asset |
+| POST | `/assets` | Submit asset for compliance check (async) |
+| POST | `/assets/image` | Submit image for compliance check (async) |
+| GET | `/assets/{asset_id}` | Poll for verdict when ready |
 
-**POST /assets** — Submit content for compliance evaluation. Persists the full compliance graph (Asset → Signals → Evidence → Verdict → AuditEvent) to the database.
+**POST /assets** — Submit content for compliance evaluation. Returns immediately with `status: processing` and `asset_id`. Poll `GET /assets/{asset_id}` for the verdict.
+
+Optional headers:
+- `X-Tenant-ID` — Tenant ID for multi-tenant isolation
+- `Idempotency-Key` — If provided and an asset with the same key exists, returns the existing verdict without re-running the pipeline
 
 Request body:
 
@@ -119,13 +125,24 @@ Request body:
 }
 ```
 
-Response:
+Immediate response:
 
 ```json
 {
+  "status": "processing",
+  "asset_id": "uuid"
+}
+```
+
+**GET /assets/{asset_id}** — Poll for result. Returns `status: processing` while running, or `status: completed` with verdict when done:
+
+```json
+{
+  "status": "completed",
+  "asset_id": "uuid",
   "verdict": "likely_approved | borderline | likely_rejected",
   "risk_score": 0.0,
-  "status": "COMPLIANT | REVIEW_REQUIRED | NON_COMPLIANT",
+  "compliance_status": "COMPLIANT | REVIEW_REQUIRED | NON_COMPLIANT",
   "violations": [],
   "signals": [],
   "fix_suggestions": [],
@@ -136,9 +153,14 @@ Response:
 Example:
 
 ```bash
-curl -X POST http://localhost:8000/assets \
+# Submit
+RESP=$(curl -s -X POST http://localhost:8000/assets \
   -H "Content-Type: application/json" \
-  -d '{"content": "Guaranteed instant cure", "type": "text"}'
+  -d '{"content": "Guaranteed instant cure", "type": "text"}')
+ASSET_ID=$(echo $RESP | jq -r '.asset_id')
+
+# Poll for result
+curl "http://localhost:8000/assets/$ASSET_ID"
 ```
 
 ---
@@ -153,28 +175,35 @@ The pipeline persists the full compliance graph to PostgreSQL when `persist=True
 - **verdicts** — Final decision with risk score and result
 - **audit_events** — Immutable trail for each compliance check
 
-Set `DATABASE_URL` before running (default: `postgresql://localhost:5432/zetaone`):
+Set `DATABASE_URL` before running (default: `postgresql://localhost:5432/zataone`):
 
 ```bash
-export DATABASE_URL=postgresql://zetaone:zetaone@127.0.0.1:5432/zetaone
+export DATABASE_URL=postgresql://zataone:zataone@127.0.0.1:5432/zataone
 ```
 
 Create tables:
 
 ```bash
-python -c "from zetaone.storage.database import create_all_tables; create_all_tables(); print('OK')"
+python -c "from zataone.storage.database import create_all_tables; create_all_tables(); print('OK')"
+```
+
+**Upgrading existing DB** — To add idempotency and async status support:
+
+```bash
+psql $DATABASE_URL -f migrations/add_idempotency_key.sql
+psql $DATABASE_URL -f migrations/add_asset_status.sql
 ```
 
 PostgreSQL via Docker:
 
 ```bash
-docker run --name zetaone-postgres \
-  -e POSTGRES_DB=zetaone \
-  -e POSTGRES_USER=zetaone \
-  -e POSTGRES_PASSWORD=zetaone \
+docker run --name zataone-postgres \
+  -e POSTGRES_DB=zataone \
+  -e POSTGRES_USER=zataone \
+  -e POSTGRES_PASSWORD=zataone \
   -p 5433:5432 -d postgres:15
 
-export DATABASE_URL=postgresql://zetaone:zetaone@127.0.0.1:5433/zetaone
+export DATABASE_URL=postgresql://zataone:zataone@127.0.0.1:5433/zataone
 ```
 
 ---
@@ -185,7 +214,7 @@ export DATABASE_URL=postgresql://zetaone:zetaone@127.0.0.1:5433/zetaone
 pytest tests/ -v
 ```
 
-- `tests/test_zetaone_pipeline.py` — Mocked pipeline (no external deps)
+- `tests/test_zataone_pipeline.py` — Mocked pipeline (no external deps)
 - `tests/test_persistence.py` — Integration test for DB persistence (requires PostgreSQL)
 
 ---
@@ -203,10 +232,10 @@ The API is available at `http://localhost:8000`. Source code is mounted for deve
 
 ### Project name
 
-The Compose project name is `zetaone`. Override if needed:
+The Compose project name is `zataone`. Override if needed:
 
 ```bash
-docker compose -p zetaone -f docker/docker-compose.yml up
+docker compose -p zataone -f docker/docker-compose.yml up
 ```
 
 ---

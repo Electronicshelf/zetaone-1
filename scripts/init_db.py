@@ -1,2 +1,2 @@
-# zetaone database initialization
+# zataone database initialization
 # Placeholder

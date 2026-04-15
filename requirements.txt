@@ -1,4 +1,4 @@
-# zetaone dependencies
+# zataone dependencies
 fastapi
 uvicorn
 pydantic
