@@ -30,9 +30,11 @@ class IngestionService:
         session: Session,
         idempotency_key: str,
         tenant_id: uuid.UUID | str | None = None,
-    ) -> dict[str, Any] | None:
+    ) -> tuple[uuid.UUID, dict[str, Any]] | None:
         """
-        Find existing verdict by idempotency_key. Returns verdict result dict if found.
+        Find existing verdict by idempotency_key.
+
+        Returns (asset_id, verdict.result dict) so callers can return asset_id to clients.
         """
         tid = self._resolve_tenant_id(session, tenant_id)
         asset = (
@@ -53,7 +55,7 @@ class IngestionService:
         )
         if verdict is None:
             return None
-        return dict(verdict.result)
+        return asset.id, dict(verdict.result)
 
     def create_asset_stub(
         self,
@@ -117,6 +119,20 @@ class IngestionService:
         session.add(model)
         session.flush()
         return model
+
+    def set_asset_status(
+        self,
+        session: Session,
+        asset_id: uuid.UUID,
+        status: str,
+    ) -> bool:
+        """Update asset.status (e.g. failed). Returns True if row existed."""
+        row = session.query(AssetModel).filter(AssetModel.id == asset_id).first()
+        if row is None:
+            return False
+        row.status = status
+        session.commit()
+        return True
 
 
 def compute_content_hash(asset: Any) -> str:

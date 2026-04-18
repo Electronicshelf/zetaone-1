@@ -1,5 +1,7 @@
 # zataone API routes
 
+import asyncio
+import os
 import uuid
 from types import SimpleNamespace
 from typing import Any, Literal
@@ -19,6 +21,59 @@ from zataone.services.ingestion_service import IngestionService
 from zataone.storage.database import get_session_factory
 
 router = APIRouter()
+
+
+def _use_sync_pipeline() -> bool:
+    """
+    Run the compliance pipeline in the POST request (not BackgroundTasks).
+
+    Cloud Run throttles CPU after the response unless configured otherwise, so
+    background tasks often never finish. Cloud Run sets K_SERVICE; we default to
+    sync there. Override with ZATAONE_ASYNC_PIPELINE=true or ZATAONE_SYNC_PIPELINE=false.
+    """
+    if os.environ.get("ZATAONE_ASYNC_PIPELINE", "").lower() in ("1", "true", "yes"):
+        return False
+    if os.environ.get("ZATAONE_SYNC_PIPELINE", "").lower() in ("0", "false", "no"):
+        return False
+    if os.environ.get("ZATAONE_SYNC_PIPELINE", "").lower() in ("1", "true", "yes"):
+        return True
+    return bool(os.environ.get("K_SERVICE"))
+
+
+def _asset_status_dict(session: Any, asset_id: uuid.UUID) -> dict[str, Any] | None:
+    """Build GET /assets/{id} payload, or None if asset missing."""
+    asset = session.query(AssetModel).filter(AssetModel.id == asset_id).first()
+    if asset is None:
+        return None
+
+    if asset.status == "processing":
+        return {"status": "processing", "asset_id": str(asset_id)}
+
+    if asset.status == "failed":
+        return {
+            "status": "failed",
+            "asset_id": str(asset_id),
+            "detail": "Compliance pipeline did not complete; see Cloud Run logs.",
+        }
+
+    verdict = (
+        session.query(VerdictModel)
+        .filter(VerdictModel.asset_id == asset_id)
+        .order_by(VerdictModel.created_at.desc())
+        .first()
+    )
+    if verdict is None:
+        return {"status": asset.status, "asset_id": str(asset_id)}
+
+    result = dict(verdict.result)
+    verdict_formatted = _format_verdict_response(result)
+    compliance_status = verdict_formatted.pop("status", "")
+    return {
+        "status": "completed",
+        "asset_id": str(asset_id),
+        "compliance_status": compliance_status,
+        **verdict_formatted,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +132,13 @@ def _run_pipeline_background(
         logger.info("Background pipeline completed for asset %s", asset_id)
     except Exception as e:
         logger.exception("Background pipeline failed for asset %s: %s", asset_id, e)
+        session = get_session_factory()()
+        try:
+            IngestionService().set_asset_status(session, asset_id, "failed")
+        except Exception:
+            logger.exception("Could not mark asset %s as failed", asset_id)
+        finally:
+            session.close()
 
 
 @router.post("/assets")
@@ -103,7 +165,10 @@ def post_assets(
                 session, idempotency_key, tenant_id=x_tenant_id
             )
             if existing:
-                return _format_verdict_response(existing)
+                eid, eresult = existing
+                out = _format_verdict_response(eresult)
+                out["asset_id"] = str(eid)
+                return out
         finally:
             session.close()
 
@@ -131,6 +196,31 @@ def post_assets(
         raise HTTPException(status_code=500, detail=str(e)) from e
     finally:
         session.close()
+
+    if _use_sync_pipeline():
+        try:
+            CompliancePipeline(domain="ad_compliance").run(
+                asset,
+                tenant_id=x_tenant_id,
+                persist=True,
+                idempotency_key=idempotency_key,
+                existing_asset_id=asset_id,
+            )
+        except Exception as e:
+            session = get_session_factory()()
+            try:
+                IngestionService().set_asset_status(session, asset_id, "failed")
+            finally:
+                session.close()
+            raise HTTPException(status_code=500, detail=str(e)) from e
+        session = get_session_factory()()
+        try:
+            out = _asset_status_dict(session, asset_id)
+            if out is None:
+                raise HTTPException(status_code=404, detail="Asset not found")
+            return out
+        finally:
+            session.close()
 
     background_tasks.add_task(
         _run_pipeline_background,
@@ -167,7 +257,10 @@ async def post_assets_image(
                 session, idempotency_key, tenant_id=x_tenant_id
             )
             if existing:
-                return _format_verdict_response(existing)
+                eid, eresult = existing
+                out = _format_verdict_response(eresult)
+                out["asset_id"] = str(eid)
+                return out
         finally:
             session.close()
 
@@ -201,6 +294,35 @@ async def post_assets_image(
     finally:
         session.close()
 
+    if _use_sync_pipeline():
+
+        def _run_img_pipeline() -> None:
+            CompliancePipeline(domain="ad_compliance").run(
+                asset,
+                tenant_id=x_tenant_id,
+                persist=True,
+                idempotency_key=idempotency_key,
+                existing_asset_id=asset_id,
+            )
+
+        try:
+            await asyncio.to_thread(_run_img_pipeline)
+        except Exception as e:
+            session = get_session_factory()()
+            try:
+                IngestionService().set_asset_status(session, asset_id, "failed")
+            finally:
+                session.close()
+            raise HTTPException(status_code=500, detail=str(e)) from e
+        session = get_session_factory()()
+        try:
+            out = _asset_status_dict(session, asset_id)
+            if out is None:
+                raise HTTPException(status_code=404, detail="Asset not found")
+            return out
+        finally:
+            session.close()
+
     background_tasks.add_task(
         _run_pipeline_background,
         asset,
@@ -224,32 +346,10 @@ def get_asset(
     """
     session = get_session_factory()()
     try:
-        asset = session.query(AssetModel).filter(AssetModel.id == asset_id).first()
-        if asset is None:
+        out = _asset_status_dict(session, asset_id)
+        if out is None:
             raise HTTPException(status_code=404, detail="Asset not found")
-
-        if asset.status == "processing":
-            return {"status": "processing", "asset_id": str(asset_id)}
-
-        verdict = (
-            session.query(VerdictModel)
-            .filter(VerdictModel.asset_id == asset_id)
-            .order_by(VerdictModel.created_at.desc())
-            .first()
-        )
-        if verdict is None:
-            return {"status": asset.status, "asset_id": str(asset_id)}
-
-        result = dict(verdict.result)
-        verdict_formatted = _format_verdict_response(result)
-        # Use compliance_status to avoid overwriting job status
-        compliance_status = verdict_formatted.pop("status", "")
-        return {
-            "status": "completed",
-            "asset_id": str(asset_id),
-            "compliance_status": compliance_status,
-            **verdict_formatted,
-        }
+        return out
     finally:
         session.close()
 

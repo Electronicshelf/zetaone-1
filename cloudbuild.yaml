@@ -1,0 +1,33 @@
+# Build container for Cloud Run (run from repo root).
+#
+#   export PROJECT_ID=your-project-id
+#   export REGION=us-central1
+#   gcloud config set project $PROJECT_ID
+#   gcloud builds submit --config cloudbuild.yaml --substitutions=_REGION=$REGION .
+#
+substitutions:
+  _REGION: us-central1
+  # Optional: set to hf_... for higher Hub limits during image build (public models work without it).
+  _HF_TOKEN: ""
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg
+      - HF_TOKEN=${_HF_TOKEN}
+      - -f
+      - docker/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/zataone/zataone-api:latest
+      - .
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/zataone/zataone-api:latest
+
+# Preloading two HF models during docker build needs RAM; default e2-medium often OOM-kills the step.
+timeout: 2400s
+options:
+  logging: CLOUD_LOGGING_ONLY
+  # E2_HIGHCPU_8 ≈ 8 GiB RAM; E2_HIGHCPU_32 ≈ 32 GiB (better for heavy docker build / model preload).
+  machineType: E2_HIGHCPU_32

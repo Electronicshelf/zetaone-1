@@ -13,6 +13,10 @@ ALTER TABLE evidence ADD COLUMN IF NOT EXISTS evidence_data JSONB DEFAULT '{}';
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='evidence' AND column_name='content') THEN
-    UPDATE evidence SET evidence_data = content WHERE evidence_data = '{}' OR evidence_data IS NULL;
+    -- evidence_data may be json (SQLAlchemy JSON) or jsonb; compare via to_jsonb
+    UPDATE evidence
+    SET evidence_data = COALESCE(content::jsonb, '{}'::jsonb)
+    WHERE evidence_data IS NULL
+       OR to_jsonb(evidence_data) = '{}'::jsonb;
   END IF;
 END $$;

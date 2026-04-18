@@ -15,14 +15,24 @@ from typing import Any
 from zataone.extractors.registry import ExtractorRegistry
 from zataone.policy_engine.engine import PolicyEngine
 from zataone.storage.database import get_session_factory
-
-logger = logging.getLogger(__name__)
 from zataone.services.audit_service import AuditService
 from zataone.services.evidence_service import EvidenceService
 from zataone.services.ingestion_service import IngestionService
 from zataone.services.signal_service import SignalService
 from zataone.services.verdict_service import VerdictService
 from zataone.services.violation_service import ViolationService
+
+logger = logging.getLogger(__name__)
+
+
+def _core_stub_extractors_disabled() -> bool:
+    """When true, ad_compliance skips core OCR/Vision/Embedding/VLM (domain extractors only)."""
+    v = os.environ.get("ZATAONE_DISABLE_CORE_STUB_EXTRACTORS", "").strip().lower()
+    if v in ("1", "true", "yes", "on"):
+        return True
+    if v in ("0", "false", "no", "off"):
+        return False
+    return False
 
 
 class CompliancePipeline:
@@ -88,7 +98,7 @@ class CompliancePipeline:
         if hasattr(extractors_module, "VLMExtractor"):
             extractor_classes.append(("VLMExtractor", {}))
 
-        # Core extractors for ad_compliance
+        # Core extractors for ad_compliance (text always; OCR/Vision/Embedding/VLM optional stubs)
         if self._domain == "ad_compliance":
             from zataone.extractors.text_extractor import TextExtractor
             from zataone.extractors.ocr_extractor import OCRExtractor
@@ -97,10 +107,16 @@ class CompliancePipeline:
             from zataone.extractors.vlm_extractor import VLMExtractor
 
             self._extractor_registry.register(TextExtractor())
-            self._extractor_registry.register(OCRExtractor())
-            self._extractor_registry.register(VisionExtractor())
-            self._extractor_registry.register(EmbeddingExtractor())
-            self._extractor_registry.register(VLMExtractor())
+            if _core_stub_extractors_disabled():
+                logger.info(
+                    "Core stub extractors disabled (ZATAONE_DISABLE_CORE_STUB_EXTRACTORS); "
+                    "using domain OCR/Vision/Embedding/VLM only."
+                )
+            else:
+                self._extractor_registry.register(OCRExtractor())
+                self._extractor_registry.register(VisionExtractor())
+                self._extractor_registry.register(EmbeddingExtractor())
+                self._extractor_registry.register(VLMExtractor())
 
         for name, kwargs in extractor_classes:
             cls = getattr(extractors_module, name)
@@ -177,15 +193,28 @@ class CompliancePipeline:
         """
         start_time = time.perf_counter()
         signals = []
+        counts: dict[str, int] = {}
         for extractor in self._extractor_registry.list():
+            eid = getattr(extractor, "extractor_id", None) or type(extractor).__name__
             try:
-                extracted = extractor.extract(asset)
-                if extracted:
-                    signals.extend(extracted)
+                extracted = list(extractor.extract(asset) or [])
             except Exception:
-                pass
+                logger.exception("Extractor failed: id=%s", eid)
+                counts[eid] = 0
+                continue
+            n = len(extracted)
+            counts[eid] = n
+            if n:
+                signals.extend(extracted)
+                logger.info("Extractor produced signals: id=%s count=%d", eid, n)
 
-        logger.info("Extracted %d signals", len(signals))
+        producers = sorted(eid for eid, n in counts.items() if n > 0)
+        logger.info(
+            "Extraction complete: total_signals=%d counts=%s producers=%s",
+            len(signals),
+            counts,
+            producers,
+        )
 
         violations = self._policy_engine.evaluate(signals)
 
@@ -204,6 +233,18 @@ class CompliancePipeline:
                 idempotency_key=idempotency_key,
                 existing_asset_id=existing_asset_id,
             )
+
+        if persist and existing_asset_id is not None and asset_id_result is None:
+            sess = get_session_factory()()
+            try:
+                self._ingestion_service.set_asset_status(sess, existing_asset_id, "failed")
+            except Exception:
+                logger.exception(
+                    "Could not mark asset %s failed after persistence error",
+                    existing_asset_id,
+                )
+            finally:
+                sess.close()
 
         processing_time_ms = round((time.perf_counter() - start_time) * 1000)
         tenant_id_str = str(tenant_id) if tenant_id is not None else None

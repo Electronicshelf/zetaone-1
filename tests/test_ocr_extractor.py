@@ -4,14 +4,17 @@ Mocks pytesseract; no real OCR or pytesseract installation required.
 """
 
 import base64
+import importlib.util
 import sys
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-# Inject fake pytesseract before any zataone imports (avoids import-time segfaults)
-sys.modules["pytesseract"] = MagicMock()
-import pytesseract  # noqa: E402 - gets fake for patch target
+# Minimal stub module (MagicMock alone breaks importlib / pytest.importorskip for pytesseract)
+_pytesseract_stub = ModuleType("pytesseract")
+_pytesseract_stub.__spec__ = importlib.util.spec_from_loader("pytesseract", loader=None)
+_pytesseract_stub.image_to_string = MagicMock(return_value="")
+sys.modules["pytesseract"] = _pytesseract_stub
 
 # Ensure src is first for correct zataone import
 src = Path(__file__).resolve().parent.parent / "src"

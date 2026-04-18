@@ -1,4 +1,5 @@
-# zataone dependencies
+# zataone dependencies (keep aligned with pyproject.toml for Docker layer)
+numpy>=1.24
 fastapi
 uvicorn
 pydantic
@@ -8,3 +9,12 @@ psycopg2-binary
 python-dotenv
 pyyaml
 loguru
+python-multipart
+httpx
+pytesseract
+Pillow
+torch
+torchvision
+transformers
+sentencepiece
+protobuf

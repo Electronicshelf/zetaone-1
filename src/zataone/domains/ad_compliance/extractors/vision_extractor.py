@@ -5,6 +5,7 @@ Inherits from zataone.extractors.base.BaseExtractor.
 """
 
 from typing import List, Dict, Any, Optional
+import logging
 import sys
 import os
 import uuid
@@ -40,8 +41,10 @@ try:
 except ImportError:
     GROUNDING_DINO_AVAILABLE = False
 
-_dino_model: Optional["AutoModelForZeroShotObjectDetection"] = None
-_dino_processor: Optional["AutoProcessor"] = None
+logger = logging.getLogger(__name__)
+
+_dino_model: Any = None
+_dino_processor: Any = None
 
 
 class VisionExtractor(BaseExtractor):
@@ -60,41 +63,59 @@ class VisionExtractor(BaseExtractor):
             "money", "cash", "banknote",
         ]
 
-    def _load_model(self) -> None:
+    def _load_model(self) -> bool:
         if not GROUNDING_DINO_AVAILABLE:
-            raise ImportError(
-                "Grounding DINO requires transformers, torch, and pillow. "
-                "Install deps and ensure the model is available locally."
+            logger.warning(
+                "ad_compliance vision: Grounding DINO deps missing (transformers/torch/Pillow)"
             )
+            return False
         global _dino_model, _dino_processor
-        if _dino_model is None or _dino_processor is None:
+        if _dino_model is not None and _dino_processor is not None:
+            self._model = _dino_model
+            self._processor = _dino_processor
+            return True
+        try:
             model_id = "IDEA-Research/grounding-dino-base"
             _dino_processor = AutoProcessor.from_pretrained(model_id)
             _dino_model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id)
             _dino_model.eval()
+        except Exception:
+            logger.exception(
+                "ad_compliance vision: Grounding DINO model unavailable (download or load failed)"
+            )
+            _dino_model, _dino_processor = None, None
+            return False
         self._model = _dino_model
         self._processor = _dino_processor
+        return True
 
     def extract(self, asset: Any) -> List[Signal]:
         """Extract object detection signals from asset image data."""
         image_data = getattr(asset, "image_data", None)
         if image_data is None or not GROUNDING_DINO_AVAILABLE:
             return []
-        self._load_model()
-        image = Image.open(BytesIO(image_data))
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-        text_labels = [[q.lower() for q in self._object_queries]]
-        inputs = self._processor(images=image, text=text_labels, return_tensors="pt").to(self._device)
-        with torch.no_grad():
-            outputs = self._model(**inputs)
-        results = self._processor.post_process_grounded_object_detection(
-            outputs,
-            inputs.input_ids,
-            threshold=0.3,
-            text_threshold=0.3,
-            target_sizes=[image.size[::-1]],
-        )
+        if not self._load_model():
+            return []
+        try:
+            image = Image.open(BytesIO(image_data))
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            text_labels = [[q.lower() for q in self._object_queries]]
+            inputs = self._processor(images=image, text=text_labels, return_tensors="pt").to(
+                self._device
+            )
+            with torch.no_grad():
+                outputs = self._model(**inputs)
+            results = self._processor.post_process_grounded_object_detection(
+                outputs,
+                inputs.input_ids,
+                threshold=0.3,
+                text_threshold=0.3,
+                target_sizes=[image.size[::-1]],
+            )
+        except Exception:
+            logger.exception("ad_compliance vision: inference failed")
+            return []
         if not results:
             return []
         boxes = results[0].get("boxes", [])

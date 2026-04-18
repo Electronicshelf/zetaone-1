@@ -214,6 +214,12 @@ export DATABASE_URL=postgresql://zataone:zataone@127.0.0.1:5433/zataone
 pytest tests/ -v
 ```
 
+**Full local check** (Docker Postgres + schema + migrations + pytest). Start Docker Desktop, then:
+
+```bash
+./scripts/run_local_check.sh
+```
+
 - `tests/test_zataone_pipeline.py` — Mocked pipeline (no external deps)
 - `tests/test_persistence.py` — Integration test for DB persistence (requires PostgreSQL)
 
@@ -237,6 +243,35 @@ The Compose project name is `zataone`. Override if needed:
 ```bash
 docker compose -p zataone -f docker/docker-compose.yml up
 ```
+
+### Deploy to Google Cloud
+
+Step-by-step: **[docs/deploy-gcp-step-by-step.md](docs/deploy-gcp-step-by-step.md)** (project setup → Cloud SQL → Cloud Run → static `web/` UI).
+
+**Image build (`cloudbuild.yaml` + `docker/Dockerfile`):**
+
+- **Hugging Face models** (Grounding DINO + SigLIP) are **pre-downloaded during the Docker build** via `docker/preload_models.py` into `/app/.cache/huggingface`, so Cloud Run does not re-fetch full weights on every cold start.
+- **Cloud Build** uses a larger worker (`options.machineType`, e.g. `E2_HIGHCPU_32`) so the preload step has enough RAM.
+- Optional Hub auth (higher rate limits during build): pass **`_HF_TOKEN`** in substitutions (see `cloudbuild.yaml`).
+
+**Rebuild and roll out a new image** (run from repo root; deploy only runs if the build succeeds):
+
+```bash
+export PROJECT_ID=your-gcp-project-id
+export REGION=us-central1
+# Optional: export HF_TOKEN=hf_...
+
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions=_REGION="${REGION}",_HF_TOKEN="${HF_TOKEN:-}" . \
+  && gcloud run services update zataone-api \
+    --project="${PROJECT_ID}" \
+    --region="${REGION}" \
+    --image="${REGION}-docker.pkg.dev/${PROJECT_ID}/zataone/zataone-api:latest"
+```
+
+**Runtime notes:** Set **`DATABASE_URL`** to the Cloud SQL Unix socket form, attach the instance on the service, set **`CORS_ORIGINS`** for your UI origin, and **`HF_TOKEN`** on Cloud Run if you still want Hub access for edge cases. The Dockerfile sets **`ZATAONE_DISABLE_CORE_STUB_EXTRACTORS=true`** so domain extractors are used on Cloud Run.
+
+**Web UI:** `web/sentrilens.html` is served at **`/ui/sentrilens.html`** when the `web/` folder is in the image.
 
 ---
 

@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 license = { text = "Proprietary" }
 dependencies = [
     "sqlalchemy>=1.4",
+    "numpy>=1.24",
     "fastapi",
     "uvicorn",
     "pydantic",
@@ -21,6 +22,13 @@ dependencies = [
     "python-dotenv",
     "pyyaml",
     "loguru",
+    "pytesseract",
+    "Pillow",
+    "torch",
+    "torchvision",
+    "transformers",
+    "sentencepiece",
+    "protobuf",
 ]
 
 [project.optional-dependencies]
@@ -35,3 +43,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "integration: optional tests requiring tesseract, HF model download, or GPU/CPU inference",
+]

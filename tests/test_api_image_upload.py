@@ -6,6 +6,7 @@ Requires: pip install httpx (for FastAPI TestClient)
 
 import base64
 import sys
+import uuid
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -75,7 +76,10 @@ def test_post_assets_image_idempotency_returns_existing():
     ):
         mock_sf.return_value.return_value = mock_session
         mock_instance = MockIngestion.return_value
-        mock_instance.find_existing_verdict.return_value = existing_verdict
+        mock_instance.find_existing_verdict.return_value = (
+            uuid.UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
+            existing_verdict,
+        )
 
         client = TestClient(app)
         response = client.post(
@@ -88,6 +92,7 @@ def test_post_assets_image_idempotency_returns_existing():
     data = response.json()
     assert data["verdict"] == "likely_rejected"
     assert data["risk_score"] == 0.9
+    assert data["asset_id"] == "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
     mock_instance.find_existing_verdict.assert_called_once_with(
         mock_session, "test-key-123", tenant_id=None
     )

@@ -1,7 +1,10 @@
 # zataone verdict service
 
 import uuid
+from datetime import date, datetime
+from enum import Enum
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -53,14 +56,39 @@ class VerdictService:
         }
 
     def _sanitize_for_json(self, obj: Any) -> Any:
-        """Convert object to JSON-serializable form (e.g. SimpleNamespace -> dict)."""
+        """Convert object to JSON-serializable form (dataclasses, Enums, dates, ORM leftovers)."""
+        if obj is None:
+            return None
+        if isinstance(obj, (str, int, float, bool)):
+            return obj
+        if isinstance(obj, UUID):
+            return str(obj)
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        if isinstance(obj, Enum):
+            return obj.value
+        if isinstance(obj, type) and issubclass(obj, Enum):
+            return obj.__name__
         if isinstance(obj, dict):
-            return {k: self._sanitize_for_json(v) for k, v in obj.items()}
-        if isinstance(obj, list):
+            return {str(k): self._sanitize_for_json(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple, set)):
             return [self._sanitize_for_json(v) for v in obj]
+        if hasattr(obj, "item") and callable(getattr(obj, "item")):
+            try:
+                return self._sanitize_for_json(obj.item())
+            except Exception:
+                pass
+        if hasattr(obj, "tolist") and callable(getattr(obj, "tolist")):
+            try:
+                return self._sanitize_for_json(obj.tolist())
+            except Exception:
+                pass
         if hasattr(obj, "__dict__") and not isinstance(obj, type):
-            return self._sanitize_for_json(vars(obj))
-        return obj
+            try:
+                return self._sanitize_for_json(vars(obj))
+            except TypeError:
+                pass
+        return str(obj)
 
     def persist_verdict(
         self,

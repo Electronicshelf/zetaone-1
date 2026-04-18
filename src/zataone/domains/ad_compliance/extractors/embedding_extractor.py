@@ -5,7 +5,10 @@ Compares image embeddings to regulation text embeddings for supporting evidence.
 Inherits from zataone.extractors.base.BaseExtractor.
 """
 
+from __future__ import annotations
+
 from typing import List, Optional, Tuple, Any
+import logging
 import sys
 import os
 import uuid
@@ -42,9 +45,12 @@ try:
 except ImportError:
     SIGLIP_AVAILABLE = False
 
-_model: Optional[AutoModel] = None
-_processor: Optional[AutoProcessor] = None
+logger = logging.getLogger(__name__)
+
+_model: Any = None
+_processor: Any = None
 _device: Optional[str] = None
+_siglip_load_failed: bool = False
 _text_embedding_cache: dict = {}
 
 
@@ -57,28 +63,39 @@ def _extract_embedding_tensor(output) -> "torch.Tensor":
 
 
 def _get_model():
-    global _model, _processor, _device
+    global _model, _processor, _device, _siglip_load_failed
+    if _siglip_load_failed:
+        return None, None, None
     if _model is None:
         if not SIGLIP_AVAILABLE:
-            raise ImportError(
-                "transformers and torch are required for SigLIP. "
-                "Install with: pip install transformers torch pillow"
+            logger.warning(
+                "ad_compliance embedding: SigLIP deps missing (transformers/torch/Pillow)"
             )
-        model_name = "google/siglip-base-patch16-224"
-        _processor = AutoProcessor.from_pretrained(model_name)
-        _model = AutoModel.from_pretrained(model_name)
-        _device = "cuda" if torch.cuda.is_available() else "cpu"
-        _model = _model.to(_device)
-        _model.eval()
+            return None, None, None
+        try:
+            model_name = "google/siglip-base-patch16-224"
+            _processor = AutoProcessor.from_pretrained(model_name)
+            _model = AutoModel.from_pretrained(model_name)
+            _device = "cuda" if torch.cuda.is_available() else "cpu"
+            _model = _model.to(_device)
+            _model.eval()
+        except Exception:
+            logger.exception(
+                "ad_compliance embedding: SigLIP model unavailable (download or load failed)"
+            )
+            _siglip_load_failed = True
+            _model, _processor, _device = None, None, None
+            return None, None, None
     return _model, _processor, _device
 
 
-def encode_regulation_texts(regulation_texts: List[Tuple[str, str]]) -> List[np.ndarray]:
+def encode_regulation_texts(
+    regulation_texts: List[Tuple[str, str]],
+) -> Optional[List[np.ndarray]]:
     """Encode regulation text strings into normalized embeddings. Uses cache."""
     global _text_embedding_cache
     if not SIGLIP_AVAILABLE:
-        raise ImportError("transformers and torch are required for text encoding.")
-    model, processor, device = _get_model()
+        return None
     embeddings = []
     texts_to_encode = []
     text_indices = []
@@ -89,7 +106,12 @@ def encode_regulation_texts(regulation_texts: List[Tuple[str, str]]) -> List[np.
             texts_to_encode.append(text)
             text_indices.append(i)
     if texts_to_encode:
-        inputs = processor(text=texts_to_encode, return_tensors="pt", padding="max_length", truncation=True)
+        model, processor, device = _get_model()
+        if model is None:
+            return None
+        inputs = processor(
+            text=texts_to_encode, return_tensors="pt", padding="max_length", truncation=True
+        )
         inputs = {k: v.to(device) for k, v in inputs.items()}
         with torch.no_grad():
             out = model.get_text_features(**inputs)
@@ -133,16 +155,18 @@ class EmbeddingExtractor(BaseExtractor):
         self._processor = None
         self._device = None
 
-    def _load_model(self):
+    def _load_model(self) -> bool:
         if self._model is None:
             self._model, self._processor, self._device = _get_model()
+        return self._model is not None
 
     def extract_embedding(self, image_data: bytes) -> np.ndarray:
         """Extract normalized image embedding (public for testing)."""
         return self._extract_embedding_impl(image_data)
 
     def _extract_embedding_impl(self, image_data: bytes) -> np.ndarray:
-        self._load_model()
+        if not self._load_model():
+            raise RuntimeError("SigLIP model unavailable")
         image = Image.open(BytesIO(image_data))
         if image.mode != "RGB":
             image = image.convert("RGB")
@@ -164,9 +188,14 @@ class EmbeddingExtractor(BaseExtractor):
         image_data = getattr(asset, "image_data", None)
         if image_data is None or not self._regulation_texts or not SIGLIP_AVAILABLE:
             return []
-        self._load_model()
-        image_emb = self._extract_embedding_impl(image_data)
         text_embs = encode_regulation_texts(self._regulation_texts)
+        if text_embs is None:
+            return []
+        try:
+            image_emb = self._extract_embedding_impl(image_data)
+        except Exception:
+            logger.exception("ad_compliance embedding: image encoding failed")
+            return []
         names = [n for n, _ in self._regulation_texts]
         signals = []
         for name, text_emb in zip(names, text_embs):
