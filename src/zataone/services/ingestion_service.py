@@ -136,8 +136,12 @@ class IngestionService:
 
 
 def compute_content_hash(asset: Any) -> str:
-    """Compute content hash from asset (e.g. image_data)."""
-    content = getattr(asset, "image_data", None) or getattr(asset, "content", b"")
+    """Compute content hash from asset (e.g. image_data, audio_data, content)."""
+    content = (
+        getattr(asset, "image_data", None)
+        or getattr(asset, "audio_data", None)
+        or getattr(asset, "content", b"")
+    )
     if isinstance(content, str):
         content = content.encode("utf-8")
     return hashlib.sha256(content or b"").hexdigest()

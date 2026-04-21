@@ -1,19 +1,15 @@
 """
-SigLIP embedding similarity extractor.
-
-Compares image embeddings to regulation text embeddings for supporting evidence.
-Inherits from zataone.extractors.base.BaseExtractor.
+SigLIP embedding extractor — thin domain wrapper over zataone.extractors.modality.embedding.
 """
 
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Any
-import logging
-import sys
 import os
+import sys
 import uuid
-from io import BytesIO
 from datetime import datetime
+from typing import Any, List, Optional, Tuple
+
 import numpy as np
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,114 +26,43 @@ try:
     from zataone.extractors.base import BaseExtractor
 except ImportError:
     from abc import ABC, abstractmethod
+
     class BaseExtractor(ABC):
         extractor_id: str = ""
         version: str = ""
+
         @abstractmethod
-        def extract(self, asset): pass
+        def extract(self, asset):
+            pass
+
+
 from schemas.models import Signal, SignalType
 
-try:
-    from transformers import AutoProcessor, AutoModel
-    import torch
-    from PIL import Image
-    SIGLIP_AVAILABLE = True
-except ImportError:
-    SIGLIP_AVAILABLE = False
+from zataone.extractors.modality import embedding as emb_mod
 
-logger = logging.getLogger(__name__)
-
-_model: Any = None
-_processor: Any = None
-_device: Optional[str] = None
-_siglip_load_failed: bool = False
-_text_embedding_cache: dict = {}
-
-
-def _extract_embedding_tensor(output) -> "torch.Tensor":
-    if hasattr(output, "pooler_output") and output.pooler_output is not None:
-        return output.pooler_output
-    elif hasattr(output, "last_hidden_state") and output.last_hidden_state is not None:
-        return output.last_hidden_state[:, 0, :]
-    return output[0] if hasattr(output, "__getitem__") else output
-
-
-def _get_model():
-    global _model, _processor, _device, _siglip_load_failed
-    if _siglip_load_failed:
-        return None, None, None
-    if _model is None:
-        if not SIGLIP_AVAILABLE:
-            logger.warning(
-                "ad_compliance embedding: SigLIP deps missing (transformers/torch/Pillow)"
-            )
-            return None, None, None
-        try:
-            model_name = "google/siglip-base-patch16-224"
-            _processor = AutoProcessor.from_pretrained(model_name)
-            _model = AutoModel.from_pretrained(model_name)
-            _device = "cuda" if torch.cuda.is_available() else "cpu"
-            _model = _model.to(_device)
-            _model.eval()
-        except Exception:
-            logger.exception(
-                "ad_compliance embedding: SigLIP model unavailable (download or load failed)"
-            )
-            _siglip_load_failed = True
-            _model, _processor, _device = None, None, None
-            return None, None, None
-    return _model, _processor, _device
+SIGLIP_AVAILABLE = emb_mod.SIGLIP_AVAILABLE
 
 
 def encode_regulation_texts(
     regulation_texts: List[Tuple[str, str]],
+    model_name: str | None = None,
 ) -> Optional[List[np.ndarray]]:
-    """Encode regulation text strings into normalized embeddings. Uses cache."""
-    global _text_embedding_cache
-    if not SIGLIP_AVAILABLE:
-        return None
-    embeddings = []
-    texts_to_encode = []
-    text_indices = []
-    for i, (name, text) in enumerate(regulation_texts):
-        if text in _text_embedding_cache:
-            embeddings.append((i, _text_embedding_cache[text]))
-        else:
-            texts_to_encode.append(text)
-            text_indices.append(i)
-    if texts_to_encode:
-        model, processor, device = _get_model()
-        if model is None:
-            return None
-        inputs = processor(
-            text=texts_to_encode, return_tensors="pt", padding="max_length", truncation=True
-        )
-        inputs = {k: v.to(device) for k, v in inputs.items()}
-        with torch.no_grad():
-            out = model.get_text_features(**inputs)
-            t = _extract_embedding_tensor(out)
-            text_embeds = t.detach().cpu().numpy()
-        for idx, (text, embedding) in enumerate(zip(texts_to_encode, text_embeds)):
-            norm = np.linalg.norm(embedding)
-            if norm > 0:
-                embedding = embedding / norm
-            embedding = embedding.astype(np.float32)
-            _text_embedding_cache[text] = embedding
-            embeddings.append((text_indices[idx], embedding))
-    embeddings.sort(key=lambda x: x[0])
-    return [emb for _, emb in embeddings]
+    """Re-export for tests; default model matches domain YAML."""
+    mn = model_name or "google/siglip-base-patch16-224"
+    return emb_mod.encode_regulation_texts(regulation_texts, model_name=mn)
 
 
 class EmbeddingExtractor(BaseExtractor):
-    """SigLIP-based embedding similarity extractor."""
+    """SigLIP similarity: modality scores → domain signals."""
 
     extractor_id = "ad_compliance_embedding"
     version = "1.0.0"
 
     def __init__(
         self,
-        regulation_texts: List[Tuple[str, str]] = None,
+        regulation_texts: List[Tuple[str, str]] | None = None,
         similarity_threshold: float = 0.6,
+        model_name: str | None = None,
     ):
         self.model_name = "siglip"
         self._regulation_texts = regulation_texts or [
@@ -151,57 +76,25 @@ class EmbeddingExtractor(BaseExtractor):
             ("cryptocurrency_services", "cryptocurrency crypto bitcoin trading exchange financial"),
         ]
         self._similarity_threshold = similarity_threshold
-        self._model = None
-        self._processor = None
-        self._device = None
-
-    def _load_model(self) -> bool:
-        if self._model is None:
-            self._model, self._processor, self._device = _get_model()
-        return self._model is not None
+        self._model_name = model_name or "google/siglip-base-patch16-224"
 
     def extract_embedding(self, image_data: bytes) -> np.ndarray:
-        """Extract normalized image embedding (public for testing)."""
-        return self._extract_embedding_impl(image_data)
-
-    def _extract_embedding_impl(self, image_data: bytes) -> np.ndarray:
-        if not self._load_model():
-            raise RuntimeError("SigLIP model unavailable")
-        image = Image.open(BytesIO(image_data))
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-        inputs = self._processor(images=image, return_tensors="pt")
-        inputs = {k: v.to(self._device) for k, v in inputs.items()}
-        with torch.no_grad():
-            features = self._model.get_image_features(**inputs)
-            t = _extract_embedding_tensor(features)
-            if t.dim() > 1:
-                t = t[0]
-            embedding = t.detach().cpu().numpy()
-        norm = np.linalg.norm(embedding)
-        if norm > 0:
-            embedding = embedding / norm
-        return embedding.astype(np.float32)
+        """Public for tests."""
+        return emb_mod.encode_image_bytes(image_data, model_name=self._model_name)
 
     def extract(self, asset: Any) -> List[Signal]:
-        """Extract similarity signals (only when above threshold)."""
         image_data = getattr(asset, "image_data", None)
         if image_data is None or not self._regulation_texts or not SIGLIP_AVAILABLE:
             return []
-        text_embs = encode_regulation_texts(self._regulation_texts)
-        if text_embs is None:
+        scores = emb_mod.similarity_scores(
+            image_data if isinstance(image_data, bytes) else bytes(image_data),
+            self._regulation_texts,
+            model_name=self._model_name,
+        )
+        if not scores:
             return []
-        try:
-            image_emb = self._extract_embedding_impl(image_data)
-        except Exception:
-            logger.exception("ad_compliance embedding: image encoding failed")
-            return []
-        names = [n for n, _ in self._regulation_texts]
         signals = []
-        for name, text_emb in zip(names, text_embs):
-            dot_result = np.dot(image_emb, text_emb)
-            cos_sim = float(np.asarray(dot_result).ravel()[0])
-            score = max(0.0, min(1.0, (cos_sim + 1.0) / 2.0))
+        for name, score in scores:
             if score <= self._similarity_threshold:
                 continue
             raw = {
@@ -210,14 +103,15 @@ class EmbeddingExtractor(BaseExtractor):
                 "score": score,
                 "model": self.model_name,
             }
-            sig = Signal(
-                signal_id=str(uuid.uuid4()),
-                signal_type=SignalType.SCENE,
-                source_model=self.model_name,
-                confidence=score,
-                raw_data=raw,
-                bounding_box=None,
-                detected_at=datetime.now(),
+            signals.append(
+                Signal(
+                    signal_id=str(uuid.uuid4()),
+                    signal_type=SignalType.SCENE,
+                    source_model=self.model_name,
+                    confidence=score,
+                    raw_data=raw,
+                    bounding_box=None,
+                    detected_at=datetime.now(),
+                )
             )
-            signals.append(sig)
         return signals

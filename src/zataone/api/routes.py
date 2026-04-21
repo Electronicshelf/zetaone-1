@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import re
 import uuid
 from types import SimpleNamespace
 from typing import Any, Literal
@@ -21,6 +22,36 @@ from zataone.services.ingestion_service import IngestionService
 from zataone.storage.database import get_session_factory
 
 router = APIRouter()
+
+_DOMAIN_RE = re.compile(r"^[a-z0-9_]+$")
+
+
+def _resolve_domain(x_domain: str | None) -> str:
+    """
+    Resolve pipeline domain from optional X-Domain header.
+
+    Env:
+      ZATAONE_DEFAULT_DOMAIN — used when header is absent (default: ad_compliance).
+      ZATAONE_ALLOWED_DOMAINS — comma-separated allowlist; if unset, only the default domain is allowed.
+    The default domain is always permitted even if omitted from the explicit list.
+    """
+    default = (os.environ.get("ZATAONE_DEFAULT_DOMAIN") or "ad_compliance").strip() or "ad_compliance"
+    default_l = default.lower()
+    raw = (os.environ.get("ZATAONE_ALLOWED_DOMAINS") or "").strip()
+    if raw:
+        allowed = {p.strip().lower() for p in raw.split(",") if p.strip()}
+    else:
+        allowed = {default_l}
+    allowed.add(default_l)
+
+    req = (x_domain or "").strip().lower()
+    if not req:
+        req = default_l
+    if not _DOMAIN_RE.match(req):
+        raise HTTPException(status_code=400, detail="Invalid X-Domain")
+    if req not in allowed:
+        raise HTTPException(status_code=403, detail=f"Domain not allowed: {req}")
+    return req
 
 
 def _use_sync_pipeline() -> bool:
@@ -115,13 +146,14 @@ def _run_pipeline_background(
     asset_id: uuid.UUID,
     tenant_id: str | None,
     idempotency_key: str | None,
+    domain: str,
 ) -> None:
     """Background task: run pipeline and persist result to existing asset."""
     import logging
 
     logger = logging.getLogger(__name__)
     try:
-        pipeline = CompliancePipeline(domain="ad_compliance")
+        pipeline = CompliancePipeline(domain=domain)
         pipeline.run(
             asset,
             tenant_id=tenant_id,
@@ -146,6 +178,7 @@ def post_assets(
     background_tasks: BackgroundTasks,
     body: AssetCreateRequest,
     x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    x_domain: str | None = Header(None, alias="X-Domain"),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
 ) -> dict[str, Any]:
     """
@@ -157,6 +190,7 @@ def post_assets(
     Optional Idempotency-Key: if provided and an asset with the same key exists,
     returns the existing verdict without re-running the pipeline.
     """
+    domain = _resolve_domain(x_domain)
     if idempotency_key:
         session = get_session_factory()()
         try:
@@ -199,7 +233,7 @@ def post_assets(
 
     if _use_sync_pipeline():
         try:
-            CompliancePipeline(domain="ad_compliance").run(
+            CompliancePipeline(domain=domain).run(
                 asset,
                 tenant_id=x_tenant_id,
                 persist=True,
@@ -228,6 +262,7 @@ def post_assets(
         asset_id,
         x_tenant_id,
         idempotency_key,
+        domain,
     )
 
     return {"status": "processing", "asset_id": str(asset_id)}
@@ -238,6 +273,7 @@ async def post_assets_image(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    x_domain: str | None = Header(None, alias="X-Domain"),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
 ) -> dict[str, Any]:
     """
@@ -249,6 +285,7 @@ async def post_assets_image(
     Optional Idempotency-Key: if provided and an asset with the same key exists,
     returns the existing verdict without re-running the pipeline.
     """
+    domain = _resolve_domain(x_domain)
     if idempotency_key:
         session = get_session_factory()()
         try:
@@ -297,7 +334,7 @@ async def post_assets_image(
     if _use_sync_pipeline():
 
         def _run_img_pipeline() -> None:
-            CompliancePipeline(domain="ad_compliance").run(
+            CompliancePipeline(domain=domain).run(
                 asset,
                 tenant_id=x_tenant_id,
                 persist=True,
@@ -329,6 +366,108 @@ async def post_assets_image(
         asset_id,
         x_tenant_id,
         idempotency_key,
+        domain,
+    )
+
+    return {"status": "processing", "asset_id": str(asset_id)}
+
+
+@router.post("/assets/audio")
+async def post_assets_audio(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    x_domain: str | None = Header(None, alias="X-Domain"),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
+) -> dict[str, Any]:
+    """
+    Run compliance check on uploaded audio: transcribe with Whisper (faster-whisper), then policy on text.
+
+    Poll GET /assets/{asset_id} for the verdict when async; sync on Cloud Run (see _use_sync_pipeline).
+    """
+    domain = _resolve_domain(x_domain)
+    if idempotency_key:
+        session = get_session_factory()()
+        try:
+            ingestion = IngestionService()
+            existing = ingestion.find_existing_verdict(
+                session, idempotency_key, tenant_id=x_tenant_id
+            )
+            if existing:
+                eid, eresult = existing
+                out = _format_verdict_response(eresult)
+                out["asset_id"] = str(eid)
+                return out
+        finally:
+            session.close()
+
+    try:
+        audio_bytes = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read file: {e}") from e
+
+    asset = SimpleNamespace(
+        asset_id=None,
+        content=None,
+        audio_data=audio_bytes,
+        audio_filename=file.filename or "audio.wav",
+        type="audio",
+    )
+
+    asset_id = uuid.uuid4()
+    session = get_session_factory()()
+    try:
+        ingestion = IngestionService()
+        ingestion.create_asset_stub(
+            session,
+            asset,
+            asset_id=asset_id,
+            tenant_id=x_tenant_id,
+            idempotency_key=idempotency_key,
+        )
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    finally:
+        session.close()
+
+    if _use_sync_pipeline():
+
+        def _run_audio_pipeline() -> None:
+            CompliancePipeline(domain=domain).run(
+                asset,
+                tenant_id=x_tenant_id,
+                persist=True,
+                idempotency_key=idempotency_key,
+                existing_asset_id=asset_id,
+            )
+
+        try:
+            await asyncio.to_thread(_run_audio_pipeline)
+        except Exception as e:
+            session = get_session_factory()()
+            try:
+                IngestionService().set_asset_status(session, asset_id, "failed")
+            finally:
+                session.close()
+            raise HTTPException(status_code=500, detail=str(e)) from e
+        session = get_session_factory()()
+        try:
+            out = _asset_status_dict(session, asset_id)
+            if out is None:
+                raise HTTPException(status_code=404, detail="Asset not found")
+            return out
+        finally:
+            session.close()
+
+    background_tasks.add_task(
+        _run_pipeline_background,
+        asset,
+        asset_id,
+        x_tenant_id,
+        idempotency_key,
+        domain,
     )
 
     return {"status": "processing", "asset_id": str(asset_id)}

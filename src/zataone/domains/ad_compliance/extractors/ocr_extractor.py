@@ -1,23 +1,19 @@
 """
-OCR extractor - extracts text from images.
-
-Uses a backend abstraction to support multiple OCR providers.
-Inherits from zataone.extractors.base.BaseExtractor.
+OCR extractor — thin domain wrapper over zataone.extractors.modality.ocr.
 """
 
-from typing import List, Dict, Any
-from abc import ABC, abstractmethod
-import sys
+from __future__ import annotations
+
 import os
-from io import BytesIO
+import sys
 import uuid
 from datetime import datetime
+from typing import Any, List
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-# Add zataone package path when running as part of ZataOne (parent of zataone pkg)
 _zataone_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 _src_root = os.path.dirname(_zataone_dir)
 if os.path.exists(os.path.join(_zataone_dir, "extractors", "base.py")):
@@ -28,93 +24,43 @@ try:
     from zataone.extractors.base import BaseExtractor
 except ImportError:
     from abc import ABC, abstractmethod
+
     class BaseExtractor(ABC):
         extractor_id: str = ""
         version: str = ""
+
         @abstractmethod
-        def extract(self, asset): pass
+        def extract(self, asset):
+            pass
+
+
 from schemas.models import Signal, SignalType
 
-try:
-    import pytesseract
-    from PIL import Image
-    TESSERACT_AVAILABLE = True
-except ImportError:
-    TESSERACT_AVAILABLE = False
+from zataone.extractors.modality import ocr as ocr_mod
+from zataone.extractors.modality.ocr import OCRBackend, TesseractOCRBackend, get_ocr_backend
 
-
-class OCRBackend(ABC):
-    """Abstract base class for OCR backends."""
-
-    @abstractmethod
-    def extract_text_data(self, image_data: bytes) -> List[Dict[str, Any]]:
-        """Extract text data from image."""
-        pass
-
-
-class TesseractOCRBackend(OCRBackend):
-    """Tesseract OCR backend using pytesseract."""
-
-    def __init__(self):
-        if not TESSERACT_AVAILABLE:
-            raise ImportError(
-                "pytesseract and Pillow are required for TesseractOCRBackend. "
-                "Install with: pip install pytesseract pillow"
-            )
-        self.backend_name = "tesseract"
-
-    def extract_text_data(self, image_data: bytes) -> List[Dict[str, Any]]:
-        image = Image.open(BytesIO(image_data))
-        ocr_data = pytesseract.image_to_data(
-            image,
-            output_type=pytesseract.Output.DICT
-        )
-        results = []
-        num_detections = len(ocr_data.get('text', []))
-        for i in range(num_detections):
-            text = ocr_data.get('text', [])[i]
-            conf = ocr_data.get('conf', [])[i]
-            left = ocr_data.get('left', [])[i]
-            top = ocr_data.get('top', [])[i]
-            width = ocr_data.get('width', [])[i]
-            height = ocr_data.get('height', [])[i]
-            if not text or not text.strip():
-                continue
-            if conf == -1 or conf < 40:
-                continue
-            normalized_confidence = conf / 100.0
-            result = {
-                "type": "ocr_text",
-                "value": text.strip(),
-                "confidence": normalized_confidence,
-                "source": "image",
-                "bbox": [int(left), int(top), int(width), int(height)]
-            }
-            results.append(result)
-        return results
-
-
-def get_ocr_backend(backend_type: str = "tesseract") -> OCRBackend:
-    """Factory function to get OCR backend instance."""
-    if backend_type == "tesseract":
-        return TesseractOCRBackend()
-    elif backend_type == "google_vision":
-        raise ValueError("Google Vision backend not yet implemented")
-    else:
-        raise ValueError(f"Unsupported OCR backend type: {backend_type}")
+# Re-export for tests / callers that need backend types
+TESSERACT_AVAILABLE = ocr_mod.TESSERACT_AVAILABLE
 
 
 class OCRExtractor(BaseExtractor):
-    """OCR extractor that extracts text from images. Uses backend abstraction."""
+    """OCR: modality backends → domain signals."""
 
     extractor_id = "ad_compliance_ocr"
     version = "1.0.0"
 
-    def __init__(self, backend: OCRBackend = None):
+    def __init__(
+        self,
+        backend: OCRBackend | None = None,
+        backend_type: str = "tesseract",
+        min_confidence: int = 40,
+    ):
         if backend is None:
             try:
-                self.backend = get_ocr_backend("tesseract")
-                self.model_name = "ocr_tesseract"
+                self.backend = get_ocr_backend(
+                    backend_type, min_confidence=min_confidence
+                )
+                self.model_name = f"ocr_{self.backend.backend_name}"
             except (ImportError, ValueError):
                 self.backend = None
                 self.model_name = "ocr_placeholder"
@@ -123,7 +69,6 @@ class OCRExtractor(BaseExtractor):
             self.model_name = f"ocr_{backend.backend_name}"
 
     def extract(self, asset: Any) -> List[Signal]:
-        """Extract text signals from asset image data."""
         image_data = getattr(asset, "image_data", None)
         if image_data is None or self.backend is None:
             return []
@@ -136,7 +81,7 @@ class OCRExtractor(BaseExtractor):
                     "x": float(bbox_list[0]),
                     "y": float(bbox_list[1]),
                     "width": float(bbox_list[2]),
-                    "height": float(bbox_list[3])
+                    "height": float(bbox_list[3]),
                 }
             else:
                 bbox = None
@@ -149,10 +94,10 @@ class OCRExtractor(BaseExtractor):
                     "text": ocr_result.get("value", ""),
                     "type": ocr_result.get("type", "ocr_text"),
                     "source": ocr_result.get("source", "image"),
-                    "bbox": bbox_list
+                    "bbox": bbox_list,
                 },
                 bounding_box=bbox,
-                detected_at=datetime.now()
+                detected_at=datetime.now(),
             )
             signals.append(signal)
         return signals

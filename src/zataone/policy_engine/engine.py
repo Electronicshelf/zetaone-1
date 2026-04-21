@@ -68,7 +68,11 @@ class PolicyEngine:
                     if val == "text" or str(st).endswith("TEXT"):
                         return True
             rd = getattr(s, "raw_data", None) or {}
-            return rd.get("type") == "ocr_text" or "text" in rd
+            return (
+                rd.get("type") == "ocr_text"
+                or rd.get("type") == "asr_text"
+                or "text" in rd
+            )
 
         text_signals = [s for s in signals if _is_text_signal(s)]
 

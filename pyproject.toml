@@ -29,6 +29,7 @@ dependencies = [
     "transformers",
     "sentencepiece",
     "protobuf",
+    "faster-whisper",
 ]
 
 [project.optional-dependencies]

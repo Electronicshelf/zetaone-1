@@ -24,6 +24,14 @@
   <label for="base">API base URL (no trailing slash)</label>
   <input id="base" type="text" placeholder="https://your-service-xxx.run.app or http://127.0.0.1:8000" />
 
+  <!-- Same domain behavior as web/sentrilens.html: X-Domain on POST + poll; localStorage zataone_api_base / zataone_domain. -->
+  <label for="domain">Domain (<code>X-Domain</code>)</label>
+  <input id="domain" type="text" list="domainPresets" placeholder="ad_compliance" autocomplete="off" spellcheck="false" />
+  <datalist id="domainPresets">
+    <option value="ad_compliance"></option>
+  </datalist>
+  <p class="muted" style="margin-top:0.25rem;font-size:0.82rem;">Must match <code>ZATAONE_ALLOWED_DOMAINS</code> on the API (default domain always allowed). Otherwise <strong>403</strong>.</p>
+
   <div class="row">
     <label><input type="radio" name="mode" value="text" checked /> Text</label>
     <label><input type="radio" name="mode" value="image" /> Image file</label>
@@ -45,8 +53,23 @@
   <pre id="out">(not run yet)</pre>
 
   <script>
+    const LS_BASE = "zataone_api_base";
+    const LS_DOMAIN = "zataone_domain";
     const $ = (id) => document.getElementById(id);
     const base = () => $("base").value.replace(/\/$/, "");
+    const domainValue = () => {
+      const v = $("domain").value.trim();
+      return v || "ad_compliance";
+    };
+    const domainHeaders = (extra) => ({ ...(extra || {}), "X-Domain": domainValue() });
+
+    $("base").value = localStorage.getItem(LS_BASE) || "";
+    $("domain").value = localStorage.getItem(LS_DOMAIN) || "ad_compliance";
+    $("base").addEventListener("change", () => localStorage.setItem(LS_BASE, base()));
+    const persistDomain = () => localStorage.setItem(LS_DOMAIN, domainValue());
+    $("domain").addEventListener("change", persistDomain);
+    $("domain").addEventListener("input", persistDomain);
+
     document.querySelectorAll('input[name="mode"]').forEach((r) => {
       r.addEventListener("change", () => {
         const text = document.querySelector('input[name="mode"]:checked').value === "text";
@@ -59,7 +82,7 @@
       const b = base();
       const max = 60;
       for (let i = 0; i < max; i++) {
-        const r = await fetch(b + "/assets/" + assetId);
+        const r = await fetch(b + "/assets/" + assetId, { headers: domainHeaders() });
         const data = await r.json();
         if (!r.ok) throw new Error(data.detail || r.statusText);
         if (data.status === "completed") return data;
@@ -75,6 +98,8 @@
         $("out").innerHTML = '<span class="err">Set API base URL first.</span>';
         return;
       }
+      localStorage.setItem(LS_BASE, base());
+      localStorage.setItem(LS_DOMAIN, domainValue());
       try {
         const mode = document.querySelector('input[name="mode"]:checked').value;
         let assetId;
@@ -82,7 +107,7 @@
           const content = $("content").value;
           const r = await fetch(b + "/assets", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: domainHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify({ content, type: "text" }),
           });
           const data = await r.json();
@@ -93,7 +118,7 @@
           if (!f) throw new Error("Choose an image file");
           const fd = new FormData();
           fd.append("file", f);
-          const r = await fetch(b + "/assets/image", { method: "POST", body: fd });
+          const r = await fetch(b + "/assets/image", { method: "POST", headers: domainHeaders(), body: fd });
           const data = await r.json();
           if (!r.ok) throw new Error(JSON.stringify(data));
           assetId = data.asset_id;

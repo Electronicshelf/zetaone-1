@@ -4,6 +4,7 @@ from .ocr_extractor import OCRExtractor, OCRBackend, TesseractOCRBackend, get_oc
 from .vision_extractor import VisionExtractor
 from .embedding_extractor import EmbeddingExtractor, encode_regulation_texts
 from .vlm_extractor import VLMExtractor, analyze_image_context
+from .asr_extractor import AsrExtractor
 
 __all__ = [
     "OCRExtractor",
@@ -15,4 +16,5 @@ __all__ = [
     "encode_regulation_texts",
     "VLMExtractor",
     "analyze_image_context",
+    "AsrExtractor",
 ]

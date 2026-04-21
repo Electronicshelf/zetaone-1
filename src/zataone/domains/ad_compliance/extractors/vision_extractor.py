@@ -1,16 +1,14 @@
 """
-Vision extractor - detects objects in images (Grounding DINO).
-
-Inherits from zataone.extractors.base.BaseExtractor.
+Vision extractor — thin domain wrapper over zataone.extractors.modality.vision (Grounding DINO).
 """
 
-from typing import List, Dict, Any, Optional
-import logging
-import sys
+from __future__ import annotations
+
 import os
+import sys
 import uuid
-from io import BytesIO
 from datetime import datetime
+from typing import Any, List, Optional
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
@@ -26,126 +24,91 @@ try:
     from zataone.extractors.base import BaseExtractor
 except ImportError:
     from abc import ABC, abstractmethod
+
     class BaseExtractor(ABC):
         extractor_id: str = ""
         version: str = ""
+
         @abstractmethod
-        def extract(self, asset): pass
+        def extract(self, asset):
+            pass
+
+
 from schemas.models import Signal, SignalType
 
-try:
-    import torch
-    from PIL import Image
-    from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
-    GROUNDING_DINO_AVAILABLE = True
-except ImportError:
-    GROUNDING_DINO_AVAILABLE = False
+from zataone.extractors.modality import vision as vision_mod
 
-logger = logging.getLogger(__name__)
-
-_dino_model: Any = None
-_dino_processor: Any = None
+GROUNDING_DINO_AVAILABLE = vision_mod.GROUNDING_DINO_AVAILABLE
 
 
 class VisionExtractor(BaseExtractor):
-    """Grounding DINO vision extractor for object detection."""
+    """Grounding DINO: modality detection → domain signals."""
 
     extractor_id = "ad_compliance_vision"
     version = "1.0.0"
 
-    def __init__(self, object_queries: List[str] = None):
+    def __init__(
+        self,
+        object_queries: Optional[List[str]] = None,
+        model_id: Optional[str] = None,
+        detection_threshold: Optional[float] = None,
+        text_threshold: Optional[float] = None,
+        box_score_min: Optional[float] = None,
+        device: str = "cpu",
+    ):
         self.model_name = "grounding_dino"
-        self._model = None
-        self._processor = None
-        self._device = "cpu"
         self._object_queries = object_queries or [
-            "weapon", "gun", "knife", "pill", "medicine", "syringe",
-            "money", "cash", "banknote",
+            "weapon",
+            "gun",
+            "knife",
+            "pill",
+            "medicine",
+            "syringe",
+            "money",
+            "cash",
+            "banknote",
         ]
-
-    def _load_model(self) -> bool:
-        if not GROUNDING_DINO_AVAILABLE:
-            logger.warning(
-                "ad_compliance vision: Grounding DINO deps missing (transformers/torch/Pillow)"
-            )
-            return False
-        global _dino_model, _dino_processor
-        if _dino_model is not None and _dino_processor is not None:
-            self._model = _dino_model
-            self._processor = _dino_processor
-            return True
-        try:
-            model_id = "IDEA-Research/grounding-dino-base"
-            _dino_processor = AutoProcessor.from_pretrained(model_id)
-            _dino_model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id)
-            _dino_model.eval()
-        except Exception:
-            logger.exception(
-                "ad_compliance vision: Grounding DINO model unavailable (download or load failed)"
-            )
-            _dino_model, _dino_processor = None, None
-            return False
-        self._model = _dino_model
-        self._processor = _dino_processor
-        return True
+        self._model_id = model_id or "IDEA-Research/grounding-dino-base"
+        self._detection_threshold = 0.3 if detection_threshold is None else float(detection_threshold)
+        self._text_threshold = 0.3 if text_threshold is None else float(text_threshold)
+        self._box_score_min = 0.3 if box_score_min is None else float(box_score_min)
+        self._device = device
 
     def extract(self, asset: Any) -> List[Signal]:
-        """Extract object detection signals from asset image data."""
         image_data = getattr(asset, "image_data", None)
         if image_data is None or not GROUNDING_DINO_AVAILABLE:
             return []
-        if not self._load_model():
-            return []
-        try:
-            image = Image.open(BytesIO(image_data))
-            if image.mode != "RGB":
-                image = image.convert("RGB")
-            text_labels = [[q.lower() for q in self._object_queries]]
-            inputs = self._processor(images=image, text=text_labels, return_tensors="pt").to(
-                self._device
-            )
-            with torch.no_grad():
-                outputs = self._model(**inputs)
-            results = self._processor.post_process_grounded_object_detection(
-                outputs,
-                inputs.input_ids,
-                threshold=0.3,
-                text_threshold=0.3,
-                target_sizes=[image.size[::-1]],
-            )
-        except Exception:
-            logger.exception("ad_compliance vision: inference failed")
-            return []
-        if not results:
-            return []
-        boxes = results[0].get("boxes", [])
-        scores = results[0].get("scores", [])
-        labels = results[0].get("text_labels", results[0].get("labels", []))
+        raw = vision_mod.detect_grounding_dino(
+            image_data if isinstance(image_data, bytes) else bytes(image_data),
+            object_queries=self._object_queries,
+            model_id=self._model_id,
+            device=self._device,
+            detection_threshold=self._detection_threshold,
+            text_threshold=self._text_threshold,
+            box_score_min=self._box_score_min,
+        )
         signals = []
-        for box, score, label in zip(boxes, scores, labels):
-            conf = float(score)
-            if conf < 0.3:
-                continue
-            x0, y0, x1, y1 = [float(v) for v in box.tolist()]
-            w = max(0.0, x1 - x0)
-            h = max(0.0, y1 - y0)
+        for det in raw:
+            conf = float(det["confidence"])
+            x0, y0, w, h = det["bbox"]
             payload = {
                 "type": "vision_object",
-                "label": str(label).strip().lower(),
+                "label": det["label"],
                 "confidence": conf,
                 "bbox": [x0, y0, w, h],
                 "source": "image",
                 "model": "grounding_dino",
             }
             bounding_box = {"x": x0, "y": y0, "width": w, "height": h}
-            signal = Signal(
-                signal_id=str(uuid.uuid4()),
-                signal_type=SignalType.OBJECT,
-                source_model=self.model_name,
-                confidence=conf,
-                raw_data=payload,
-                bounding_box=bounding_box,
-                detected_at=datetime.now(),
+            signals.append(
+                Signal(
+                    signal_id=str(uuid.uuid4()),
+                    signal_type=SignalType.OBJECT,
+                    source_model=self.model_name,
+                    confidence=conf,
+                    raw_data=payload,
+                    bounding_box=bounding_box,
+                    detected_at=datetime.now(),
+                )
             )
-            signals.append(signal)
         return signals

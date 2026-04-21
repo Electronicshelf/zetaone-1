@@ -25,6 +25,21 @@ from zataone.services.violation_service import ViolationService
 logger = logging.getLogger(__name__)
 
 
+def _enabled_domain_modalities(config: dict) -> set[str] | None:
+    """
+    If domain YAML lists extractors.enabled, only those short names are registered.
+    Missing or empty list => all domain extractors that exist in the module.
+    Short names: ocr, vision, embedding, vlm, asr
+    """
+    ex = config.get("extractors") or {}
+    raw = ex.get("enabled")
+    if raw is None:
+        return None
+    if isinstance(raw, list) and len(raw) == 0:
+        return None
+    return {str(x).strip().lower() for x in raw}
+
+
 def _core_stub_extractors_disabled() -> bool:
     """When true, ad_compliance skips core OCR/Vision/Embedding/VLM (domain extractors only)."""
     v = os.environ.get("ZATAONE_DISABLE_CORE_STUB_EXTRACTORS", "").strip().lower()
@@ -73,16 +88,39 @@ class CompliancePipeline:
             f"zataone.domains.{self._domain}.extractors"
         )
 
+        enabled = _enabled_domain_modalities(config)
+
+        def _allow(short: str) -> bool:
+            return enabled is None or short in enabled
+
         extractor_classes = []
-        if hasattr(extractors_module, "OCRExtractor"):
-            extractor_classes.append(("OCRExtractor", {}))
-        if hasattr(extractors_module, "VisionExtractor"):
-            vision_cfg = config.get("vision", {})
+        ocr_cfg = config.get("ocr") or {}
+        if hasattr(extractors_module, "OCRExtractor") and _allow("ocr"):
             extractor_classes.append(
-                ("VisionExtractor", {"object_queries": vision_cfg.get("object_queries")})
+                (
+                    "OCRExtractor",
+                    {
+                        "backend_type": ocr_cfg.get("backend", "tesseract"),
+                        "min_confidence": ocr_cfg.get("min_confidence", 40),
+                    },
+                )
             )
-        if hasattr(extractors_module, "EmbeddingExtractor"):
-            emb_cfg = config.get("embedding", {})
+        vision_cfg = config.get("vision", {})
+        if hasattr(extractors_module, "VisionExtractor") and _allow("vision"):
+            extractor_classes.append(
+                (
+                    "VisionExtractor",
+                    {
+                        "object_queries": vision_cfg.get("object_queries"),
+                        "model_id": vision_cfg.get("model_id"),
+                        "detection_threshold": vision_cfg.get("detection_threshold"),
+                        "text_threshold": vision_cfg.get("text_threshold"),
+                        "box_score_min": vision_cfg.get("box_score_min"),
+                    },
+                )
+            )
+        emb_cfg = config.get("embedding", {})
+        if hasattr(extractors_module, "EmbeddingExtractor") and _allow("embedding"):
             reg_texts = [
                 (k, v) for k, v in emb_cfg.get("regulation_texts", {}).items()
             ]
@@ -92,11 +130,25 @@ class CompliancePipeline:
                     {
                         "regulation_texts": reg_texts or None,
                         "similarity_threshold": emb_cfg.get("similarity_threshold", 0.6),
+                        "model_name": emb_cfg.get("model_name"),
                     },
                 )
             )
-        if hasattr(extractors_module, "VLMExtractor"):
-            extractor_classes.append(("VLMExtractor", {}))
+        vlm_cfg = config.get("vlm") or {}
+        if hasattr(extractors_module, "VLMExtractor") and _allow("vlm"):
+            extractor_classes.append(
+                (
+                    "VLMExtractor",
+                    {
+                        "model": vlm_cfg.get("model"),
+                        "max_tokens": vlm_cfg.get("max_tokens"),
+                        "temperature": vlm_cfg.get("temperature"),
+                        "env_api_key": vlm_cfg.get("env_api_key"),
+                    },
+                )
+            )
+        if hasattr(extractors_module, "AsrExtractor") and _allow("asr"):
+            extractor_classes.append(("AsrExtractor", {}))
 
         # Core extractors for ad_compliance (text always; OCR/Vision/Embedding/VLM optional stubs)
         if self._domain == "ad_compliance":

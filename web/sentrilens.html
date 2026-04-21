@@ -97,6 +97,9 @@
         details { margin-top: 8px; }
         summary { cursor: pointer; font-weight: 700; font-size: 13px; }
         code { font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; }
+        .domain-hint {
+            margin: 6px 0 0 0; font-size: 12px; color: #555; line-height: 1.45;
+        }
     </style>
 </head>
 <body>
@@ -106,6 +109,20 @@
 
         <label for="apiBase">API base URL (no trailing slash)</label>
         <input type="text" id="apiBase" placeholder="https://zataone-api-….run.app" />
+
+        <!-- Domain: sent on every API request as X-Domain. API must allow via ZATAONE_ALLOWED_DOMAINS on Cloud Run
+             (default domain always allowed; else 403). Add <option> in domainPresets when new domains ship.
+             zataone_domain in localStorage; input+change persist while typing. -->
+        <label for="domain">Compliance domain (<code>X-Domain</code>)</label>
+        <input type="text" id="domain" list="domainPresets" placeholder="ad_compliance" autocomplete="off" spellcheck="false" />
+        <datalist id="domainPresets">
+            <option value="ad_compliance"></option>
+        </datalist>
+        <p class="domain-hint">
+            Sent on every API request. The service must allow this name (Cloud Run env
+            <code>ZATAONE_ALLOWED_DOMAINS</code>, comma-separated; the default domain is always allowed).
+            If you pick a domain the server does not allow, the API returns <strong>403</strong>.
+        </p>
 
         <div class="row-modes">
             <label><input type="radio" name="mode" value="image" checked /> Image</label>
@@ -150,17 +167,30 @@
 
     <script>
         const LS_KEY = 'zataone_api_base';
+        const LS_DOMAIN = 'zataone_domain';
 
         const apiBase = () => document.getElementById('apiBase').value.replace(/\/$/, '');
+        const domainValue = () => {
+            const v = document.getElementById('domain').value.trim();
+            return v || 'ad_compliance';
+        };
+        /** Merge with JSON or FormData requests; do not set Content-Type on multipart. */
+        const domainHeaders = (extra) => ({ ...(extra || {}), 'X-Domain': domainValue() });
         const defaultApiBase =
             (window.location.pathname || '').startsWith('/ui/')
                 ? window.location.origin
                 : '';
         document.getElementById('apiBase').value =
             localStorage.getItem(LS_KEY) || defaultApiBase;
+        document.getElementById('domain').value =
+            localStorage.getItem(LS_DOMAIN) || 'ad_compliance';
         document.getElementById('apiBase').addEventListener('change', () => {
             localStorage.setItem(LS_KEY, apiBase());
         });
+        const domainEl = document.getElementById('domain');
+        const persistDomain = () => localStorage.setItem(LS_DOMAIN, domainValue());
+        domainEl.addEventListener('change', persistDomain);
+        domainEl.addEventListener('input', persistDomain);
 
         document.querySelectorAll('input[name="mode"]').forEach((r) => {
             r.addEventListener('change', () => {
@@ -254,7 +284,7 @@
             const b = apiBase();
             const max = 240;
             for (let i = 0; i < max; i++) {
-                const r = await fetch(`${b}/assets/${assetId}`);
+                const r = await fetch(`${b}/assets/${assetId}`, { headers: domainHeaders() });
                 const data = await readJsonResponse(r);
                 if (!r.ok) throw new Error(formatApiDetail(data.detail) || r.statusText);
                 if (data.status === 'completed') return data;
@@ -274,7 +304,7 @@
 
         async function fetchGraph(assetId) {
             const b = apiBase();
-            const r = await fetch(`${b}/assets/${assetId}/graph`);
+            const r = await fetch(`${b}/assets/${assetId}/graph`, { headers: domainHeaders() });
             const data = await readJsonResponse(r);
             if (!r.ok) throw new Error(formatApiDetail(data.detail) || r.statusText);
             return data;
@@ -543,6 +573,7 @@
                 return;
             }
             localStorage.setItem(LS_KEY, b);
+            localStorage.setItem(LS_DOMAIN, domainValue());
 
             resultDiv.innerHTML = '<div class="loading">Submitting…</div>';
             resultDiv.style.display = 'block';
@@ -561,7 +592,11 @@
                     if (!file) throw new Error('Choose an image');
                     const fd = new FormData();
                     fd.append('file', file);
-                    const r = await fetch(`${b}/assets/image`, { method: 'POST', body: fd });
+                    const r = await fetch(`${b}/assets/image`, {
+                        method: 'POST',
+                        headers: domainHeaders(),
+                        body: fd,
+                    });
                     postJson = await readJsonResponse(r);
                     if (!r.ok) throw new Error(formatApiDetail(postJson.detail) || r.statusText);
                     assetId = postJson.asset_id;
@@ -570,7 +605,7 @@
                     if (!content) throw new Error('Enter text');
                     const r = await fetch(`${b}/assets`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: domainHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ content, type: 'text' }),
                     });
                     postJson = await readJsonResponse(r);

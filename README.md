@@ -106,6 +106,7 @@ curl http://localhost:8000/health
 | GET | `/health` | Health check |
 | POST | `/assets` | Submit asset for compliance check (async) |
 | POST | `/assets/image` | Submit image for compliance check (async) |
+| POST | `/assets/audio` | Submit audio for transcription (faster-whisper) + compliance check |
 | GET | `/assets/{asset_id}` | Poll for verdict when ready |
 
 **POST /assets** — Submit content for compliance evaluation. Returns immediately with `status: processing` and `asset_id`. Poll `GET /assets/{asset_id}` for the verdict.
