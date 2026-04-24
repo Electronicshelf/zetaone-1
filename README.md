@@ -108,6 +108,8 @@ curl http://localhost:8000/health
 | POST | `/assets/image` | Submit image for compliance check (async) |
 | POST | `/assets/audio` | Submit audio for transcription (faster-whisper) + compliance check |
 | GET | `/assets/{asset_id}` | Poll for verdict when ready |
+| GET | `/assets/{asset_id}/graph` | Compliance graph (signals, evidence, violations) for explainability / UI overlays |
+| POST | `/assets/{asset_id}/llm-final-review` | Optional advisory pass (Gemini VLM + text); does not override deterministic verdict |
 
 **POST /assets** — Submit content for compliance evaluation. Returns immediately with `status: processing` and `asset_id`. Poll `GET /assets/{asset_id}` for the verdict.
 
@@ -163,6 +165,24 @@ ASSET_ID=$(echo $RESP | jq -r '.asset_id')
 # Poll for result
 curl "http://localhost:8000/assets/$ASSET_ID"
 ```
+
+### Advisory review (optional Gemini)
+
+After the pipeline **completes**, you can request an **advisory** second read that uses **Google Gemini** (not the policy engine). It **does not** change the binding compliance outcome; the result is stored on the latest verdict (e.g. `llm_final_review`) for explainability.
+
+- **Text:** One Gemini call with structured context (deterministic verdict, signals, violations).
+- **Image:** If the asset is an image, **re-upload the same file** in the multipart `file` field so the service can run a **VLM** pass first (compliance-oriented visual inspection), then merge that into the JSON context for the final text call.
+
+| Variable | Role |
+|----------|------|
+| `GEMINI_API_KEY` or `GOOGLE_API_KEY` | Required for advisory calls (Google AI / AI Studio) |
+| `ZATAONE_LLM_FINAL_REVIEW` | `0`/`false` to disable; if unset, advisory is on when a Gemini key is set |
+| `GEMINI_MODEL` | Default generative model (text + vision if unset; see [Gemini API models](https://ai.google.dev/gemini-api/docs/models)) |
+| `GEMINI_REVIEW_MODEL` / `GEMINI_VLM_MODEL` | Optional overrides for the text and vision steps |
+| `GEMINI_REVIEW_MAX_TOKENS` / `GEMINI_VLM_MAX_TOKENS` | Cap advisory JSON / VLM inspection length (defaults are set in code) |
+| `ZATAONE_ALLOWED_DOMAINS` | Comma-separated; requests send **`X-Domain`**; unknown domains return **403** |
+
+**UI:** [web/sentrilens.html](web/sentrilens.html) — “SentriLens-style” flow (upload, poll, graph overlays, **Run advisory review**). Configure **API base URL** and **X-Domain** in the page; enable **CORS** on the API for that origin. Also available at `/ui/sentrilens.html` when `web/` is included in the container.
 
 ---
 
@@ -272,7 +292,7 @@ gcloud builds submit --config cloudbuild.yaml \
 
 **Runtime notes:** Set **`DATABASE_URL`** to the Cloud SQL Unix socket form, attach the instance on the service, set **`CORS_ORIGINS`** for your UI origin, and **`HF_TOKEN`** on Cloud Run if you still want Hub access for edge cases. The Dockerfile sets **`ZATAONE_DISABLE_CORE_STUB_EXTRACTORS=true`** so domain extractors are used on Cloud Run.
 
-**Web UI:** `web/sentrilens.html` is served at **`/ui/sentrilens.html`** when the `web/` folder is in the image.
+**Web UI:** `web/sentrilens.html` is served at **`/ui/sentrilens.html`** when the `web/` folder is in the image. Set **`GEMINI_*`** and **`CORS_ORIGINS`** on the Cloud Run service for advisory review from the browser (see *Advisory review* above).
 
 ---
 
