@@ -1,2 +1,10 @@
-# zataone policy registry
-# Placeholder
+# zataone policy registry — domain → policy pack paths
+
+domains:
+  ad_compliance:
+    default_pack: meta_ads_us
+    packs:
+      meta_ads_us:
+        path: domains/ad_compliance/policies/meta_ads.yaml
+        platform: meta
+        jurisdiction: US

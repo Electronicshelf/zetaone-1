@@ -7,20 +7,40 @@
     <meta name="description" content="PolicyLens: visual compliance review with overlays and optional advisory LLM" />
     <title>Zataone PolicyLens</title>
     <style>
+        :root {
+            --pl-primary: #5b6ee8;
+            --pl-primary-dark: #4a57c4;
+            --pl-bg: #f0f2f8;
+            --pl-card: #ffffff;
+            --pl-border: #e4e7ef;
+            --pl-text: #1a1d26;
+            --pl-muted: #5c6370;
+            --pl-green: #1e7e34;
+            --pl-green-bg: #e8f5ec;
+            --pl-yellow: #9a6700;
+            --pl-yellow-bg: #fff8e6;
+            --pl-red: #b02a37;
+            --pl-red-bg: #fdecef;
+            --pl-radius: 12px;
+            --pl-shadow: 0 2px 12px rgba(26, 29, 38, 0.08);
+            --pl-transition: 0.18s ease;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            max-width: 1100px;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 16px 20px 40px;
+            background: var(--pl-bg);
+            color: var(--pl-text);
+            line-height: 1.5;
         }
         .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--pl-card);
+            padding: 28px 32px;
+            border-radius: var(--pl-radius);
+            box-shadow: var(--pl-shadow);
         }
-        h1 { color: #667eea; text-align: center; margin-bottom: 10px; font-size: 1.5rem; }
+        h1 { color: var(--pl-primary); text-align: center; margin-bottom: 8px; font-size: 1.65rem; font-weight: 700; letter-spacing: -0.02em; }
         .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 0.95rem; }
         label { display: block; margin-top: 12px; font-weight: bold; color: #333; font-size: 13px; }
         input[type="text"], textarea {
@@ -38,10 +58,12 @@
         .row-modes { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
         .row-modes label { font-weight: 600; margin: 0; }
         button {
-            width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 6px;
-            font-size: 14px; font-weight: bold; cursor: pointer; background: #667eea; color: white;
+            width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer; background: var(--pl-primary); color: white;
+            transition: background var(--pl-transition), transform 0.12s ease;
         }
-        button:hover { background: #5568d3; }
+        button:hover { background: var(--pl-primary-dark); }
+        button:active { transform: scale(0.99); }
         button:disabled { background: #ccc; cursor: not-allowed; }
         #analyzeBtn:focus-visible, .btn-secondary:focus-visible, .btn-ghost:focus-visible, .btn-copy:focus-visible {
             outline: 2px solid #667eea; outline-offset: 2px;
@@ -142,12 +164,91 @@
         @keyframes plspin { to { transform: rotate(360deg); } }
         .box-label { pointer-events: none; }
         .image-stage.labels-off .box-label { opacity: 0; }
+
+        /* Verdict card */
+        .verdict-card {
+            border-radius: var(--pl-radius);
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            border: 1px solid var(--pl-border);
+            transition: box-shadow var(--pl-transition);
+        }
+        .verdict-card:hover { box-shadow: 0 4px 16px rgba(26, 29, 38, 0.1); }
+        .verdict-card.status-COMPLIANT { background: linear-gradient(135deg, var(--pl-green-bg) 0%, #fff 60%); border-left: 5px solid #28a745; }
+        .verdict-card.status-REVIEW_REQUIRED { background: linear-gradient(135deg, var(--pl-yellow-bg) 0%, #fff 60%); border-left: 5px solid #ffc107; }
+        .verdict-card.status-NON_COMPLIANT { background: linear-gradient(135deg, var(--pl-red-bg) 0%, #fff 60%); border-left: 5px solid #dc3545; }
+        .verdict-hero { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; justify-content: space-between; }
+        .verdict-hero-main { flex: 1; min-width: 200px; }
+        .verdict-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--pl-muted); font-weight: 600; margin-bottom: 4px; }
+        .verdict-value { font-size: 1.35rem; font-weight: 700; margin: 0; }
+        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+        .status-dot.green { background: #28a745; box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25); }
+        .status-dot.yellow { background: #ffc107; box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.35); }
+        .status-dot.red { background: #dc3545; box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25); }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 14px; }
+        .metric-box { background: rgba(255,255,255,0.85); border: 1px solid var(--pl-border); border-radius: 8px; padding: 10px 12px; text-align: center; }
+        .metric-box .val { font-size: 1.25rem; font-weight: 700; display: block; }
+        .metric-box .lbl { font-size: 10px; text-transform: uppercase; color: var(--pl-muted); letter-spacing: 0.04em; }
+
+        /* Run stats & flags */
+        .run-stats { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: var(--pl-muted); margin: 0 0 12px 0; padding: 10px 12px; background: #f8f9fc; border-radius: 8px; border: 1px solid var(--pl-border); }
+        .run-stats[hidden] { display: none !important; }
+        .feature-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .flag-chip { font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--pl-border); background: #fff; color: var(--pl-muted); }
+        .flag-chip.on { border-color: #a8b4f0; background: #eef0ff; color: var(--pl-primary-dark); font-weight: 600; }
+        .flag-chip.off { opacity: 0.75; }
+
+        /* Explainability */
+        .explain-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 8px 0; }
+        .explain-toolbar .btn-ghost { margin-top: 0; width: auto; }
+        .explain-section { border: 1px solid var(--pl-border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; background: #fafbfd; transition: border-color var(--pl-transition); }
+        .explain-section[open] { border-color: #c5cae9; background: #fff; }
+        .explain-section summary { padding: 12px 14px; font-weight: 600; font-size: 13px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .explain-section summary::-webkit-details-marker { display: none; }
+        .explain-section summary::after { content: '▾'; color: var(--pl-muted); font-size: 12px; transition: transform var(--pl-transition); }
+        .explain-section[open] summary::after { transform: rotate(180deg); }
+        .explain-body { padding: 0 14px 14px 14px; font-size: 13px; border-top: 1px solid var(--pl-border); }
+        .doc-highlight { white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; line-height: 1.6; padding: 12px; background: #f4f5f9; border-radius: 8px; max-height: 220px; overflow: auto; }
+        .doc-highlight mark { background: #ffe082; color: inherit; padding: 0 2px; border-radius: 2px; }
+        .clause-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .clause-row:last-child { border-bottom: none; }
+        .score-bar-wrap { flex: 0 0 72px; height: 6px; background: #e8eaf0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .score-bar { height: 100%; background: var(--pl-primary); border-radius: 3px; transition: width var(--pl-transition); }
+        .rule-tag { display: inline-block; font-size: 11px; padding: 2px 8px; margin: 2px 4px 2px 0; background: #eef0ff; color: var(--pl-primary-dark); border-radius: 6px; font-weight: 600; }
+
+        /* Signals */
+        .signal-group { margin-bottom: 14px; }
+        .signal-group h4 { margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pl-muted); }
+        .signal-card { background: #fff; border: 1px solid var(--pl-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12px; transition: border-color var(--pl-transition); }
+        .signal-card:hover { border-color: #c5cae9; }
+        .conf-bar { height: 5px; background: #e8eaf0; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+        .conf-fill { height: 100%; background: linear-gradient(90deg, var(--pl-primary), #7c8ef5); border-radius: 3px; }
+
+        /* Pipeline extended */
+        .run-progress.pipeline-extended .step { font-size: 11px; }
+        .run-progress .step .dot { transition: background var(--pl-transition), color var(--pl-transition); }
+        .run-progress .connector { color: #ccc; font-size: 10px; user-select: none; }
+
+        /* Empty / loading */
+        .empty-state { text-align: center; padding: 24px 16px; color: var(--pl-muted); font-size: 13px; border: 1px dashed var(--pl-border); border-radius: 10px; background: #fafbfd; }
+        .empty-state strong { display: block; color: var(--pl-text); margin-bottom: 6px; }
+        .overlay-hint { margin: 8px 0 0; font-size: 12px; line-height: 1.45; }
+        .overlay-hint[hidden] { display: none !important; }
+        .skeleton { background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 8px; height: 80px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        pre.raw-json { font-size: 11px; overflow: auto; max-height: 280px; margin: 0; padding: 12px; background: #1e1f26; color: #e8e8ed; border-radius: 8px; }
+        @media (max-width: 600px) {
+            .container { padding: 18px 16px; }
+            .metric-grid { grid-template-columns: repeat(2, 1fr); }
+            .verdict-value { font-size: 1.15rem; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Zataone PolicyLens</h1>
-        <p class="subtitle">Ad &amp; compliance visual review — run the pipeline, inspect overlays, optional advisory (Gemini). <code>POST /assets/image</code> or <code>POST /assets</code> → poll → <code>GET /assets/{id}/graph</code>.</p>
+        <p class="subtitle">Visual compliance review for demos — deterministic verdict, document explainability, and optional Gemini advisory. Same APIs: upload → poll → graph.</p>
 
         <label for="apiBase">API base URL (no trailing slash)</label>
         <div class="api-input-row">
@@ -196,11 +297,19 @@
 
         <button type="button" id="analyzeBtn" disabled>Run compliance check</button>
 
-        <div id="runProgress" class="run-progress" hidden>
+        <div id="runProgress" class="run-progress pipeline-extended" hidden aria-label="Pipeline progress">
             <div class="step" data-step="1"><span class="dot">1</span> Upload</div>
-            <div class="step" data-step="2"><span class="dot">2</span> Process</div>
-            <div class="step" data-step="3"><span class="dot">3</span> Graph &amp; result</div>
+            <div class="step" data-step="2"><span class="dot">2</span> Extraction</div>
+            <span class="connector" aria-hidden="true">→</span>
+            <div class="step" data-step="3"><span class="dot">3</span> Document</div>
+            <span class="connector" aria-hidden="true">→</span>
+            <div class="step" data-step="4"><span class="dot">4</span> Retrieval</div>
+            <span class="connector" aria-hidden="true">→</span>
+            <div class="step" data-step="5"><span class="dot">5</span> Policy</div>
+            <span class="connector" aria-hidden="true">→</span>
+            <div class="step" data-step="6"><span class="dot">6</span> Verdict</div>
         </div>
+        <p id="runStats" class="run-stats" hidden></p>
         <p id="pollDetail" class="poll-detail" style="display:none" aria-live="polite"></p>
 
         <div class="grid">
@@ -212,10 +321,12 @@
                     <img id="preview" alt="Preview" />
                     <div class="overlay" id="overlay"></div>
                 </div>
+                <p id="overlayHint" class="muted overlay-hint" hidden>No bounding boxes in graph for the current selection. Enable OCR/Vision toggles or try “All signal boxes”.</p>
             </div>
             <div class="panel result-panel" id="rightResultPanel">
                 <h2>Results</h2>
                 <div id="result" role="status" aria-live="polite"></div>
+                <div id="explainMount"></div>
                 <div id="llmSection" style="display: none;">
                     <h3>Advisory review (Gemini)</h3>
                     <p class="muted" id="llmHint" style="margin: 0 0 8px 0;">
@@ -295,7 +406,11 @@
         const apiHealthEl = document.getElementById('apiHealth');
         const MAX_OVERLAY_BOXES = 60;
 
-        /** phase: 0=hide, 1=upload, 2=process, 3=graph, 4=all done */
+        const runStatsEl = document.getElementById('runStats');
+        const explainMount = document.getElementById('explainMount');
+        let runStartedAt = 0;
+
+        /** phase: 0=hide, 1–6 pipeline steps, 7=all done */
         function setRunProgress(phase) {
             if (!phase) {
                 runProgressEl.hidden = true;
@@ -306,18 +421,270 @@
             runProgressEl.hidden = false;
             const steps = runProgressEl.querySelectorAll('.step');
             steps.forEach((s) => s.classList.remove('active', 'done'));
-            if (phase === 1) {
-                steps[0].classList.add('active');
-            } else if (phase === 2) {
-                steps[0].classList.add('done');
-                steps[1].classList.add('active');
-            } else if (phase === 3) {
-                steps[0].classList.add('done');
-                steps[1].classList.add('done');
-                steps[2].classList.add('active');
-            } else if (phase === 4) {
+            const n = steps.length;
+            if (phase >= 7 || phase === 'done') {
                 steps.forEach((s) => s.classList.add('done'));
+                return;
             }
+            const activeIdx = Math.min(Math.max(phase - 1, 0), n - 1);
+            for (let i = 0; i < n; i++) {
+                if (i < activeIdx) steps[i].classList.add('done');
+                else if (i === activeIdx) steps[i].classList.add('active');
+            }
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (btn) {
+                    const prev = btn.textContent;
+                    btn.textContent = 'Copied';
+                    setTimeout(() => { btn.textContent = prev; }, 1400);
+                }
+            }).catch(() => {});
+        }
+
+        function mergeMeta(poll, graph) {
+            const pollMeta = (poll && poll.metadata) || {};
+            const verdictResult = (graph.verdict && graph.verdict.result) || {};
+            const verdictMeta = verdictResult.metadata || {};
+            return {
+                ...pollMeta,
+                ...verdictMeta,
+                document: graph.document || pollMeta.document || verdictMeta.document,
+                retrieval: graph.retrieval || pollMeta.retrieval || verdictMeta.retrieval,
+                policy_pack: graph.policy_pack || pollMeta.policy_pack || verdictMeta.policy_pack,
+                document_centric_enabled:
+                    graph.document_centric_enabled ??
+                    pollMeta.document_centric_enabled ??
+                    verdictMeta.document_centric_enabled,
+                policy_retrieval_enabled:
+                    graph.policy_retrieval_enabled ??
+                    pollMeta.policy_retrieval_enabled ??
+                    verdictMeta.policy_retrieval_enabled,
+            };
+        }
+
+        function collectMatchedSpans(violations) {
+            const spans = [];
+            (violations || []).forEach((v) => {
+                (v.evidence || []).forEach((e) => {
+                    const sp = e.data && e.data.matched_span;
+                    if (sp && typeof sp.start === 'number') spans.push(sp);
+                });
+            });
+            return spans;
+        }
+
+        function highlightDocumentText(text, spans) {
+            if (!text) return '<span class="muted">(empty document)</span>';
+            const sorted = [...spans].sort((a, b) => a.start - b.start);
+            let html = '';
+            let cursor = 0;
+            sorted.forEach((sp) => {
+                const start = Math.max(0, sp.start);
+                const end = Math.min(text.length, sp.end);
+                if (start > cursor) html += escapeHtml(text.slice(cursor, start));
+                if (end > start) html += '<mark>' + escapeHtml(text.slice(start, end)) + '</mark>';
+                cursor = Math.max(cursor, end);
+            });
+            if (cursor < text.length) html += escapeHtml(text.slice(cursor));
+            return html || escapeHtml(text);
+        }
+
+        function statusDotClass(status) {
+            if (status === 'COMPLIANT') return 'green';
+            if (status === 'NON_COMPLIANT') return 'red';
+            if (status === 'REVIEW_REQUIRED') return 'yellow';
+            return '';
+        }
+
+        function verdictDisplayLabel(verdict) {
+            if (verdict === 'likely_approved') return 'Likely approved';
+            if (verdict === 'likely_rejected') return 'Likely rejected';
+            if (verdict === 'borderline') return 'Borderline';
+            return verdict || 'Unknown';
+        }
+
+        function signalModality(sig) {
+            const v = sig.value || {};
+            const t = v.type || '';
+            const st = String(sig.signal_type || '').toLowerCase();
+            const ex = String(sig.extractor_id || '').toLowerCase();
+            if (t === 'asr_text' || ex.includes('asr') || ex.includes('whisper')) return 'ASR';
+            if (t === 'vision_object' || st.includes('object') || ex.includes('vision') || ex.includes('dino')) return 'Vision';
+            if (t === 'image_embedding_similarity' || st.includes('scene') || ex.includes('siglip') || ex.includes('embedding')) return 'Embedding';
+            if (st.includes('vlm') || ex.includes('vlm') || ex.includes('gpt')) return 'VLM';
+            if (t === 'ocr_text' || ex.includes('ocr') || st === 'text') return 'OCR';
+            return 'Text / other';
+        }
+
+        function renderSignalsByModality(graph, violations) {
+            const sigs = graph.signals || [];
+            if (!sigs.length) {
+                return '<div class="empty-state"><strong>No signals</strong>Extractors returned no persisted signals for this asset.</div>';
+            }
+            const linkedIds = new Set();
+            (violations || []).forEach((v) => {
+                (v.evidence || []).forEach((e) => {
+                    const sid = e.data && e.data.signal_id;
+                    if (sid) linkedIds.add(String(sid));
+                });
+            });
+            const groups = {};
+            sigs.forEach((sig) => {
+                const mod = signalModality(sig);
+                if (!groups[mod]) groups[mod] = [];
+                groups[mod].push(sig);
+            });
+            const order = ['OCR', 'Vision', 'Embedding', 'ASR', 'VLM', 'Text / other'];
+            let html = '';
+            order.forEach((mod) => {
+                const list = groups[mod];
+                if (!list || !list.length) return;
+                html += '<div class="signal-group"><h4>' + escapeHtml(mod) + ' (' + list.length + ')</h4>';
+                list.slice(0, 40).forEach((sig) => {
+                    const v = sig.value || {};
+                    const conf = typeof sig.confidence === 'number' ? sig.confidence : 0;
+                    const pct = Math.round(Math.min(1, Math.max(0, conf)) * 100);
+                    const label = v.text || v.label || v.regulation || v.type || sig.signal_type || '—';
+                    const linked = linkedIds.has(String(sig.id)) ? ' · linked to violation' : '';
+                    html += '<div class="signal-card"><div style="display:flex;justify-content:space-between;gap:8px;"><span><code style="font-size:10px;">' +
+                        escapeHtml(String(sig.extractor_id || '').slice(0, 28)) +
+                        '</code></span><span class="muted">' + pct + '%</span></div><div style="margin-top:4px;">' +
+                        escapeHtml(String(label).slice(0, 120)) + escapeHtml(linked) +
+                        '</div><div class="conf-bar"><div class="conf-fill" style="width:' + pct + '%"></div></div></div>';
+                });
+                if (list.length > 40) html += '<p class="muted">+' + (list.length - 40) + ' more…</p>';
+                html += '</div>';
+            });
+            return html;
+        }
+
+        function renderExplainPanels(data, graph) {
+            const meta = data.metadata || {};
+            const doc = meta.document || graph.document;
+            const retrieval = meta.retrieval || graph.retrieval;
+            const pack = meta.policy_pack || graph.policy_pack;
+            const violations = data.violations || [];
+            const spans = collectMatchedSpans(violations);
+            const docText = doc && doc.normalized_text ? doc.normalized_text : '';
+
+            let flagsHtml = '<div class="feature-flags">';
+            flagsHtml += '<span class="flag-chip ' + (meta.document_centric_enabled ? 'on' : 'off') + '">Document-centric: ' + (meta.document_centric_enabled ? 'ON' : 'off') + '</span>';
+            flagsHtml += '<span class="flag-chip ' + (meta.policy_retrieval_enabled ? 'on' : 'off') + '">Retrieval: ' + (meta.policy_retrieval_enabled ? 'ON' : 'off') + '</span>';
+            flagsHtml += '</div>';
+
+            let html = flagsHtml + '<div class="explain-toolbar">';
+            html += '<button type="button" class="btn-ghost btn-expand-all">Expand all</button>';
+            html += '<button type="button" class="btn-ghost btn-collapse-all">Collapse all</button>';
+            html += '</div>';
+
+            html += '<details class="explain-section" open><summary>Normalized document</summary><div class="explain-body">';
+            if (docText) {
+                html += '<p class="muted" style="margin:0 0 8px 0;">Modality: <strong>' + escapeHtml(doc.modality || '—') + '</strong>';
+                if (spans.length) html += ' · <span>' + spans.length + ' OCR/text span(s)</span>';
+                html += '</p><div class="doc-highlight" id="docHighlight">' + highlightDocumentText(docText, spans) + '</div>';
+                html += '<button type="button" class="btn-copy btn-copy-doc" style="margin-top:8px;">Copy document</button>';
+            } else {
+                html += '<div class="empty-state"><strong>No document snapshot</strong>Server did not return <code>metadata.document</code>. Enable pipeline document build on the API.</div>';
+            }
+            html += '</div></details>';
+
+            html += '<details class="explain-section"><summary>Policy pack</summary><div class="explain-body">';
+            if (pack) {
+                html += '<p style="margin:0 0 8px 0;"><span class="rule-tag">' + escapeHtml(pack.id || '') + '</span> ';
+                html += '<span class="muted">' + escapeHtml(pack.platform || '') + ' · ' + escapeHtml(pack.jurisdiction || '') + ' · v' + escapeHtml((pack.version && pack.version.version) || '?') + '</span></p>';
+                if (pack.effective_date || (pack.version && pack.version.effective_date)) {
+                    html += '<p class="muted">Effective: ' + escapeHtml(pack.effective_date || pack.version.effective_date) + '</p>';
+                }
+            } else {
+                html += '<p class="muted">No policy pack metadata on this response.</p>';
+            }
+            html += '</div></details>';
+
+            html += '<details class="explain-section"><summary>Retrieved rules (BM25)</summary><div class="explain-body">';
+            if (retrieval && retrieval.method === 'bm25' && retrieval.retrieved_rule_ids && retrieval.retrieved_rule_ids.length) {
+                const scores = retrieval.retrieval_scores || {};
+                const maxScore = Math.max(...Object.values(scores).map(Number), 0.001);
+                retrieval.retrieved_rule_ids.forEach((rid) => {
+                    const sc = scores[rid] || 0;
+                    const pct = Math.round((sc / maxScore) * 100);
+                    html += '<div class="clause-row"><div><span class="rule-tag">' + escapeHtml(rid) + '</span>';
+                    html += '<div class="score-bar-wrap"><div class="score-bar" style="width:' + pct + '%"></div></div>';
+                    html += '<span class="muted" style="font-size:11px;">' + sc.toFixed(3) + '</span></div>';
+                });
+                if (retrieval.retrieved_clause_ids && retrieval.retrieved_clause_ids.length) {
+                    html += '<p class="muted" style="margin-top:10px;">Clauses: ' + retrieval.retrieved_clause_ids.map((c) => '<code>' + escapeHtml(c) + '</code>').join(', ') + '</p>';
+                }
+            } else if (retrieval && retrieval.method === 'all_rules') {
+                html += '<p class="muted">Retrieval disabled — all rules evaluated.</p>';
+            } else {
+                html += '<div class="empty-state"><strong>Retrieval off or empty</strong>Set <code>ZATAONE_POLICY_RETRIEVAL=true</code> on the API to shortlist rules.</div>';
+            }
+            html += '</div></details>';
+
+            html += '<details class="explain-section"><summary>Triggered rules &amp; matched spans</summary><div class="explain-body">';
+            if (violations.length) {
+                const ruleIds = [...new Set(violations.map((v) => v.rule_id))];
+                html += '<p style="margin:0 0 8px 0;">' + ruleIds.map((r) => '<span class="rule-tag">' + escapeHtml(r) + '</span>').join('') + '</p>';
+                violations.forEach((v) => {
+                    (v.evidence || []).filter((e) => e.evidence_type === 'text_match').forEach((e) => {
+                        const sp = e.data && e.data.matched_span;
+                        const term = e.data && e.data.matched_term;
+                        if (sp) html += '<p class="muted" style="margin:4px 0;"><code>' + escapeHtml(v.rule_id) + '</code>: “' + escapeHtml(sp.text || term || '') + '” @ ' + sp.start + '–' + sp.end + '</p>';
+                    });
+                });
+            } else {
+                html += '<div class="empty-state"><strong>No violations</strong>Deterministic policy found no rule matches.</div>';
+            }
+            html += '</div></details>';
+
+            html += '<details class="explain-section"><summary>Signals by modality</summary><div class="explain-body">';
+            html += renderSignalsByModality(graph, violations);
+            html += '</div></details>';
+
+            html += '<details class="explain-section raw-graph-details"><summary>Raw graph (debug)</summary><div class="explain-body"><button type="button" class="btn-copy btn-copy-raw" style="margin-bottom:8px;">Copy JSON</button><pre class="raw-json">' +
+                escapeHtml(JSON.stringify(graph || {}, null, 2)) + '</pre></div></details>';
+
+            return html;
+        }
+
+        function bindExplainToolbar() {
+            const expand = explainMount.querySelector('.btn-expand-all');
+            const collapse = explainMount.querySelector('.btn-collapse-all');
+            if (expand) expand.addEventListener('click', () => {
+                explainMount.querySelectorAll('.explain-section').forEach((d) => { d.open = true; });
+            });
+            if (collapse) collapse.addEventListener('click', () => {
+                explainMount.querySelectorAll('.explain-section').forEach((d) => { d.open = false; });
+            });
+            const copyDoc = explainMount.querySelector('.btn-copy-doc');
+            if (copyDoc) copyDoc.addEventListener('click', () => {
+                const el = document.getElementById('docHighlight');
+                copyToClipboard(el ? el.innerText : '', copyDoc);
+                const copyRaw = explainMount.querySelector('.btn-copy-raw');
+            if (copyRaw) copyRaw.addEventListener('click', () => {
+                const pre = explainMount.querySelector('.raw-json');
+                copyToClipboard(pre ? pre.textContent : '', copyRaw);
+            });
+        });
+            const copyRaw = explainMount.querySelector('.btn-copy-raw');
+            if (copyRaw) copyRaw.addEventListener('click', () => {
+                const pre = explainMount.querySelector('.raw-json');
+                copyToClipboard(pre ? pre.textContent : '', copyRaw);
+            });
+        }
+
+        function showRunStats(graph, elapsedMs) {
+            const sigCount = (graph.signals || []).length;
+            const retrieval = graph.retrieval || {};
+            const ruleCount = retrieval.retrieved_rule_ids ? retrieval.retrieved_rule_ids.length : 'all';
+            runStatsEl.hidden = false;
+            runStatsEl.innerHTML =
+                '<span><strong>' + (elapsedMs / 1000).toFixed(1) + 's</strong> total</span>' +
+                '<span><strong>' + sigCount + '</strong> signals</span>' +
+                '<span><strong>' + ruleCount + '</strong> rules in scope</span>' +
+                '<span>Retrieval: <strong>' + escapeHtml(retrieval.method || 'n/a') + '</strong></span>';
         }
         function syncLabelVisibility() {
             if (toggleLabels.checked) {
@@ -482,9 +849,9 @@
 
         function enrichEvidenceRow(evRow, sigById) {
             const sig = sigById[evRow.signal_id];
-            const data = { ...(evRow.evidence_data || {}) };
+            const data = { ...(evRow.evidence_data || evRow.content || {}) };
             if (sig && sig.value && typeof sig.value === 'object') Object.assign(data, sig.value);
-            const evidence_type = inferEvidenceType(sig, data);
+            const evidence_type = evRow.evidence_type || inferEvidenceType(sig, data);
             return { evidence_type, data };
         }
 
@@ -529,36 +896,38 @@
                 verdict: poll.verdict || 'unknown',
                 risk_score: typeof poll.risk_score === 'number' ? poll.risk_score : null,
                 violations,
-                metadata: poll.metadata,
+                metadata: mergeMeta(poll, graph),
                 _graph: graph,
                 _sigById: sigById,
             };
         }
 
         function displayResult(data, assetId) {
-            resultDiv.className = `status-${data.status || ''}`;
+            const status = data.status || 'UNKNOWN';
+            const dot = statusDotClass(status);
+            resultDiv.className = 'verdict-card status-' + status;
             const verdict = data.verdict || 'unknown';
             const riskScore = typeof data.risk_score === 'number' ? data.risk_score : null;
-            const status = data.status || 'UNKNOWN';
             const violations = Array.isArray(data.violations) ? data.violations : [];
             const imgMode = document.querySelector('input[name="mode"]:checked').value === 'image';
 
-            const verdictPill = verdict === 'likely_approved' ? 'green' : verdict === 'borderline' ? 'yellow' : verdict === 'likely_rejected' ? 'red' : '';
+            let html = '<div class="verdict-hero"><div class="verdict-hero-main">';
+            html += '<div class="verdict-label">Compliance status</div>';
+            html += '<p class="verdict-value"><span class="status-dot ' + dot + '"></span>' + escapeHtml(status.replace(/_/g, ' ')) + '</p>';
+            html += '<div class="verdict-label" style="margin-top:12px;">Platform verdict</div>';
+            html += '<p class="verdict-value" style="font-size:1.1rem;">' + escapeHtml(verdictDisplayLabel(verdict)) + '</p></div>';
+            html += '<div class="metric-grid" style="min-width:180px;"><div class="metric-box"><span class="val">' + (riskScore === null ? '—' : riskScore.toFixed(2)) + '</span><span class="lbl">Risk</span></div>';
+            html += '<div class="metric-box"><span class="val">' + violations.length + '</span><span class="lbl">Violations</span></div></div></div>';
 
-            let html = '<h3>Result</h3>';
             if (assetId) {
-                html += `<div class="result-actions"><code id="assetIdDisplay" class="muted" style="font-size:12px;">${escapeHtml(String(assetId))}</code>`;
-                html += ` <button type="button" class="btn-copy" id="copyAssetIdBtn" title="Copy asset id">Copy id</button></div>`;
+                html += '<div class="result-actions"><code id="assetIdDisplay" class="muted" style="font-size:11px;">' + escapeHtml(String(assetId)) + '</code>';
+                html += ' <button type="button" class="btn-copy" id="copyAssetIdBtn">Copy id</button></div>';
             }
-            html += `<div style="display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0;">`;
-            html += `<span class="pill ${verdictPill}">Verdict: ${escapeHtml(verdict)}</span>`;
-            html += `<span class="pill">Compliance: ${escapeHtml(status)}</span>`;
-            html += `<span class="pill">Risk: ${riskScore === null ? 'n/a' : riskScore.toFixed(2)}</span>`;
-            html += `<span class="pill">Violations: ${violations.length}</span></div>`;
 
-            if (!violations.length) html += '<p class="muted">No violations in response.</p>';
-            else {
-                html += '<h3>Violations</h3>';
+            if (!violations.length) {
+                html += '<div class="empty-state" style="margin-top:12px;"><strong>No violations</strong>Policy engine found no rule matches.</div>';
+            } else {
+                html += '<h3 style="margin:16px 0 8px;font-size:14px;">Violations</h3>';
                 violations.forEach((v) => {
                     const vid = v.violation_id || '';
                     const sev = v.severity || 'UNKNOWN';
@@ -580,25 +949,20 @@
             }
 
             if (imgMode) {
-                html += '<p class="next-hint">Use toggles in <strong>Preview &amp; overlays</strong> to show or hide boxes. <strong>Run advisory review</strong> below for an optional Gemini pass (re-uploads the same image for vision if enabled on the server).</p>';
+                html += '<p class="next-hint">Use <strong>Preview &amp; overlays</strong> for bbox highlights. See explainability sections below.</p>';
             } else {
-                html += '<p class="next-hint">Switch to <strong>Image</strong> mode to see preview overlays. Advisory review still uses text+deterministic context.</p>';
+                html += '<p class="next-hint">Text mode — explainability below. Switch to <strong>Image</strong> for overlays.</p>';
             }
-
-            html += '<details class="raw-graph-details"><summary>Raw graph (debug)</summary><pre style="font-size:11px;overflow:auto;max-height:240px;">' +
-                escapeHtml(JSON.stringify(lastGraph || {}, null, 2)) + '</pre></details>';
 
             resultDiv.innerHTML = html;
             resultDiv.style.display = 'block';
+
+            const graph = data._graph || lastGraph || {};
+            explainMount.innerHTML = '<h3 style="margin:18px 0 10px;font-size:14px;">Explainability</h3>' + renderExplainPanels(data, graph);
+            bindExplainToolbar();
+
             const cpy = document.getElementById('copyAssetIdBtn');
-            if (cpy && assetId) {
-                cpy.addEventListener('click', () => {
-                    navigator.clipboard.writeText(String(assetId)).then(() => {
-                        cpy.textContent = 'Copied';
-                        setTimeout(() => { cpy.textContent = 'Copy id'; }, 1500);
-                    }).catch(() => {});
-                });
-            }
+            if (cpy && assetId) cpy.addEventListener('click', () => copyToClipboard(String(assetId), cpy));
         }
 
         function renderEvidenceGroups(evidence) {
@@ -610,7 +974,9 @@
                 html += ocr.map((e) => {
                     const t = e.data && e.data.ocr_text ? String(e.data.ocr_text) : (e.data.matched_term || '');
                     const b = e.data && e.data.bbox ? e.data.bbox : null;
-                    return `<div class="evidence"><strong>Text:</strong> ${escapeHtml(t)}${b ? `<div class="muted">bbox: ${escapeHtml(JSON.stringify(b))}</div>` : ''}</div>`;
+                    const sp = e.data && e.data.matched_span;
+                    const spanNote = sp ? `<div class="muted">span @ ${sp.start}–${sp.end}: “${escapeHtml(sp.text || '')}”</div>` : '';
+                    return `<div class="evidence"><strong>Text:</strong> ${escapeHtml(t)}${spanNote}${b ? `<div class="muted">bbox: ${escapeHtml(JSON.stringify(b))}</div>` : ''}</div>`;
                 }).join('');
             }
             if (vision.length) {
@@ -735,8 +1101,12 @@
 
         function renderOverlayForSelectedViolation() {
             clearOverlay();
+            const hintEl = document.getElementById('overlayHint');
             const imgMode = document.querySelector('input[name="mode"]:checked').value === 'image';
-            if (!imgMode || !preview.complete || !preview.naturalWidth || !lastGraph) return;
+            if (!imgMode || !preview.complete || !preview.naturalWidth || !lastGraph) {
+                if (hintEl) hintEl.hidden = true;
+                return;
+            }
 
             const stageRect = preview.getBoundingClientRect();
             const scaleX = stageRect.width / preview.naturalWidth;
@@ -746,15 +1116,15 @@
 
             if (toggleAllSignals.checked) {
                 drawBoxesFromAllSignals(lastGraph, showOcr, showVision, scaleX, scaleY);
-                return;
-            }
-
-            const v = getSelectedViolation();
-            if (v && Array.isArray(v.evidence) && v.evidence.length) {
-                drawBoxesFromEvidence(v.evidence, showOcr, showVision, scaleX, scaleY);
             } else {
-                drawBoxesFromAllSignals(lastGraph, showOcr, showVision, scaleX, scaleY);
+                const v = getSelectedViolation();
+                if (v && Array.isArray(v.evidence) && v.evidence.length) {
+                    drawBoxesFromEvidence(v.evidence, showOcr, showVision, scaleX, scaleY);
+                } else {
+                    drawBoxesFromAllSignals(lastGraph, showOcr, showVision, scaleX, scaleY);
+                }
             }
+            if (hintEl) hintEl.hidden = overlay.children.length > 0;
         }
 
         preview.addEventListener('load', () => renderOverlayForSelectedViolation());
@@ -772,6 +1142,7 @@
             localStorage.setItem(LS_KEY, b);
             localStorage.setItem(LS_DOMAIN, domainValue());
 
+            runStartedAt = performance.now();
             setRunProgress(1);
             resultDiv.innerHTML = '<div class="loading"><span class="spinner" aria-hidden="true"></span> Uploading to API…</div>';
             resultDiv.style.display = 'block';
@@ -781,6 +1152,7 @@
             lastResponse = null;
             selectedViolationId = null;
             hideLlmSection();
+            explainMount.innerHTML = '';
 
             try {
                 const imgMode = document.querySelector('input[name="mode"]:checked').value === 'image';
@@ -834,16 +1206,19 @@
                             'Processing failed. On Cloud Run, try redeploying the API or check logs.'
                     );
                 } else {
+                    setRunProgress(3);
                     poll = await pollAsset(assetId, (n) => {
                         pollDetailEl.textContent = 'Polling for verdict… ' + n + ' / 240 (every 0.5s)';
                     });
                 }
-                setRunProgress(3);
+                setRunProgress(4);
                 pollDetailEl.textContent = 'Loading graph for overlays…';
+                setRunProgress(5);
                 lastGraph = await fetchGraph(assetId);
                 lastResponse = buildLegacyModel(poll, lastGraph);
                 selectedViolationId = lastResponse.violations[0] ? lastResponse.violations[0].violation_id : null;
-                setRunProgress(4);
+                setRunProgress(7);
+                showRunStats(lastGraph, performance.now() - runStartedAt);
                 pollDetailEl.textContent = 'Done';
                 setTimeout(() => { setRunProgress(0); }, 1500);
                 displayResult(lastResponse, assetId);
@@ -860,7 +1235,9 @@
                     /Failed to fetch|NetworkError|Load failed/i.test(msg)
                         ? ' (Often CORS: set CORS_ORIGINS on the API to include this page’s origin, or CORS_ALLOW_ALL=true for local testing.)'
                         : '';
-                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${escapeHtml(msg)}${escapeHtml(hint)}</div>`;
+                resultDiv.className = '';
+                resultDiv.innerHTML = '<div class="empty-state"><strong>Something went wrong</strong>' + escapeHtml(msg) + escapeHtml(hint) + '</div>';
+                explainMount.innerHTML = '';
             } finally {
                 analyzeBtn.disabled = false;
                 syncButton();

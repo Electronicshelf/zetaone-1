@@ -12,8 +12,13 @@ import time
 import uuid
 from typing import Any
 
+from zataone.document.builder import DocumentBuilder
+from zataone.document.flags import document_centric_enabled
 from zataone.extractors.registry import ExtractorRegistry
+from zataone.policy_engine.corpus.loader import load_policy_pack_from_dict
 from zataone.policy_engine.engine import PolicyEngine
+from zataone.policy_engine.retrieval.flags import policy_retrieval_enabled
+from zataone.policy_engine.retrieval.retriever import PolicyRetriever
 from zataone.storage.database import get_session_factory
 from zataone.services.audit_service import AuditService
 from zataone.services.evidence_service import EvidenceService
@@ -68,6 +73,8 @@ class CompliancePipeline:
         self._domain = domain
         self._extractor_registry = ExtractorRegistry()
         self._policy_engine = PolicyEngine()
+        self._policy_pack = None
+        self._policy_retriever: PolicyRetriever | None = None
         self._evidence_service = EvidenceService()
         self._verdict_service = VerdictService()
         self._ingestion_service = IngestionService()
@@ -203,7 +210,9 @@ class CompliancePipeline:
 
         with open(policy_path, "r") as f:
             data = yaml.safe_load(f) or {}
-        rules = data.get("rules", {})
+
+        self._policy_pack = load_policy_pack_from_dict(data, source_path=policy_path)
+        rules = self._policy_pack.rules
 
         vision_support_map = {}
         embedding_rule_map = {}
@@ -221,6 +230,7 @@ class CompliancePipeline:
             vision_support_map=vision_support_map,
             embedding_rule_map=embedding_rule_map,
         )
+        self._policy_retriever = PolicyRetriever(self._policy_pack)
 
     def run(
         self,
@@ -268,11 +278,51 @@ class CompliancePipeline:
             producers,
         )
 
-        violations = self._policy_engine.evaluate(signals)
+        document = DocumentBuilder.build(asset, signals)
+        document.metadata["document_centric_enabled"] = document_centric_enabled()
+        logger.info(
+            "Document built: modality=%s chars=%d spans=%d scenes=%d",
+            document.modality,
+            len(document.normalized_text),
+            len(document.spans),
+            len(document.scene_descriptions),
+        )
+
+        evaluate_document = document if document_centric_enabled() else None
+
+        retrieval_result = None
+        if self._policy_retriever is not None:
+            vision_primary_ids = {
+                rid
+                for rid, rule in (self._policy_pack.rules if self._policy_pack else {}).items()
+                if rule.get("vision_primary_labels")
+            }
+            retrieval_result = self._policy_retriever.retrieve(
+                document.normalized_text,
+                vision_rule_ids=vision_primary_ids,
+            )
+            if policy_retrieval_enabled() and retrieval_result.retrieved_rule_ids:
+                self._policy_engine.set_active_rule_ids(retrieval_result.retrieved_rule_ids)
+            else:
+                self._policy_engine.set_active_rule_ids(None)
+        else:
+            self._policy_engine.set_active_rule_ids(None)
+
+        violations = self._policy_engine.evaluate(signals, document=evaluate_document)
+        self._policy_engine.set_active_rule_ids(None)
 
         evidence = self._evidence_service.generate(signals, violations)
 
         verdict = self._verdict_service.generate(evidence)
+        verdict_metadata = dict(verdict.get("metadata") or {})
+        verdict_metadata["document"] = document.to_dict()
+        verdict_metadata["document_centric_enabled"] = document_centric_enabled()
+        if self._policy_pack is not None:
+            verdict_metadata["policy_pack"] = self._policy_pack.to_dict()
+        if retrieval_result is not None:
+            verdict_metadata["retrieval"] = retrieval_result.to_dict()
+        verdict_metadata["policy_retrieval_enabled"] = policy_retrieval_enabled()
+        verdict["metadata"] = verdict_metadata
 
         asset_id_result: uuid.UUID | None = existing_asset_id
         if persist:

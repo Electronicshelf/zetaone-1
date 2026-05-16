@@ -1,12 +1,57 @@
 # Meta Ads compliance policy rules
 # Used by ZataOne policy engine for ad_compliance domain
 
+policy_pack:
+  id: meta_ads_us
+  platform: meta
+  jurisdiction: US
+  version: "2025-05-01"
+  effective_date: "2025-05-01"
+  modalities:
+    - text
+    - image
+
+clauses:
+  - clause_id: meta.misleading.exaggerated_claims
+    text: "Advertising must not use misleading or exaggerated claims such as guaranteed outcomes, miracle results, or unrealistic time-bound promises."
+    modalities: [text]
+    rule_ids: [misleading_exaggerated_claims]
+  - clause_id: meta.medical.health_claims
+    text: "Advertising must not make unsubstantiated medical or health claims including cure, treat, or heal language in a health context."
+    modalities: [text]
+    rule_ids: [medical_health_claims]
+  - clause_id: meta.gambling.restricted
+    text: "Promotion of real-money gambling, betting, and casino services is restricted except where permitted and clearly qualified."
+    modalities: [text]
+    rule_ids: [gambling]
+
 rules:
   misleading_exaggerated_claims:
     name: "Misleading or Exaggerated Claims"
     severity: HIGH
     description: "Detects misleading or exaggerated advertising claims that may deceive consumers"
     type: keyword
+    clause_ids: [meta.misleading.exaggerated_claims]
+    match:
+      any:
+        - terms:
+            - guaranteed
+            - instant
+            - "100%"
+            - miracle
+            - overnight
+            - immediate
+            - proven
+            - scientifically proven
+            - doctor recommended
+            - clinically proven
+        - patterns:
+            - pattern: "lose\\s+\\d+\\s+days?"
+              confidence: 0.9
+            - pattern: "lose\\s+\\d+\\s+pounds?\\s+in\\s+\\d+\\s+days?"
+              confidence: 0.95
+            - pattern: "\\d+%\\s+(guaranteed|safe|effective)"
+              confidence: 0.9
     prohibited_terms:
       - guaranteed
       - instant
@@ -34,6 +79,59 @@ rules:
     severity: HIGH
     description: "Detects unsubstantiated or guaranteed medical/health claims in ad images (OCR-driven)"
     type: keyword
+    clause_ids: [meta.medical.health_claims]
+    match:
+      requires_context:
+        terms:
+          - pain
+          - chronic
+          - inflammation
+          - symptom
+          - disease
+          - condition
+          - arthritis
+          - diabetes
+          - asthma
+          - eczema
+          - acne
+          - psoriasis
+          - blood pressure
+          - cholesterol
+          - heart
+          - immune
+          - anxiety
+          - depression
+          - stress
+          - sleep
+          - insomnia
+          - weight
+          - weight loss
+          - lose
+          - lbs
+          - lb
+          - kg
+          - kgs
+          - pounds
+      any:
+        - terms:
+            - cure
+            - treat
+            - heal
+            - reverse
+            - guaranteed results
+            - "100% effective"
+            - clinically proven
+        - patterns:
+            - pattern: "\\b(cure|treat|heal|reverse)\\b"
+              confidence: 0.9
+            - pattern: "\\bguaranteed\\s+results?\\b"
+              confidence: 0.9
+            - pattern: "\\bclinically\\s+proven\\b"
+              confidence: 0.85
+            - pattern: "\\blose\\s+\\d+\\s*(lbs|lb|kg|kgs|pounds?)\\s+in\\s+\\d+\\s+days?\\b"
+              confidence: 0.95
+            - pattern: "\\b100%\\s+effective\\b"
+              confidence: 0.95
     context_terms:
       - pain
       - chronic
@@ -255,6 +353,47 @@ rules:
     severity: HIGH
     description: "Meta Ads policy: restricted gambling and betting promotions"
     type: keyword
+    clause_ids: [meta.gambling.restricted]
+    match:
+      exceptions:
+        patterns:
+          - "gambling\\s+laws?"
+          - "informational\\s+(content|about)"
+          - "for\\s+fun\\b"
+          - "\\bfree\\s+(to\\s+play)?\\s*(card\\s+)?games?\\b"
+          - "\\bno\\s+real\\s+money\\b"
+          - "\\bno\\s+purchase\\s+necessary\\b"
+          - "\\bno\\s+prizes?\\b"
+        terms:
+          - for fun
+          - free to play
+          - no real money
+          - gambling laws
+          - informational only
+      any:
+        - terms:
+            - betting
+            - sportsbook
+            - casino
+            - wager
+            - odds
+            - betting lines
+            - poker
+            - blackjack
+            - roulette
+            - win money gambling
+            - real money bets
+        - patterns:
+            - pattern: "\\b(betting|sportsbook|casino|wager)\\b"
+              confidence: 0.9
+            - pattern: "betting\\s+lines?|odds\\s+on"
+              confidence: 0.9
+            - pattern: "\\b(poker|blackjack|roulette)\\b"
+              confidence: 0.9
+            - pattern: "real\\s+money\\s+(bet|gambling)"
+              confidence: 0.92
+            - pattern: "win\\s+money\\s+gambling|bet\\s+real\\s+money"
+              confidence: 0.92
     prohibited_terms:
       - betting
       - sportsbook

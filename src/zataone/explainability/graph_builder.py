@@ -68,7 +68,16 @@ def build_explainability_graph(asset_id: uuid.UUID, session: Session) -> dict[st
             }
         )
 
+    meta = verdict_data.get("metadata", {}) if verdict_data else {}
+    document = meta.get("document")
+    retrieval = meta.get("retrieval")
+    policy_pack = meta.get("policy_pack")
+
     return {
         "verdict": verdict_data,
+        "document": document,
+        "document_centric_enabled": meta.get("document_centric_enabled"),
+        "policy_pack": policy_pack,
+        "retrieval": retrieval,
         "violations": violations_out,
     }

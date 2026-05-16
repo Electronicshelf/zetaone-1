@@ -603,12 +603,24 @@ def get_asset_graph(
             .first()
         )
 
+        verdict_dict = _model_to_dict(verdict) if verdict else {}
+        verdict_result = verdict_dict.get("result") or {}
+        meta = verdict_result.get("metadata") or {} if isinstance(verdict_result, dict) else {}
+        document = meta.get("document")
+        document_centric = meta.get("document_centric_enabled")
+        policy_pack = meta.get("policy_pack")
+        retrieval = meta.get("retrieval")
+
         return {
             "asset": _model_to_dict(asset),
+            "document": document,
+            "document_centric_enabled": document_centric,
+            "policy_pack": policy_pack,
+            "retrieval": retrieval,
             "signals": [_model_to_dict(s) for s in signals],
             "violations": [_model_to_dict(v) for v in violations],
             "evidence": [_model_to_dict(e) for e in evidence],
-            "verdict": _model_to_dict(verdict) if verdict else {},
+            "verdict": verdict_dict,
         }
     finally:
         session.close()
