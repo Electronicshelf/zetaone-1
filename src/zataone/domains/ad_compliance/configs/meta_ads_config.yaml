@@ -1,10 +1,11 @@
 # Meta Ads domain configuration
 # Constants used by ad_compliance extractors and pipeline
 
-# Optional: limit which domain extractors register (omit or empty list = all).
-# Short names: ocr, vision, embedding, vlm, asr
-# extractors:
-#   enabled: [ocr, vision, embedding, vlm, asr]
+# Registered extractors (modality filter still applies per asset type).
+# embedding/vlm/asr off unless ZATAONE_ENABLE_EMBEDDING / ZATAONE_ENABLE_PIPELINE_VLM.
+# Short names: ocr, vision, embedding, vlm, asr, text
+extractors:
+  enabled: [ocr, vision]
 
 # Vision extractor (Grounding DINO)
 vision:

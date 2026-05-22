@@ -74,6 +74,165 @@ def _vlm_max_output_tokens() -> int:
     return 1200
 
 
+def _signal_rows_from_raw(signals: list[Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for s in signals or []:
+        if isinstance(s, dict):
+            rows.append(
+                {
+                    "id": str(s.get("id") or s.get("signal_id") or ""),
+                    "extractor_id": s.get("extractor_id", ""),
+                    "signal_type": s.get("signal_type", ""),
+                    "confidence": s.get("confidence"),
+                    "value": s.get("value") or s.get("raw_data") or {},
+                }
+            )
+            continue
+        rows.append(
+            {
+                "id": str(getattr(s, "id", "") or ""),
+                "extractor_id": getattr(s, "extractor_id", ""),
+                "signal_type": getattr(s, "signal_type", ""),
+                "confidence": getattr(s, "confidence", None),
+                "value": getattr(s, "value", None) or getattr(s, "raw_data", None) or {},
+            }
+        )
+    return rows
+
+
+def _violation_rows_from_raw(violations: list[Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for v in violations or []:
+        if isinstance(v, dict):
+            rows.append(
+                {
+                    "id": str(v.get("id") or ""),
+                    "rule_id": v.get("rule_id", ""),
+                    "violation_type": v.get("violation_type", ""),
+                    "signal_id": str(v.get("signal_id") or ""),
+                }
+            )
+            continue
+        rows.append(
+            {
+                "id": str(getattr(v, "id", "") or ""),
+                "rule_id": getattr(v, "rule_id", ""),
+                "violation_type": getattr(v, "violation_type", ""),
+                "signal_id": str(getattr(v, "signal_id", "") or ""),
+            }
+        )
+    return rows
+
+
+def run_gemini_vlm_inspection(
+    image_bytes: bytes,
+    *,
+    domain: str,
+    det: dict[str, Any],
+) -> tuple[str | None, str | None, dict[str, Any]]:
+    """
+    Gemini vision pass only. Safe to run in parallel with deterministic extraction.
+    """
+    vlm_summary: str | None = None
+    vlm_error: str | None = None
+    try:
+        vlm_user = _build_vlm_user_prompt(domain=domain, det=det)
+        vlm_summary = gemini_mod.gemini_vision_image(
+            image_bytes,
+            vlm_user,
+            system_prompt=_VLM_SYSTEM,
+            model=os.environ.get("GEMINI_VLM_MODEL") or None,
+            max_output_tokens=_vlm_max_output_tokens(),
+        )
+    except Exception as e:
+        vlm_error = str(e)[:800]
+        logger.exception("Gemini vision summary failed")
+        vlm_summary = None
+
+    status: dict[str, Any] = {
+        "vlm_eligible": True,
+        "file_bytes_received": bool(image_bytes),
+        "vlm_called": True,
+        "vlm_succeeded": bool((vlm_summary or "").strip()),
+        "vlm_error": vlm_error,
+        "inspection": (vlm_summary or "").strip() or None,
+        "skipped": False,
+        "skipped_reason": None,
+    }
+    return vlm_summary, vlm_error, status
+
+
+def run_advisory_synthesis_in_memory(
+    *,
+    domain: str,
+    asset: Any,
+    asset_id: str | None,
+    verdict: dict[str, Any],
+    signals: list[Any],
+    violations: list[Any],
+    vlm_status: dict[str, Any] | None,
+    image_bytes: bytes | None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Advisory JSON from in-memory pipeline state (no DB reads)."""
+    if not _llm_enabled():
+        raise RuntimeError("LLM final review is disabled")
+    if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        raise RuntimeError("Set GEMINI_API_KEY or GOOGLE_API_KEY")
+
+    asset_type = getattr(asset, "type", None) or "text"
+    det = {
+        "verdict": verdict.get("verdict", ""),
+        "status": verdict.get("status", ""),
+        "risk_score": verdict.get("risk_score"),
+    }
+
+    if vlm_status is None:
+        if asset_type == "image" and image_bytes:
+            _, _, vlm_status = run_gemini_vlm_inspection(image_bytes, domain=domain, det=det)
+        else:
+            vlm_status = {
+                "vlm_eligible": False,
+                "skipped": True,
+                "skipped_reason": "not_image",
+                "inspection": None,
+            }
+
+    inspection = (vlm_status or {}).get("inspection")
+    advisory_vlm = {
+        "inspection": inspection,
+        "prompt_focus": _VLM_PROMPT_FOCUS,
+        "skipped": bool((vlm_status or {}).get("skipped")),
+        "skipped_reason": (vlm_status or {}).get("skipped_reason"),
+    }
+
+    aid: UUID | None = None
+    if asset_id:
+        try:
+            aid = UUID(str(asset_id))
+        except ValueError:
+            aid = None
+
+    ctx = build_review_context(
+        schema_version=_CTX_VERSION,
+        asset_id=aid or UUID(int=0),
+        domain=domain,
+        asset_type=asset_type,
+        deterministic_verdict=det,
+        signals=_signal_rows_from_raw(signals),
+        violations=_violation_rows_from_raw(violations),
+        advisory_vlm=advisory_vlm,
+    )
+    user_msg = context_json_for_prompt(ctx)
+    review = _advisory_json_from_gemini(
+        user_msg,
+        system_prompt=_SYSTEM,
+        model=os.environ.get("GEMINI_REVIEW_MODEL") or None,
+        max_toks=_max_review_output_tokens(),
+    )
+    stored = wrap_stored_review(review)
+    return stored, vlm_status or {}
+
+
 def _build_vlm_user_prompt(*, domain: str, det: dict[str, Any]) -> str:
     status = det.get("status", "")
     verdict = det.get("verdict", "")
@@ -243,22 +402,10 @@ def run_llm_final_review(
     vlm_error: str | None = None
     vlm_eligible = bool(image_bytes) and (asset.type == "image")
     if vlm_eligible:
-        try:
-            vlm_user = _build_vlm_user_prompt(domain=domain, det=det)
-            vlm_summary = gemini_mod.gemini_vision_image(
-                image_bytes,
-                vlm_user,
-                system_prompt=_VLM_SYSTEM,
-                model=os.environ.get("GEMINI_VLM_MODEL") or None,
-                max_output_tokens=_vlm_max_output_tokens(),
-            )
-        except Exception as e:
-            vlm_error = str(e)[:800]
-            logger.exception("Gemini vision summary failed; continuing with signals only")
-            vlm_summary = None
-
-    if vlm_eligible:
-        advisory_vlm: dict[str, Any] = {
+        vlm_summary, vlm_error, _st = run_gemini_vlm_inspection(
+            image_bytes, domain=domain, det=det
+        )
+        advisory_vlm = {
             "inspection": vlm_summary,
             "prompt_focus": _VLM_PROMPT_FOCUS,
             "skipped": False,
@@ -266,6 +413,8 @@ def run_llm_final_review(
         }
     else:
         reason = "asset_not_image" if (asset.type != "image") else "no_image_bytes_in_request"
+        vlm_summary = None
+        vlm_error = None
         advisory_vlm = {
             "inspection": None,
             "prompt_focus": _VLM_PROMPT_FOCUS,

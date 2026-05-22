@@ -341,9 +341,8 @@
                 <div id="llmSection" style="display: none;">
                     <h3>Advisory review (Gemini)</h3>
                     <p class="muted" id="llmHint" style="margin: 0 0 8px 0;">
-                        Optional second read (Gemini). <strong>Step 1 — VLM:</strong> inspects the image.
-                        <strong>Step 2 — Text LLM:</strong> reasons over deterministic verdict + signals + VLM notes.
-                        Does not replace the policy verdict. Cloud Run needs <code>GEMINI_API_KEY</code>.
+                        Pipeline runs <strong>VLM ∥ extractors</strong> (images), then <strong>text LLM</strong> when <code>GEMINI_API_KEY</code> is set.
+                        Shown below after the authoritative verdict. Does not replace policy engine status.
                     </p>
                     <button type="button" id="llmReviewBtn" class="btn-secondary" disabled>Run advisory review</button>
                     <div id="llmReviewOut" class="muted" style="margin-top: 10px; font-size: 13px;"></div>
@@ -810,6 +809,34 @@
         }
         document.getElementById('textContent').addEventListener('input', syncButton);
 
+        function pipelineProgressLabel(prog) {
+            if (!prog || typeof prog !== 'object') return '';
+            const parts = [];
+            const keys = ['extraction', 'vlm', 'deterministic', 'advisory'];
+            keys.forEach((k) => {
+                if (prog[k]) parts.push(k + ': ' + prog[k]);
+            });
+            return parts.length ? parts.join(' · ') : '';
+        }
+
+        function renderPipelineAdvisory(poll) {
+            llmSection.style.display = 'block';
+            const review = poll.llm_final_review || (poll.metadata && poll.metadata.llm_final_review);
+            const vlm = poll.advisory_vlm || (poll.metadata && poll.metadata.advisory_vlm);
+            if (!review) {
+                llmReviewOut.innerHTML =
+                    '<p class="muted">Pipeline advisory not included (set <code>GEMINI_API_KEY</code> on the API). Use the button below to run manually.</p>';
+                llmReviewBtn.disabled = false;
+                return;
+            }
+            let html = '<p class="muted" style="margin:0 0 8px;font-size:12px;"><strong>Included in this run</strong> (VLM ∥ deterministic → text LLM)</p>';
+            if (vlm) html += formatAdvisoryVlmBlock(vlm);
+            html += formatLlmTextBlock(review);
+            llmReviewOut.innerHTML = html;
+            llmReviewBtn.disabled = false;
+            llmReviewBtn.textContent = 'Re-run advisory review';
+        }
+
         async function pollAsset(assetId, onProgress) {
             const b = apiBase();
             const max = 240;
@@ -817,7 +844,7 @@
                 const r = await fetch(`${b}/assets/${assetId}`, { headers: domainHeaders() });
                 const data = await readJsonResponse(r);
                 if (!r.ok) throw new Error(formatApiDetail(data.detail) || r.statusText);
-                if (onProgress) onProgress(i + 1, max);
+                if (onProgress) onProgress(i + 1, max, data);
                 if (data.status === 'completed') return data;
                 if (data.status === 'failed') {
                     throw new Error(
@@ -903,12 +930,17 @@
                 }));
             }
 
+            const meta = mergeMeta(poll, graph);
+            if (poll.llm_final_review) meta.llm_final_review = poll.llm_final_review;
+            if (poll.advisory_vlm) meta.advisory_vlm = poll.advisory_vlm;
+            if (poll.pipeline_progress) meta.pipeline_progress = poll.pipeline_progress;
             return {
                 status: complianceStatus || 'UNKNOWN',
                 verdict: poll.verdict || 'unknown',
                 risk_score: typeof poll.risk_score === 'number' ? poll.risk_score : null,
                 violations,
-                metadata: mergeMeta(poll, graph),
+                metadata: meta,
+                llm_final_review: poll.llm_final_review,
                 _graph: graph,
                 _sigById: sigById,
             };
@@ -923,7 +955,8 @@
             const violations = Array.isArray(data.violations) ? data.violations : [];
             const imgMode = document.querySelector('input[name="mode"]:checked').value === 'image';
 
-            let html = '<div class="verdict-hero"><div class="verdict-hero-main">';
+            let html = '<p class="muted" style="margin:0 0 10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Authoritative · policy engine</p>';
+            html += '<div class="verdict-hero"><div class="verdict-hero-main">';
             html += '<div class="verdict-label">Compliance status</div>';
             html += '<p class="verdict-value"><span class="status-dot ' + dot + '"></span>' + escapeHtml(status.replace(/_/g, ' ')) + '</p>';
             html += '<div class="verdict-label" style="margin-top:12px;">Platform verdict</div>';
@@ -1219,8 +1252,10 @@
                     );
                 } else {
                     setRunProgress(3);
-                    poll = await pollAsset(assetId, (n) => {
-                        pollDetailEl.textContent = 'Polling for verdict… ' + n + ' / 240 (every 0.5s)';
+                    poll = await pollAsset(assetId, (n, _max, data) => {
+                        const pl = pipelineProgressLabel(data.pipeline_progress);
+                        pollDetailEl.textContent =
+                            'Polling… ' + n + ' / 240' + (pl ? ' — ' + pl : '');
                     });
                 }
                 setRunProgress(4);
@@ -1235,9 +1270,7 @@
                 setTimeout(() => { setRunProgress(0); }, 1500);
                 displayResult(lastResponse, assetId);
                 lastAssetId = assetId;
-                llmSection.style.display = 'block';
-                llmReviewBtn.disabled = false;
-                llmReviewOut.innerHTML = '';
+                renderPipelineAdvisory(poll);
                 renderOverlayForSelectedViolation();
             } catch (err) {
                 setRunProgress(0);

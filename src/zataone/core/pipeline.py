@@ -12,6 +12,16 @@ import time
 import uuid
 from typing import Any
 
+from zataone.core.extractor_flags import embedding_enabled, pipeline_vlm_extractor_enabled
+from zataone.core.extractor_plan import allow_domain_short_name, select_extractors_for_asset
+from zataone.core.pipeline_progress import clear as progress_clear
+from zataone.core.pipeline_progress import get as progress_get
+from zataone.core.pipeline_progress import update as progress_update
+from zataone.core.pipeline_run import (
+    extract_signals_parallel,
+    maybe_run_pipeline_advisory,
+    run_parallel_vlm_and_deterministic,
+)
 from zataone.document.builder import DocumentBuilder
 from zataone.document.flags import document_centric_enabled
 from zataone.extractors.registry import ExtractorRegistry
@@ -81,6 +91,7 @@ class CompliancePipeline:
         self._signal_service = SignalService()
         self._violation_service = ViolationService()
         self._audit_service = AuditService()
+        self._domain_config: dict = {}
 
         self._load_domain_extractors()
         self._load_domain_policies()
@@ -90,6 +101,7 @@ class CompliancePipeline:
         domain_module = importlib.import_module(f"zataone.domains.{self._domain}")
         domain_path = os.path.dirname(domain_module.__file__)
         config = self._load_domain_config(domain_path)
+        self._domain_config = config
 
         extractors_module = importlib.import_module(
             f"zataone.domains.{self._domain}.extractors"
@@ -98,6 +110,8 @@ class CompliancePipeline:
         enabled = _enabled_domain_modalities(config)
 
         def _allow(short: str) -> bool:
+            if not allow_domain_short_name(short, config):
+                return False
             return enabled is None or short in enabled
 
         extractor_classes = []
@@ -127,7 +141,11 @@ class CompliancePipeline:
                 )
             )
         emb_cfg = config.get("embedding", {})
-        if hasattr(extractors_module, "EmbeddingExtractor") and _allow("embedding"):
+        if (
+            hasattr(extractors_module, "EmbeddingExtractor")
+            and _allow("embedding")
+            and embedding_enabled()
+        ):
             reg_texts = [
                 (k, v) for k, v in emb_cfg.get("regulation_texts", {}).items()
             ]
@@ -142,7 +160,11 @@ class CompliancePipeline:
                 )
             )
         vlm_cfg = config.get("vlm") or {}
-        if hasattr(extractors_module, "VLMExtractor") and _allow("vlm"):
+        if (
+            hasattr(extractors_module, "VLMExtractor")
+            and _allow("vlm")
+            and pipeline_vlm_extractor_enabled()
+        ):
             extractor_classes.append(
                 (
                     "VLMExtractor",
@@ -174,8 +196,10 @@ class CompliancePipeline:
             else:
                 self._extractor_registry.register(OCRExtractor())
                 self._extractor_registry.register(VisionExtractor())
-                self._extractor_registry.register(EmbeddingExtractor())
-                self._extractor_registry.register(VLMExtractor())
+                if embedding_enabled():
+                    self._extractor_registry.register(EmbeddingExtractor())
+                if pipeline_vlm_extractor_enabled():
+                    self._extractor_registry.register(VLMExtractor())
 
         for name, kwargs in extractor_classes:
             cls = getattr(extractors_module, name)
@@ -232,43 +256,15 @@ class CompliancePipeline:
         )
         self._policy_retriever = PolicyRetriever(self._policy_pack)
 
-    def run(
-        self,
-        asset: Any,
-        tenant_id: uuid.UUID | str | None = None,
-        persist: bool = True,
-        idempotency_key: str | None = None,
-        existing_asset_id: uuid.UUID | None = None,
-    ) -> dict:
-        """
-        Run the compliance pipeline on an asset.
-
-        Args:
-            asset: Asset with image_data (and domain-specific fields).
-            tenant_id: Optional tenant ID for persistence. If None and persist=True,
-                       uses default tenant.
-            persist: If True, persist full compliance graph to database.
-
-        Returns:
-            Verdict dict with keys: verdict, risk_score, violations, signals,
-            status, fix_suggestions, metadata.
-        """
-        start_time = time.perf_counter()
-        signals = []
-        counts: dict[str, int] = {}
-        for extractor in self._extractor_registry.list():
-            eid = getattr(extractor, "extractor_id", None) or type(extractor).__name__
-            try:
-                extracted = list(extractor.extract(asset) or [])
-            except Exception:
-                logger.exception("Extractor failed: id=%s", eid)
-                counts[eid] = 0
-                continue
-            n = len(extracted)
-            counts[eid] = n
-            if n:
-                signals.extend(extracted)
-                logger.info("Extractor produced signals: id=%s count=%d", eid, n)
+    def _run_deterministic_core(self, asset: Any, *, asset_id: str | None = None) -> dict[str, Any]:
+        """Extraction → document → policy → evidence → verdict (no advisory)."""
+        t0 = time.perf_counter()
+        extractors = select_extractors_for_asset(
+            self._extractor_registry.list(),
+            asset,
+            self._domain_config,
+        )
+        signals, counts = extract_signals_parallel(extractors, asset, asset_id=asset_id)
 
         producers = sorted(eid for eid, n in counts.items() if n > 0)
         logger.info(
@@ -312,8 +308,8 @@ class CompliancePipeline:
         self._policy_engine.set_active_rule_ids(None)
 
         evidence = self._evidence_service.generate(signals, violations)
-
         verdict = self._verdict_service.generate(evidence)
+
         verdict_metadata = dict(verdict.get("metadata") or {})
         verdict_metadata["document"] = document.to_dict()
         verdict_metadata["document_centric_enabled"] = document_centric_enabled()
@@ -322,6 +318,81 @@ class CompliancePipeline:
         if retrieval_result is not None:
             verdict_metadata["retrieval"] = retrieval_result.to_dict()
         verdict_metadata["policy_retrieval_enabled"] = policy_retrieval_enabled()
+        verdict["metadata"] = verdict_metadata
+
+        return {
+            "verdict": verdict,
+            "signals": signals,
+            "violations_raw": violations,
+            "extractor_counts": counts,
+            "timing_ms": {"deterministic_core_ms": round((time.perf_counter() - t0) * 1000)},
+        }
+
+    def run(
+        self,
+        asset: Any,
+        tenant_id: uuid.UUID | str | None = None,
+        persist: bool = True,
+        idempotency_key: str | None = None,
+        existing_asset_id: uuid.UUID | None = None,
+    ) -> dict:
+        """
+        Run the compliance pipeline on an asset.
+
+        Args:
+            asset: Asset with image_data (and domain-specific fields).
+            tenant_id: Optional tenant ID for persistence. If None and persist=True,
+                       uses default tenant.
+            persist: If True, persist full compliance graph to database.
+
+        Returns:
+            Verdict dict with keys: verdict, risk_score, violations, signals,
+            status, fix_suggestions, metadata.
+        """
+        start_time = time.perf_counter()
+        aid_str = str(existing_asset_id) if existing_asset_id else None
+        if aid_str:
+            progress_clear(aid_str)
+            progress_update(aid_str, status="processing")
+
+        image_bytes = getattr(asset, "image_data", None)
+
+        def _deterministic_core() -> dict[str, Any]:
+            return self._run_deterministic_core(asset, asset_id=aid_str)
+
+        det_bundle, vlm_status, parallel_timing = run_parallel_vlm_and_deterministic(
+            asset=asset,
+            image_bytes=image_bytes,
+            domain=self._domain,
+            asset_id=aid_str,
+            deterministic_fn=_deterministic_core,
+        )
+
+        verdict = det_bundle["verdict"]
+        signals = det_bundle["signals"]
+        counts = det_bundle.get("extractor_counts") or {}
+
+        maybe_run_pipeline_advisory(
+            domain=self._domain,
+            asset=asset,
+            asset_id=aid_str,
+            det_bundle=det_bundle,
+            vlm_status=vlm_status,
+            image_bytes=image_bytes,
+        )
+
+        verdict_metadata = dict(verdict.get("metadata") or {})
+        verdict_metadata["pipeline_timing"] = {
+            **det_bundle.get("timing_ms", {}),
+            **parallel_timing,
+            "total_ms": round((time.perf_counter() - start_time) * 1000),
+        }
+        verdict_metadata["extractor_counts"] = counts
+        verdict_metadata["embedding_enabled"] = embedding_enabled()
+        verdict_metadata["pipeline_vlm_extractor_enabled"] = pipeline_vlm_extractor_enabled()
+        if aid_str:
+            verdict_metadata["pipeline_progress"] = progress_get(aid_str) or {}
+            progress_update(aid_str, status="completed")
         verdict["metadata"] = verdict_metadata
 
         asset_id_result: uuid.UUID | None = existing_asset_id

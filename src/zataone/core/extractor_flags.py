@@ -1,0 +1,55 @@
+# zataone extractor feature flags (domain-agnostic)
+
+from __future__ import annotations
+
+import os
+
+
+def _env_bool(name: str, *, default: bool = False) -> bool:
+    v = os.environ.get(name, "").strip().lower()
+    if v in ("1", "true", "yes", "on"):
+        return True
+    if v in ("0", "false", "no", "off"):
+        return False
+    return default
+
+
+def embedding_enabled() -> bool:
+    """SigLIP embedding extractor (off by default for speed)."""
+    return _env_bool("ZATAONE_ENABLE_EMBEDDING", default=False)
+
+
+def pipeline_vlm_extractor_enabled() -> bool:
+    """GPT/OpenAI VLM during extraction (off; use Gemini advisory VLM instead)."""
+    return _env_bool("ZATAONE_ENABLE_PIPELINE_VLM", default=False)
+
+
+def pipeline_parallel_vlm_enabled() -> bool:
+    """Run Gemini VLM inspection in parallel with deterministic extraction (images)."""
+    return _env_bool("ZATAONE_PARALLEL_VLM", default=True)
+
+
+def pipeline_parallel_extractors_enabled() -> bool:
+    """Run registered extractors concurrently."""
+    return _env_bool("ZATAONE_PARALLEL_EXTRACTORS", default=True)
+
+
+def pipeline_auto_advisory_enabled() -> bool:
+    """Run Gemini advisory synthesis at end of pipeline when API key is set."""
+    if os.environ.get("ZATAONE_PIPELINE_ADVISORY", "").strip().lower() in (
+        "0",
+        "false",
+        "no",
+        "off",
+    ):
+        return False
+    if os.environ.get("ZATAONE_PIPELINE_ADVISORY", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return True
+    return bool(
+        (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
+    )

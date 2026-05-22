@@ -85,7 +85,13 @@ def _asset_status_dict(session: Any, asset_id: uuid.UUID) -> dict[str, Any] | No
         return None
 
     if asset.status == "processing":
-        return {"status": "processing", "asset_id": str(asset_id)}
+        from zataone.core.pipeline_progress import get as pipeline_progress_get
+
+        return {
+            "status": "processing",
+            "asset_id": str(asset_id),
+            "pipeline_progress": pipeline_progress_get(str(asset_id)) or {},
+        }
 
     if asset.status == "failed":
         return {
@@ -106,12 +112,20 @@ def _asset_status_dict(session: Any, asset_id: uuid.UUID) -> dict[str, Any] | No
     result = dict(verdict.result)
     verdict_formatted = _format_verdict_response(result)
     compliance_status = verdict_formatted.pop("status", "")
-    return {
+    meta = verdict_formatted.get("metadata") or {}
+    out = {
         "status": "completed",
         "asset_id": str(asset_id),
         "compliance_status": compliance_status,
         **verdict_formatted,
     }
+    if result.get("llm_final_review"):
+        out["llm_final_review"] = result["llm_final_review"]
+    if meta.get("advisory_vlm"):
+        out["advisory_vlm"] = meta["advisory_vlm"]
+    if meta.get("pipeline_progress"):
+        out["pipeline_progress"] = meta["pipeline_progress"]
+    return out
 
 
 # ---------------------------------------------------------------------------
