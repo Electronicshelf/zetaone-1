@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,8 +10,12 @@ from fastapi.staticfiles import StaticFiles
 
 from zataone.api.routes import router as api_router
 
-# Repo `web/` folder (same layout in Docker: /app/web)
-_WEB_DIR = Path(__file__).resolve().parent.parent.parent / "web"
+# Repo `web/` (Docker: /app/web). ZATAONE_WEB_DIR overrides editable-install path drift.
+_WEB_DIR = Path(
+    os.environ.get("ZATAONE_WEB_DIR", "")
+).resolve() if os.environ.get("ZATAONE_WEB_DIR", "").strip() else (
+    Path(__file__).resolve().parent.parent.parent / "web"
+)
 
 app = FastAPI(
     title="zataone",
@@ -88,3 +93,24 @@ def root() -> dict[str, str]:
 def health() -> dict[str, str]:
     """Health check endpoint."""
     return {"status": "ok", "service": "zataone"}
+
+
+@app.get("/health/ui-asset")
+def health_ui_asset() -> dict[str, Any]:
+    """Debug: which policylens.html the server reads (bytes + path)."""
+    p = _WEB_DIR / "policylens.html"
+    exists = p.is_file()
+    size = p.stat().st_size if exists else 0
+    has_pipeline_mode = False
+    if exists and size < 500_000:
+        try:
+            has_pipeline_mode = "pipelineModeRow" in p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            pass
+    return {
+        "web_dir": str(_WEB_DIR),
+        "policylens_path": str(p),
+        "exists": exists,
+        "bytes": size,
+        "has_pipeline_mode_ui": has_pipeline_mode,
+    }

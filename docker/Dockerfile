@@ -32,9 +32,10 @@ RUN python /tmp/preload_models.py siglip
 RUN rm -f /tmp/preload_models.py
 
 COPY . .
-# Fail the image build if PolicyLens UI in the context is stale (avoids silent deploy of old web/).
-RUN grep -q 'pipelineModeRow' /app/web/policylens.html
 RUN pip install --no-cache-dir -e .
+ENV ZATAONE_WEB_DIR=/app/web
+RUN grep -q pipelineModeRow /app/web/policylens.html \
+    && test "$(wc -c < /app/web/policylens.html)" -gt 80000
 
 # Cloud Run sets PORT (default 8080). Local: docker run -p 8000:8000 -e PORT=8000
 ENV PORT=8000
