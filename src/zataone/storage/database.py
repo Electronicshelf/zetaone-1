@@ -72,6 +72,7 @@ def create_all_tables() -> None:
     """Create all tables defined in models. Call after importing all models."""
     from zataone.models import (  # noqa: F401 - register models
         Tenant,
+        APIKey,
         Asset,
         Signal,
         Evidence,

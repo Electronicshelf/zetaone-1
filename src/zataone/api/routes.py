@@ -9,9 +9,10 @@ import uuid
 from types import SimpleNamespace
 from typing import Any, Literal
 
-from fastapi import APIRouter, BackgroundTasks, File, Header, HTTPException, Path, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, HTTPException, Path, UploadFile
 from pydantic import BaseModel, Field
 
+from zataone.api.auth import AuthContext, get_auth_context
 from zataone.core.pipeline import CompliancePipeline, resolve_pipeline_mode
 from zataone.core.verdict_display import enrich_api_verdict_payload
 from zataone.models import (
@@ -222,7 +223,7 @@ def _run_pipeline_background(
 def post_assets(
     background_tasks: BackgroundTasks,
     body: AssetCreateRequest,
-    x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    auth: AuthContext = Depends(get_auth_context),
     x_domain: str | None = Header(None, alias="X-Domain"),
     x_pipeline_mode: str | None = Header(None, alias="X-Pipeline-Mode"),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
@@ -236,6 +237,7 @@ def post_assets(
     Optional Idempotency-Key: if provided and an asset with the same key exists,
     returns the existing verdict without re-running the pipeline.
     """
+    x_tenant_id = str(auth.tenant_id) if auth.tenant_id else None
     domain = _resolve_domain(x_domain)
     pm = _pipeline_mode_header(x_pipeline_mode)
     if idempotency_key:
@@ -321,7 +323,7 @@ def post_assets(
 async def post_assets_image(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    auth: AuthContext = Depends(get_auth_context),
     x_domain: str | None = Header(None, alias="X-Domain"),
     x_pipeline_mode: str | None = Header(None, alias="X-Pipeline-Mode"),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
@@ -335,6 +337,7 @@ async def post_assets_image(
     Optional Idempotency-Key: if provided and an asset with the same key exists,
     returns the existing verdict without re-running the pipeline.
     """
+    x_tenant_id = str(auth.tenant_id) if auth.tenant_id else None
     domain = _resolve_domain(x_domain)
     pm = _pipeline_mode_header(x_pipeline_mode)
     if idempotency_key:
@@ -429,7 +432,7 @@ async def post_assets_image(
 async def post_assets_audio(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    x_tenant_id: str | None = Header(None, alias="X-Tenant-ID"),
+    auth: AuthContext = Depends(get_auth_context),
     x_domain: str | None = Header(None, alias="X-Domain"),
     x_pipeline_mode: str | None = Header(None, alias="X-Pipeline-Mode"),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
@@ -439,6 +442,7 @@ async def post_assets_audio(
 
     Poll GET /assets/{asset_id} for the verdict when async; sync on Cloud Run (see _use_sync_pipeline).
     """
+    x_tenant_id = str(auth.tenant_id) if auth.tenant_id else None
     domain = _resolve_domain(x_domain)
     pm = _pipeline_mode_header(x_pipeline_mode)
     if idempotency_key:
