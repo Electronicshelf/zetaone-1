@@ -36,6 +36,7 @@ from zataone.document.builder import DocumentBuilder
 from zataone.document.flags import document_centric_enabled
 from zataone.extractors.registry import ExtractorRegistry
 from zataone.policy_engine.corpus.loader import load_policy_pack_from_dict
+from zataone.policy_engine.jurisdiction.router import JurisdictionRouter
 from zataone.policy_engine.engine import PolicyEngine
 from zataone.policy_engine.retrieval.flags import policy_retrieval_enabled
 from zataone.policy_engine.retrieval.retriever import PolicyRetriever
@@ -90,16 +91,17 @@ class CompliancePipeline:
     Loads domain extractors and policies, orchestrates the full flow.
     """
 
-    def __init__(self, domain: str):
+    def __init__(self, domain: str, jurisdiction: str = "US"):
         """
-        Initialize pipeline for a domain.
+        Initialize pipeline for a domain + jurisdiction.
 
         Args:
-            domain: Domain name (e.g. "ad_compliance").
-                   Loads extractors from zataone.domains.<domain>.extractors
-                   and policy pack from zataone.domains.<domain>.policies
+            domain:      Domain name (e.g. "ad_compliance").
+            jurisdiction: ISO-style jurisdiction code (US, EU, UK, CA, AU).
+                         Selects the matching policy pack YAML; falls back to US.
         """
         self._domain = domain
+        self._jurisdiction = JurisdictionRouter().normalize(jurisdiction)
         self._extractor_registry = ExtractorRegistry()
         self._policy_engine = PolicyEngine()
         self._policy_pack = None
@@ -198,15 +200,17 @@ class CompliancePipeline:
         if hasattr(extractors_module, "AsrExtractor") and _allow("asr"):
             extractor_classes.append(("AsrExtractor", {}))
 
-        # Core extractors for ad_compliance (text always; OCR/Vision/Embedding/VLM optional stubs)
+        # Core extractors for ad_compliance (text + video always; OCR/Vision/Embedding/VLM optional)
         if self._domain == "ad_compliance":
             from zataone.extractors.text_extractor import TextExtractor
+            from zataone.extractors.video_extractor import VideoExtractor
             from zataone.extractors.ocr_extractor import OCRExtractor
             from zataone.extractors.vision_extractor import VisionExtractor
             from zataone.extractors.embedding_extractor import EmbeddingExtractor
             from zataone.extractors.vlm_extractor import VLMExtractor
 
             self._extractor_registry.register(TextExtractor())
+            self._extractor_registry.register(VideoExtractor())
             if _core_stub_extractors_disabled():
                 logger.info(
                     "Core stub extractors disabled (ZATAONE_DISABLE_CORE_STUB_EXTRACTORS); "
@@ -239,22 +243,31 @@ class CompliancePipeline:
             return yaml.safe_load(f) or {}
 
     def _load_domain_policies(self) -> None:
-        """Load policy pack from domain policies."""
+        """Load jurisdiction-appropriate policy pack from domain policies."""
         domain_module = importlib.import_module(f"zataone.domains.{self._domain}")
         domain_path = os.path.dirname(domain_module.__file__)
 
         import yaml
 
-        policy_path = os.path.join(domain_path, "policies", "meta_ads.yaml")
-        if not os.path.exists(policy_path):
-            policy_path = os.path.join(domain_path, "policies", f"{self._domain}.yaml")
-        if not os.path.exists(policy_path):
+        policy_path = JurisdictionRouter().resolve_policy_path(
+            domain_path, self._domain, self._jurisdiction
+        )
+        if not policy_path:
             return
+
+        logger.info(
+            "Loading policy pack: %s (domain=%s, jurisdiction=%s)",
+            os.path.basename(policy_path), self._domain, self._jurisdiction,
+        )
 
         with open(policy_path, "r") as f:
             data = yaml.safe_load(f) or {}
 
-        self._policy_pack = load_policy_pack_from_dict(data, source_path=policy_path)
+        self._policy_pack = load_policy_pack_from_dict(
+            data,
+            source_path=policy_path,
+            jurisdiction=self._jurisdiction,
+        )
         rules = self._policy_pack.rules
 
         vision_support_map = {}
@@ -367,6 +380,7 @@ class CompliancePipeline:
         evaluate_document = document if document_centric_enabled() else None
 
         retrieval_result = None
+        active_rule_ids = None
         if self._policy_retriever is not None:
             vision_primary_ids = {
                 rid
@@ -378,18 +392,15 @@ class CompliancePipeline:
                 vision_rule_ids=vision_primary_ids,
             )
             if policy_retrieval_enabled() and retrieval_result.retrieved_rule_ids:
-                self._policy_engine.set_active_rule_ids(retrieval_result.retrieved_rule_ids)
-            else:
-                self._policy_engine.set_active_rule_ids(None)
-        else:
-            self._policy_engine.set_active_rule_ids(None)
+                active_rule_ids = set(retrieval_result.retrieved_rule_ids)
 
         engine_on = policy_engine_enabled()
         if engine_on:
-            violations = self._policy_engine.evaluate(signals, document=evaluate_document)
+            violations = self._policy_engine.evaluate(
+                signals, document=evaluate_document, active_rule_ids=active_rule_ids
+            )
         else:
             violations = []
-        self._policy_engine.set_active_rule_ids(None)
 
         evidence = self._evidence_service.generate(signals, violations)
         verdict = self._verdict_service.generate(evidence)
@@ -667,8 +678,17 @@ class CompliancePipeline:
                 session, asset_record.id, signal_records, violation_records
             )
 
+            policy_pack_id: str | None = None
+            if self._policy_pack is not None:
+                pp = self._policy_pack
+                policy_pack_id = getattr(pp, "pack_id", None) or getattr(pp, "name", None)
+
             verdict_record = self._verdict_service.persist_verdict(
-                session, asset_record.id, verdict
+                session,
+                asset_record.id,
+                verdict,
+                tenant_id=tenant_id,
+                policy_pack_id=policy_pack_id,
             )
 
             self._audit_service.persist_audit_event(
@@ -676,9 +696,39 @@ class CompliancePipeline:
                 asset_record.id,
                 verdict_record.id,
                 "COMPLIANCE_CHECK",
+                tenant_id=tenant_id,
+                action="COMPLIANCE_CHECK",
+                after_state={
+                    "status": verdict.get("status"),
+                    "risk_score": verdict.get("risk_score"),
+                    "verdict": verdict.get("verdict"),
+                },
             )
 
             session.commit()
+
+            # Fire webhooks after successful commit (non-blocking, daemon thread).
+            try:
+                from zataone.services.webhook_service import WebhookService
+                verdict_status = verdict.get("status", "")
+                event_type = (
+                    "verdict.flagged"
+                    if verdict_status in ("NON_COMPLIANT", "BORDERLINE")
+                    else "verdict.completed"
+                )
+                WebhookService().fire_event_async(
+                    event_type,
+                    {
+                        "asset_id": str(asset_record.id),
+                        "verdict": verdict_status,
+                        "risk_score": verdict.get("risk_score"),
+                        "policy_pack_id": policy_pack_id,
+                    },
+                    tenant_id=tenant_id,
+                )
+            except Exception:
+                pass  # webhook errors must never abort the pipeline
+
             return asset_record.id
         except Exception as e:
             if session is not None:

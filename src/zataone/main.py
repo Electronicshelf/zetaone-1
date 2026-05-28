@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from zataone.api.admin import router as admin_router
 from zataone.api.routes import router as api_router
 
 # Repo `web/` (Docker: /app/web). ZATAONE_WEB_DIR overrides editable-install path drift.
@@ -67,7 +68,9 @@ async def _no_cache_ui_html(request: Request, call_next):
     return response
 
 
-app.include_router(api_router)
+app.include_router(api_router)                          # legacy: /assets
+app.include_router(api_router, prefix="/api/v1")        # versioned: /api/v1/assets
+app.include_router(admin_router)
 
 if _WEB_DIR.is_dir():
     app.mount(
