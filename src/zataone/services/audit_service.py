@@ -1,10 +1,7 @@
 # zataone audit service
 
 from __future__ import annotations
-<<<<<<< HEAD
-=======
 
->>>>>>> 51460d732e9a45b67d213332c8628260fb6325d9
 import uuid
 from typing import Any
 

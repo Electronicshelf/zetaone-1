@@ -20,11 +20,8 @@ Sentiment and language signals degrade gracefully if their libraries are absent.
 Pure extractor — no DB writes.
 """
 
-<<<<<<< HEAD
 from __future__ import annotations
-=======
 import logging
->>>>>>> 51460d732e9a45b67d213332c8628260fb6325d9
 import re
 import uuid
 from dataclasses import dataclass
