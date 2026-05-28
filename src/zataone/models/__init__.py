@@ -1,5 +1,6 @@
 # Data models module
 
+from __future__ import annotations
 from zataone.models.tenant import Tenant
 from zataone.models.api_key import APIKey
 from zataone.models.asset import Asset
