@@ -256,7 +256,8 @@ def test_jurisdiction_eu() -> None:
         )
         asset_id = resp.get("asset_id")
         record("POST /assets X-Jurisdiction:EU → asset_id", bool(asset_id))
-        record("Response includes jurisdiction=EU", resp.get("jurisdiction") == "EU", str(resp))
+        actual_jur = (resp.get("metadata") or {}).get("policy_pack", {}).get("jurisdiction", "")
+        record("Response includes jurisdiction=EU", actual_jur == "EU", f"jurisdiction={actual_jur}")
 
         result = poll(asset_id)
         status = result.get("status")
@@ -285,7 +286,8 @@ def test_jurisdiction_uk() -> None:
         )
         asset_id = resp.get("asset_id")
         record("POST /assets X-Jurisdiction:UK → asset_id", bool(asset_id))
-        record("Response includes jurisdiction=UK", resp.get("jurisdiction") == "UK", str(resp))
+        actual_jur = (resp.get("metadata") or {}).get("policy_pack", {}).get("jurisdiction", "")
+        record("Response includes jurisdiction=UK", actual_jur == "UK", f"jurisdiction={actual_jur}")
 
         result = poll(asset_id)
         compliance = result.get("compliance_status", "")
