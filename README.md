@@ -557,7 +557,22 @@ gcloud builds submit --config cloudbuild.yaml \
 
 ---
 
-## Future Roadmap
+## Strategic Roadmap (current priorities)
+
+Ordered by priority. The defensible moat is the combination of a deep policy corpus, a labeled evaluation dataset with measured precision/recall, and real-world enforcement data from pilot customers.
+
+| # | Priority | Status |
+|---|----------|--------|
+| 1 | **Deep ad policy corpus** (Meta / Google / TikTok first) | In progress |
+| 2 | **Large evaluation dataset + benchmarks** (clause-level labels, precision/recall per policy category) | Next |
+| 3 | **Pilot customers** (real content → labeled enforcement data flywheel) | Next |
+| 4 | **Government grants** (SBIR, innovation programs — non-dilutive, in parallel) | Planned |
+| 5 | **Government contracts** | Later (after pilots) |
+| 6 | **Additional domains** (finance, healthcare, etc.) | After proving ads |
+
+Items 1–3 run in parallel and feed each other: deepening the corpus, building the eval set, and onboarding pilots compound together.
+
+### Platform roadmap
 
 | Phase | Focus | Status |
 |-------|-------|--------|
