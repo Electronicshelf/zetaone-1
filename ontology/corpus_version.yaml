@@ -3,7 +3,7 @@
 # reproducible and benchmarkable alongside the evaluation dataset. Bump the
 # version and add a release entry whenever a category is completed/changed.
 
-current_version: "Ad Corpus v0.3"
+current_version: "Ad Corpus v0.4"
 
 releases:
   - version: "Ad Corpus v0.1"
@@ -73,7 +73,30 @@ releases:
       (Marketing Rule 17 CFR 275.206(4)-1), FINRA (Rule 2210), and CFPB (Reg Z /
       TILA, 12 CFR 1026.24). Adds new sources linkedin_ads_us, sec_us, finra_us,
       cfpb_us. Every clause carries an `evidence` block (verbatim quote, deep
-      link, section, retrieved_at) and `last_reviewed_by: ai`. Two canonicals are
+      link, section, retrieved_at) and `last_reviewed_by: ai`.       Two canonicals are
       intentionally single-source (CFPB mortgage prohibited acts; SEC testimonial
       disclosures) and carry no `mapping` entry until a second official source
       genuinely matches — keeping the corpus honest.
+
+  - version: "Ad Corpus v0.4"
+    date: 2026-06-27
+    status: frozen
+    categories: [misleading, health, financial, discrimination]
+    sources: [meta_ads_us, google_ads_us, tiktok_ads_us, linkedin_ads_us, ftc_us, fda_us, sec_us, finra_us, cfpb_us, hud_us, eeoc_us]
+    canonical_rules_added:
+      - discrimination.discriminatory_ad_content_prohibited
+      - discrimination.restricted_targeting_protected_class
+    eval_examples: 210       # 30 misleading + 60 health + 60 financial + 60 housing/employment
+    schema_version: "1.0.0"  # unchanged; schema frozen
+    note: >
+      Adds Housing & Employment vertical (US only, category `discrimination`) from
+      official Meta (Discriminatory Practices + Special Ad Category), Google
+      (Personalized advertising restricted targeting for Housing/Employment/
+      Consumer Finance), TikTok (HEC Ad Policy), and LinkedIn (Discrimination +
+      Ads-and-discrimination) policies, plus US regulators HUD/Fair Housing Act
+      (42 U.S.C. § 3604(c)), EEOC/Title VII + ADEA (29 U.S.C. § 623(e)), and FTC
+      ECOA / Regulation B (12 CFR 1002.4(b), credit discouragement). New sources
+      hud_us, eeoc_us. Two cross-source canonicals: discriminatory ad content
+      (Meta, TikTok, LinkedIn, HUD, EEOC, FTC) and restricted protected-class
+      targeting (Meta, Google, TikTok, LinkedIn). Every clause carries an
+      `evidence` block + `last_reviewed_by: ai`; nothing invented.

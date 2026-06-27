@@ -1,8 +1,9 @@
-# Evaluation dataset — Misleading / Deceptive + Health / Medical + Financial verticals.
-# 150 examples total:
-#   Misleading: 30 (10 non_compliant, 10 compliant, 10 borderline)
-#   Health:     60 (20 non_compliant, 20 compliant, 20 borderline)
-#   Financial:  60 (20 non_compliant, 20 compliant, 20 borderline)
+# Evaluation dataset — Misleading + Health + Financial + Housing/Employment verticals.
+# 210 examples total:
+#   Misleading:           30 (10 non_compliant, 10 compliant, 10 borderline)
+#   Health:               60 (20 non_compliant, 20 compliant, 20 borderline)
+#   Financial:            60 (20 non_compliant, 20 compliant, 20 borderline)
+#   Housing/Employment:   60 (20 non_compliant, 20 compliant, 20 borderline)
 # Labeled examples linked to clauses/categories. Compute precision/recall PER
 # category_id and PER canonical_id from these. Conforms to entities.example.
 # labeled_by: expert here = seed authoring; replace with reviewed labels as the
@@ -1710,3 +1711,692 @@ examples:
     labeled_by: expert
     split: dev
     note: "Could shade into pyramid/MLM or get-rich-quick depending on the offer structure."
+
+  # =========================================================================
+  # HOUSING & EMPLOYMENT (discrimination) — NON-COMPLIANT (20)
+  # =========================================================================
+  - id: hue_nc_001
+    content: "Apartment for rent — no kids, adults-only building."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+      - meta.discrimination.no_discrimination
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Familial-status discrimination (not a HOPA 55+/62+ community)."
+
+  - id: hue_nc_002
+    content: "Cozy home for rent — Christian tenants strongly preferred."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+      - linkedin.discrimination.no_discrimination
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Religious preference in a housing ad."
+
+  - id: hue_nc_003
+    content: "House for sale — perfect for a young white family."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+      - meta.discrimination.no_discrimination
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Race + familial-status preference."
+
+  - id: hue_nc_004
+    content: "Renting to males only — no women, please."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Sex discrimination in housing."
+
+  - id: hue_nc_005
+    content: "Upstairs unit, no elevator — not suitable for handicapped or disabled people."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Handicap/disability limitation in housing ad."
+
+  - id: hue_nc_006
+    content: "Now hiring young, energetic recent college grads — digital natives only!"
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+      - eeoc.employment.age_ad_adea
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Age-coded preference discouraging applicants 40+."
+
+  - id: hue_nc_007
+    content: "Seeking female receptionists only."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Sex preference in a job ad (no BFOQ)."
+
+  - id: hue_nc_008
+    content: "Hiring — US-born native English speakers only, no immigrants."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "National-origin discrimination in a job ad."
+
+  - id: hue_nc_009
+    content: "No applicants over 40 — we want a youthful team."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.age_ad_adea
+      - eeoc.employment.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Explicit age limit; ADEA violation."
+
+  - id: hue_nc_010
+    content: "Christian-owned business hiring fellow believers only."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Religious preference in a job ad."
+
+  - id: hue_nc_011
+    content: "Auto loans for married couples only — singles need not apply."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - ftc.credit.ecoa_discouragement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Marital-status discouragement (ECOA prohibited basis)."
+
+  - id: hue_nc_012
+    content: "Credit cards built for men — sorry ladies, this one's not for you."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - ftc.credit.ecoa_discouragement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Sex-based discouragement in a credit ad."
+
+  - id: hue_nc_013
+    content: "[Housing rental ad targeted to men aged 25-40, excluding selected ZIP codes]"
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - meta.discrimination.special_ad_category
+      - google.discrimination.restricted_targeting
+      - tiktok.discrimination.hec_targeting
+      - linkedin.discrimination.targeting_certification
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Restricted demographic + ZIP targeting on a housing ad."
+
+  - id: hue_nc_014
+    content: "[Job recruitment ad targeted only to users under 30]"
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - meta.discrimination.special_ad_category
+      - google.discrimination.restricted_targeting
+      - linkedin.discrimination.targeting_certification
+      - tiktok.discrimination.hec_targeting
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Age-restricted targeting for a recruitment ad."
+
+  - id: hue_nc_015
+    content: "[Apartment ad set to exclude users interested in 'parenting' and 'children']"
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - meta.discrimination.special_ad_category
+      - tiktok.discrimination.hec_targeting
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Proxy exclusion of families with children via interest targeting."
+
+  - id: hue_nc_016
+    content: "[Credit-card offer targeted by ZIP code to avoid lower-income, minority neighborhoods]"
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - google.discrimination.restricted_targeting
+      - meta.discrimination.special_ad_category
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "ZIP-code redlining-style targeting on a consumer-finance ad."
+
+  - id: hue_nc_017
+    content: "Hiring — must be a US citizen, no foreigners or visa holders."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "National-origin/citizenship discrimination beyond lawful work-eligibility checks."
+
+  - id: hue_nc_018
+    content: "Senior apartments — must be able-bodied, no disabilities or wheelchairs."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Handicap limitation in housing ad."
+
+  - id: hue_nc_019
+    content: "We do not rent to families with children."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - hud.housing.discriminatory_ad
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Familial-status discrimination."
+
+  - id: hue_nc_020
+    content: "Salesman wanted — must be under 35 and single."
+    modality: text
+    label: non_compliant
+    category_ids: [discrimination]
+    violated_clause_ids:
+      - eeoc.employment.discriminatory_ad
+      - eeoc.employment.age_ad_adea
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Gendered title + age + marital-status preference."
+
+  # =========================================================================
+  # HOUSING & EMPLOYMENT (discrimination) — COMPLIANT (20)
+  # =========================================================================
+  - id: hue_c_001
+    content: "Apartment for rent, 2BR, $1,500/mo. Equal Housing Opportunity."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_002
+    content: "We are an Equal Opportunity Employer. All qualified applicants are welcome."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_003
+    content: "Hiring software engineers — apply regardless of background."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_004
+    content: "Home for sale, 3BR/2BA. We honor the Fair Housing Act."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_005
+    content: "Now hiring baristas; we value diversity and inclusion."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_006
+    content: "Credit card application open to all qualified applicants. Equal Credit Opportunity Lender."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_007
+    content: "Senior living community for residents 55 and older (Housing for Older Persons Act compliant)."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "55+ housing is a lawful HOPA exemption to familial-status rules."
+
+  - id: hue_c_008
+    content: "Job opening: Registered Nurse. EEO employer; all qualified candidates encouraged to apply."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_009
+    content: "Mortgage pre-approval available to all qualified buyers."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_010
+    content: "Wheelchair-accessible apartment available — step-free entry and roll-in shower."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "Describing accessibility features (welcoming) is allowed, not a limitation."
+
+  - id: hue_c_011
+    content: "Customer-service role requiring fluent Spanish and English (bilingual skills used daily on the job)."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "Job-related language requirement tied to actual duties."
+
+  - id: hue_c_012
+    content: "Apartments near downtown, pet-friendly. All are welcome."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_013
+    content: "We're hiring! Veterans are encouraged to apply."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "Veteran status is not an EEOC-protected basis; encouragement is lawful."
+
+  - id: hue_c_014
+    content: "Both entry-level and experienced candidates are welcome to apply."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_015
+    content: "Affordable housing program for income-qualified applicants."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "Income qualification is not a protected class."
+
+  - id: hue_c_016
+    content: "Open house Saturday 1-4pm — everyone welcome."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_017
+    content: "Personal loan offer; rates vary by creditworthiness. Equal Credit Opportunity Lender."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_018
+    content: "Remote job, open to applicants nationwide."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: hue_c_019
+    content: "Warehouse role: must be able to lift 50 lbs (essential job function)."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+    note: "Bona fide physical requirement tied to the job's essential functions."
+
+  - id: hue_c_020
+    content: "Family-friendly apartment community — families with children welcome."
+    modality: text
+    label: compliant
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  # =========================================================================
+  # HOUSING & EMPLOYMENT (discrimination) — BORDERLINE (20)
+  # =========================================================================
+  - id: hue_b_001
+    content: "Apartment perfect for young professionals."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Young professionals' may discourage families/older renters (familial/age-coded)."
+
+  - id: hue_b_002
+    content: "Looking for a recent graduate to join our team."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "EEOC flags 'recent graduates' as potentially discouraging older applicants; context-dependent."
+
+  - id: hue_b_003
+    content: "Seeking energetic, digital-native team members."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Digital native' can be an age proxy."
+
+  - id: hue_b_004
+    content: "Great starter home for a growing family."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Familial-status-coded language; could read as steering."
+
+  - id: hue_b_005
+    content: "Quiet building, ideal for mature residents."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Mature residents' is age-coded and may exclude families."
+
+  - id: hue_b_006
+    content: "Seeking a strong man for warehouse work."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Gendered phrasing; lawful only if a genuine BFOQ, otherwise discouraging."
+
+  - id: hue_b_007
+    content: "Native-level English required."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "May proxy national origin unless genuinely job-required."
+
+  - id: hue_b_008
+    content: "Hiring — 0 to 2 years of experience only."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Experience caps can have a disparate impact on older workers."
+
+  - id: hue_b_009
+    content: "Female-friendly co-living space."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Could imply a sex preference; shared-living exemptions are narrow."
+
+  - id: hue_b_010
+    content: "Christian community housing development."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Religious-organization housing exemptions are narrow and fact-specific."
+
+  - id: hue_b_011
+    content: "[Job ad targeted to our local city audience via city-level targeting]"
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "City/radius geo-targeting is allowed; borderline only if it proxies a protected class."
+
+  - id: hue_b_012
+    content: "Recruiting exclusively from top-tier universities."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Elite-school-only recruiting can create disparate impact."
+
+  - id: hue_b_013
+    content: "Looking for someone who fits our young, fun company culture."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Young culture fit' is age-coded."
+
+  - id: hue_b_014
+    content: "[Housing ad with audience set to ages 18-65+]"
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Full adult range is generally allowed under special-category rules; borderline pending platform check."
+
+  - id: hue_b_015
+    content: "Applicants must be able to perform the job without accommodation."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Disability-adjacent; may conflict with reasonable-accommodation duties."
+
+  - id: hue_b_016
+    content: "Seeking digital natives who grew up online."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Age proxy phrasing."
+
+  - id: hue_b_017
+    content: "Apartment near excellent schools — great for kids."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Familial-status steering risk depending on framing."
+
+  - id: hue_b_018
+    content: "We prefer local candidates."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Local' can proxy national origin; context-dependent."
+
+  - id: hue_b_019
+    content: "Recent bootcamp grads encouraged to apply."
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Recent grads' is age-adjacent; encouragement softens but doesn't eliminate risk."
+
+  - id: hue_b_020
+    content: "[Consumer-finance ad targeted by a 5 km city radius]"
+    modality: text
+    label: borderline
+    category_ids: [discrimination]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Radius >=1 km is allowed; borderline only if it functions as ZIP/demographic proxy."

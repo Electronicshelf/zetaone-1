@@ -15,10 +15,10 @@ mappings + a labeled evaluation dataset with measured precision/recall.
 | `corpus/google_ads_us.yaml` | Google Ads (US) — Misrepresentation + Healthcare/Medicines + Financial clauses + rules |
 | `corpus/tiktok_ads_us.yaml` | TikTok Ads (US) — Misleading & false content + Healthcare/Pharmaceuticals + Financial |
 | `corpus/linkedin_ads_us.yaml` | LinkedIn Ads (US) — Financial services clauses + rules |
-| `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB (US) clauses + rules (Misleading + Health + Financial) |
+| `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB + HUD + EEOC (US) clauses + rules (Misleading + Health + Financial + Housing/Employment) |
 | `mappings.yaml` | Cross-source links: equivalent clauses → one `canonical_id` |
-| `examples/eval_seed.yaml` | Labeled evaluation dataset (150 examples: 30 misleading + 60 health + 60 financial) |
-| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1, v0.2, v0.3, …) |
+| `examples/eval_seed.yaml` | Labeled evaluation dataset (210 examples: 30 misleading + 60 health + 60 financial + 60 housing/employment) |
+| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.4) |
 | `validate.py` | Validator: parse + referential integrity + evidence/applicability completeness |
 
 ## Entities
@@ -50,10 +50,10 @@ category ─< clause >── source
 
 ## Scope so far
 
-- **Categories:** `misleading` (deep), `health` (deep), `financial` (deep)
-- **Sources:** Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, FTC, FDA, SEC, FINRA, CFPB
+- **Categories:** `misleading` (deep), `health` (deep), `financial` (deep), `discrimination` (Housing/Employment, deep)
+- **Sources:** Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, FTC, FDA, SEC, FINRA, CFPB, HUD, EEOC
 - **Jurisdiction:** US
-- **Current corpus version:** `Ad Corpus v0.3` (see `corpus_version.yaml`)
+- **Current corpus version:** `Ad Corpus v0.4` (see `corpus_version.yaml`)
 
 ### Misleading / Deceptive — canonical rules (vertical 1)
 
@@ -114,6 +114,27 @@ Services), FTC (Penalty Offenses re money-making opportunities + 16 CFR 437.4), 
 Marketing Rule (17 CFR 275.206(4)-1), FINRA Rule 2210, CFPB Reg Z / TILA (12 CFR
 1026.24). Jurisdiction: US only.
 
+### Housing & Employment — canonical rules (vertical 4, category `discrimination`)
+
+| `canonical_id` | Sources mapped |
+|----------------|----------------|
+| `discrimination.discriminatory_ad_content_prohibited` | Meta, TikTok, LinkedIn, HUD (FHA), EEOC (Title VII/ADEA), FTC (ECOA) |
+| `discrimination.restricted_targeting_protected_class` | Meta, Google, TikTok, LinkedIn |
+
+Regulators (HUD/EEOC/FTC) carry higher `priority` (95) than platform rules on
+conflict. Protected-class lists differ slightly per statute (FHA: race, color,
+religion, sex, handicap, familial status, national origin; ADEA: age 40+; Title
+VII: race/color/religion/sex/national origin; ECOA: + marital status), but the
+advertising prohibition is genuinely equivalent, so the mapping is justified — not
+invented.
+
+Housing/Employment sources: Meta Discriminatory Practices + Special Ad Category,
+Google Personalized advertising (restricted targeting for Housing/Employment/
+Consumer Finance), TikTok Housing/Employment/Credit (HEC) Ad Policy, LinkedIn
+Advertising Policies (Discrimination) + LinkedIn Ads-and-discrimination, HUD Fair
+Housing Act (42 U.S.C. § 3604(c)), EEOC Prohibited Practices + ADEA (29 U.S.C.
+§ 623(e)), FTC ECOA / Regulation B (12 CFR 1002.4(b)). Jurisdiction: US only.
+
 > **TikTok US note:** TikTok's healthcare policy is per-market. In the *United
 > States*, prescription/OTC meds, pharmacies, fillers, and microdermabrasion
 > *may be allowed* with FDA / NABP / LegitScript certification and 18+ targeting
@@ -132,7 +153,8 @@ the eval dataset:
 
 - **Ad Corpus v0.1** — Misleading / Deceptive (frozen)
 - **Ad Corpus v0.2** — adds Health / Medical (frozen)
-- **Ad Corpus v0.3** — adds Financial services & investments (frozen, current)
+- **Ad Corpus v0.3** — adds Financial services & investments (frozen)
+- **Ad Corpus v0.4** — adds Housing & Employment (frozen, current)
 
 ## Build order
 
@@ -140,15 +162,18 @@ the eval dataset:
 2. ✅ Misleading / Deceptive vertical → **Ad Corpus v0.1** (30 eval examples).
 3. ✅ Health / Medical vertical: Meta + Google + TikTok + FTC + FDA, mapped → **Ad Corpus v0.2** (60 eval examples).
 4. ✅ Financial vertical: Meta + Google + TikTok + LinkedIn + FTC + SEC + FINRA + CFPB, mapped → **Ad Corpus v0.3** (60 eval examples).
-5. Build the 1,000+ labeled evaluation dataset across the three frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
-6. Deepen each canonical rule (more clauses, edge cases); then add jurisdictions (EU/UK) and platforms (X, Amazon Ads). New domains (housing/employment, gambling, etc.) come after the eval dataset.
+5. ✅ Housing & Employment vertical: Meta + Google + TikTok + LinkedIn + HUD + EEOC + FTC, mapped → **Ad Corpus v0.4** (60 eval examples).
+6. Next domains: Political & Social Issues → Alcohol/Tobacco/Cannabis → Gambling & Gaming → Children/Minors → Privacy & Personal Data → IP/Counterfeit.
+7. Build the 1,000+ labeled evaluation dataset across frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
+8. Add the `ontology/precedents/` layer (enforcement cases linking policy → canonical → precedent → verdict → evidence). Then add jurisdictions (EU/UK) and platforms (X, Amazon Ads).
 
 > Clause text is sourced from official policy pages (Meta Transparency Center,
 > Google Ads Help, TikTok Business Help Center, LinkedIn Advertising Policies,
 > FTC.gov, FDA.gov, SEC.gov / 17 CFR 275.206(4)-1, FINRA Rule 2210, CFPB / 12 CFR
-> 1026.24, 21 CFR 202.1). Some pages are JS-heavy and were captured via
-> official-source search snippets; **verify verbatim text and effective dates
-> against the cited URLs before using metrics or decisions externally.** Run
+> 1026.24, 21 CFR 202.1, HUD / 42 U.S.C. § 3604, EEOC / 29 U.S.C. § 623,
+> 12 CFR 1002.4). Some pages are JS-heavy and were captured via official-source
+> search snippets; **verify verbatim text and effective dates against the cited
+> URLs before using metrics or decisions externally.** Run
 > `python ontology/validate.py` after any change.
 
 ## Relationship to the engine policies

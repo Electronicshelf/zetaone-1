@@ -425,6 +425,77 @@ clauses:
       section: "Restricted Goods & Services > Financial and Insurance Products and Services"
       retrieved_at: 2026-06-27
 
+  # ===================== Housing & Employment (discrimination) =====================
+  - id: meta.discrimination.no_discrimination
+    source_id: meta_ads_us
+    category_id: discrimination
+    text: >
+      Ads must not discriminate or encourage discrimination against people based
+      on personal attributes such as race, ethnicity, color, national origin,
+      religion, age, sex, sexual orientation, gender identity, family status,
+      disability, medical or genetic condition. Advertisers may not use audience
+      selection tools to wrongfully target or exclude specific groups of people,
+      or include discriminatory content in their ads.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-05-01
+    version: "2025-05-01"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        Ads must not discriminate or encourage discrimination against people
+        based on personal attributes such as race, ethnicity, color, national
+        origin, religion, age, sex, sexual orientation, gender identity, family
+        status, disability, medical or genetic condition. ... advertisers may not
+        (1) use our audience selection tools to (a) wrongfully target specific
+        groups of people for advertising ... or (b) wrongfully exclude specific
+        groups of people from seeing their ads; or (2) include discriminatory
+        content in their ads.
+      source_url: https://transparency.meta.com/policies/ad-standards/unacceptable-content/discriminatory-practices/
+      section: "Unacceptable Content > Discriminatory Practices"
+      retrieved_at: 2026-06-27
+
+  - id: meta.discrimination.special_ad_category
+    source_id: meta_ads_us
+    category_id: discrimination
+    text: >
+      Any United States advertiser or advertiser targeting the United States,
+      Canada or certain parts of Europe that is running financial products and
+      services, housing or employment ads, must self identify as a Special Ad
+      Category and run such ads with approved targeting options. For these ads,
+      certain audience options (age, gender, ZIP or postal code, exclusion
+      targeting, lookalike audiences and saved audiences) are limited or
+      unavailable.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-01-21
+    version: "2025-special-ad-category"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        Any United States advertiser or advertiser targeting the United States,
+        Canada or certain parts of Europe that is running financial products and
+        services, housing or employment ads, must self identify as a Special Ad
+        Category, as it becomes available, and run such ads with approved
+        targeting options. ... Certain audience options are limited or
+        unavailable for these ads ...: age, gender, ZIP code or postal code,
+        exclusion targeting, lookalike audiences and saved audiences.
+      source_url: https://transparency.meta.com/policies/ad-standards/unacceptable-content/discriminatory-practices/
+      section: "Unacceptable Content > Discriminatory Practices (Special Ad Category)"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: meta_misleading_deceptive_practices
@@ -569,4 +640,32 @@ rules:
       authorization / identity verification / legally-required disclosures.
     exceptions:
       - "18+ targeted ads by authorized advertisers with lawful disclosures."
+    status: active
+
+  # --- Housing & Employment (discrimination) ---
+  - id: meta_discrimination_content
+    canonical_id: discrimination.discriminatory_ad_content_prohibited
+    clause_ids: [meta.discrimination.no_discrimination]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 65
+    detection: >
+      Ad content that discriminates or encourages discrimination based on
+      protected personal attributes, in housing/employment/financial contexts.
+    exceptions: []
+    status: active
+
+  - id: meta_discrimination_targeting
+    canonical_id: discrimination.restricted_targeting_protected_class
+    clause_ids: [meta.discrimination.special_ad_category]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 63
+    detection: >
+      Housing/employment/financial ads not run as a Special Ad Category, or using
+      restricted audience options (age, gender, ZIP, exclusion, lookalike).
+    exceptions:
+      - "Ads run under Special Ad Category with approved targeting options."
     status: active

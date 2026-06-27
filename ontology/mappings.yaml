@@ -317,3 +317,50 @@ mappings:
       services guaranteeing foreclosure prevention/loan modification); CFPB Reg Z
       (misleading debt-elimination claims for dwelling-secured credit). Related,
       not identical, scope.
+
+  # =========================================================================
+  # Housing & Employment (discrimination) vertical canonical rules:
+  #   discrimination.discriminatory_ad_content_prohibited
+  #       (Meta, TikTok, LinkedIn, HUD/FHA, EEOC/ADEA, FTC/ECOA)
+  #   discrimination.restricted_targeting_protected_class
+  #       (Meta, Google, TikTok, LinkedIn)
+  # US jurisdiction only. Regulators (HUD/EEOC/FTC) carry higher priority on
+  # conflict. Protected-class lists differ slightly by source (FHA, ADEA, Title
+  # VII, ECOA), but the advertising prohibition is genuinely equivalent.
+  # =========================================================================
+  - canonical_id: discrimination.discriminatory_ad_content_prohibited
+    category_id: discrimination
+    clause_ids:
+      - meta.discrimination.no_discrimination
+      - tiktok.discrimination.anti_discrimination
+      - linkedin.discrimination.no_discrimination
+      - hud.housing.discriminatory_ad
+      - eeoc.employment.discriminatory_ad
+      - eeoc.employment.age_ad_adea
+      - ftc.credit.ecoa_discouragement
+    relation: stricter
+    confidence: high
+    note: >
+      Ad content/notices that indicate or encourage a preference, limitation, or
+      discrimination based on protected characteristics in housing, employment,
+      or credit. Regulators are the higher-precedence backbone: HUD/FHA
+      §3604(c) (housing), EEOC/ADEA §623(e) (employment/age), FTC ECOA/Reg B
+      §1002.4(b) (credit discouragement); platforms (Meta, TikTok, LinkedIn)
+      prohibit the same in their ad standards. Genuinely equivalent intent.
+
+  - canonical_id: discrimination.restricted_targeting_protected_class
+    category_id: discrimination
+    clause_ids:
+      - meta.discrimination.special_ad_category
+      - google.discrimination.restricted_targeting
+      - tiktok.discrimination.hec_targeting
+      - linkedin.discrimination.targeting_certification
+    relation: related
+    confidence: high
+    note: >
+      Housing/employment/credit ads must use the platform's special-category
+      mechanism and cannot target/exclude on protected demographics: Meta
+      (Special Ad Category — age, gender, ZIP, exclusion, lookalike limited),
+      Google (no age/gender/marital/parental/ZIP targeting in US/Canada), TikTok
+      (HEC Special Ad Category Toggle), LinkedIn (gender/age certification; age
+      targeting disabled for recruitment). Same intent; mechanics differ.

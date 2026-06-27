@@ -52,6 +52,24 @@ sources:
     retrieved_at: 2026-06-27
     last_verified_at: 2026-06-27
 
+  - id: hud_us
+    type: regulator
+    name: US Department of Housing and Urban Development (Fair Housing Act)
+    jurisdiction: [US]
+    url: https://www.hud.gov/program_offices/fair_housing_equal_opp/fair_housing_act_overview
+    status: active
+    retrieved_at: 2026-06-27
+    last_verified_at: 2026-06-27
+
+  - id: eeoc_us
+    type: regulator
+    name: US Equal Employment Opportunity Commission
+    jurisdiction: [US]
+    url: https://www.eeoc.gov/prohibited-employment-policiespractices
+    status: active
+    retrieved_at: 2026-06-27
+    last_verified_at: 2026-06-27
+
 clauses:
   # ===================== FTC: Misleading backbone =====================
   - id: ftc.misleading.reasonable_basis
@@ -647,6 +665,148 @@ clauses:
       section: "12 CFR 1026.24(i) — Prohibited acts (dwelling-secured credit)"
       retrieved_at: 2026-06-27
 
+  # ===================== FTC: Credit discrimination (ECOA / Reg B) =====================
+  - id: ftc.credit.ecoa_discouragement
+    source_id: ftc_us
+    category_id: discrimination
+    text: >
+      Under the Equal Credit Opportunity Act and Regulation B, a creditor shall
+      not discriminate against an applicant on a prohibited basis regarding any
+      aspect of a credit transaction, and shall not make any oral or written
+      statement, in advertising or otherwise, to applicants or prospective
+      applicants that would discourage on a prohibited basis a reasonable person
+      from making or pursuing an application. (Prohibited bases under ECOA
+      include race, color, religion, national origin, sex, marital status, and
+      age.) The FTC shares enforcement of ECOA for creditors within its
+      jurisdiction.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2011-12-21
+    version: "12cfr1002.4-ecoa"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        (a) Discrimination. A creditor shall not discriminate against an
+        applicant on a prohibited basis regarding any aspect of a credit
+        transaction. (b) Discouragement. A creditor shall not make any oral or
+        written statement, in advertising or otherwise, to applicants or
+        prospective applicants that would discourage on a prohibited basis a
+        reasonable person from making or pursuing an application.
+      source_url: https://www.law.cornell.edu/cfr/text/12/1002.4
+      section: "12 CFR 1002.4(a)–(b) — Regulation B (ECOA) General rules"
+      retrieved_at: 2026-06-27
+
+  # ===================== HUD: Housing (Fair Housing Act) =====================
+  - id: hud.housing.discriminatory_ad
+    source_id: hud_us
+    category_id: discrimination
+    text: >
+      Under the Fair Housing Act it is unlawful to make, print, or publish, or
+      cause to be made, printed, or published any notice, statement, or
+      advertisement, with respect to the sale or rental of a dwelling, that
+      indicates any preference, limitation, or discrimination based on race,
+      color, religion, sex, handicap, familial status, or national origin, or an
+      intention to make any such preference, limitation, or discrimination.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 1968-04-11
+    version: "42usc3604c"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        To make, print, or publish, or cause to be made, printed, or published
+        any notice, statement, or advertisement, with respect to the sale or
+        rental of a dwelling that indicates any preference, limitation, or
+        discrimination based on race, color, religion, sex, handicap, familial
+        status, or national origin, or an intention to make any such preference,
+        limitation, or discrimination.
+      source_url: https://www.law.cornell.edu/uscode/text/42/3604
+      section: "42 U.S.C. § 3604(c) — Fair Housing Act (discriminatory advertising)"
+      retrieved_at: 2026-06-27
+
+  # ===================== EEOC: Employment (Title VII / ADEA) =====================
+  - id: eeoc.employment.discriminatory_ad
+    source_id: eeoc_us
+    category_id: discrimination
+    text: >
+      It is illegal for an employer to publish a job advertisement that shows a
+      preference for or discourages someone from applying for a job because of
+      his or her race, color, religion, sex (including transgender status, sexual
+      orientation, and pregnancy), national origin, age (40 or older), disability
+      or genetic information. For example, a help-wanted ad that seeks "females"
+      or "recent college graduates" may discourage men and people over 40 from
+      applying and may violate the law.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 1964-07-02
+    version: "eeoc-prohibited-practices"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        It is illegal for an employer to publish a job advertisement that shows a
+        preference for or discourages someone from applying for a job because of
+        his or her race, color, religion, sex (including transgender status,
+        sexual orientation, and pregnancy), national origin, age (40 or older),
+        disability or genetic information. For example, a help-wanted ad that
+        seeks "females" or "recent college graduates" may discourage men and
+        people over 40 from applying and may violate the law.
+      source_url: https://www.eeoc.gov/prohibited-employment-policiespractices
+      section: "Prohibited Employment Policies/Practices > Job Advertisements"
+      retrieved_at: 2026-06-27
+
+  - id: eeoc.employment.age_ad_adea
+    source_id: eeoc_us
+    category_id: discrimination
+    text: >
+      Under the Age Discrimination in Employment Act it is unlawful for an
+      employer, labor organization, or employment agency to print or publish, or
+      cause to be printed or published, any notice or advertisement relating to
+      employment indicating any preference, limitation, specification, or
+      discrimination based on age. A job notice or advertisement may specify an
+      age limit only in the rare circumstances where age is shown to be a bona
+      fide occupational qualification (BFOQ) reasonably necessary to the normal
+      operation of the business.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 1967-12-15
+    version: "29usc623e-adea"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        It shall be unlawful for an employer, labor organization, or employment
+        agency to print or publish, or cause to be printed or published, any
+        notice or advertisement relating to employment by such an employer or
+        membership in or any classification or referral for employment by such a
+        labor organization, ... indicating any preference, limitation,
+        specification, or discrimination, based on age.
+      source_url: https://www.eeoc.gov/statutes/age-discrimination-employment-act-1967
+      section: "ADEA § 4(e), 29 U.S.C. § 623(e) — Printing or publication of notice or advertisement"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: ftc_unsubstantiated_objective_claims
@@ -828,5 +988,50 @@ rules:
       Dwelling-secured credit ads with misleading "fixed" rates, misleading
       comparisons, false government endorsement, misuse of the current lender's
       name, debt-elimination claims, or misuse of "counselor."
+    exceptions: []
+    status: active
+
+  # --- Housing & Employment (discrimination) ---
+  - id: hud_housing_discriminatory_ad
+    canonical_id: discrimination.discriminatory_ad_content_prohibited
+    clause_ids: [hud.housing.discriminatory_ad]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 95
+    detection: >
+      Housing ads/notices indicating a preference, limitation, or discrimination
+      based on race, color, religion, sex, handicap, familial status, or
+      national origin (e.g. "no kids," "Christians preferred," "adults only").
+    exceptions:
+      - "Lawful Housing for Older Persons (55+/62+) communities under HOPA."
+    status: active
+
+  - id: eeoc_employment_discriminatory_ad
+    canonical_id: discrimination.discriminatory_ad_content_prohibited
+    clause_ids: [eeoc.employment.discriminatory_ad, eeoc.employment.age_ad_adea]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 95
+    detection: >
+      Job ads showing preference for / discouraging applicants based on race,
+      color, religion, sex, national origin, age (40+), disability, or genetic
+      information (e.g. "young," "recent grads only," "females only").
+    exceptions:
+      - "Age/other limits that are a bona fide occupational qualification (BFOQ)."
+    status: active
+
+  - id: ftc_credit_ecoa
+    canonical_id: discrimination.discriminatory_ad_content_prohibited
+    clause_ids: [ftc.credit.ecoa_discouragement]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 95
+    detection: >
+      Credit advertising statements that discourage, on a prohibited basis (race,
+      color, religion, national origin, sex, marital status, age), a reasonable
+      person from applying.
     exceptions: []
     status: active

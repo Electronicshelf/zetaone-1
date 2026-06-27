@@ -429,6 +429,80 @@ clauses:
       section: "Advertising Policies > Financial Services > Market-specific requirements > Canada, United States of America > Examples of what is not allowed"
       retrieved_at: 2026-06-27
 
+  # ===================== Housing & Employment (discrimination) =====================
+  - id: tiktok.discrimination.anti_discrimination
+    source_id: tiktok_ads_us
+    category_id: discrimination
+    text: >
+      TikTok's Housing, Employment, and Credit (HEC) Ad Policy is designed to
+      ensure compliance with anti-discrimination laws and to prevent the platform
+      from being used to exclude people from essential opportunities based on
+      protected characteristics. This HEC Ad Policy is in addition to TikTok's
+      existing Anti-Discrimination Ad Policy that prohibits unlawful
+      discrimination, including through the use of Custom Audiences or other tools
+      and audiences available on the platform.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-hec"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        TikTok's Housing, Employment, and Credit (HEC) Ad Policy is designed to
+        ensure compliance with anti-discrimination laws and to prevent the
+        platform from being used to exclude people from essential opportunities
+        based on protected characteristics. ... This HEC Ad Policy is in addition
+        to existing Anti-Discrimination Ad Policy that prohibits unlawful
+        discrimination, including without limitation, through the use of Custom
+        Audiences or the use of other tools and audiences available on our
+        platform.
+      source_url: https://ads.tiktok.com/help/article/housing-employment-credit-hec-ad-policy
+      section: "Housing, Employment, and Credit (HEC) Ad Policy"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.discrimination.hec_targeting
+    source_id: tiktok_ads_us
+    category_id: discrimination
+    text: >
+      Advertisers based in the United States, or advertisers targeting audiences
+      in the United States or Canada, must use the Special Ad Category Toggle to
+      self declare when they are running housing, employment or credit ads, which
+      automatically removes restricted targeting options. In the United States
+      and Canada, housing, employment, and credit ads cannot target audiences
+      using marital or parental status, or any options describing or appearing to
+      relate to protected characteristics (including key words that have a high
+      correlation to protected categories).
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-hec"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        Advertisers based in the United States, or advertisers targeting
+        audiences in the United States or Canada must use the Special Ad Category
+        Toggle to self declare when they are running housing, employment or
+        credit ads. ... In the United States and Canada, housing, employment, and
+        credit ads cannot target audiences using the following categories: ...
+        Marital or parental status ... Any options describing or appearing to
+        relate to protected characteristics (this may include key words that have
+        a high correlation to protected categories).
+      source_url: https://ads.tiktok.com/help/article/housing-employment-credit-hec-ad-policy
+      section: "Housing, Employment, and Credit (HEC) Ad Policy > Special Ad Category Toggle"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: tiktok_absolute_terms
     canonical_id: misleading.guaranteed_outcomes
@@ -569,4 +643,33 @@ rules:
       penny auctions, precious metals trading, single securities, unaccredited
       digital banks.
     exceptions: []
+    status: active
+
+  # --- Housing & Employment (discrimination) ---
+  - id: tiktok_discrimination_content
+    canonical_id: discrimination.discriminatory_ad_content_prohibited
+    clause_ids: [tiktok.discrimination.anti_discrimination]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 65
+    detection: >
+      Housing/employment/credit ad content that unlawfully discriminates or
+      excludes people based on protected characteristics.
+    exceptions: []
+    status: active
+
+  - id: tiktok_discrimination_targeting
+    canonical_id: discrimination.restricted_targeting_protected_class
+    clause_ids: [tiktok.discrimination.hec_targeting]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 63
+    detection: >
+      HEC ads (US/Canada) not run via the Special Ad Category Toggle, or
+      targeting by marital/parental status or options correlated with protected
+      characteristics.
+    exceptions:
+      - "HEC ads run via the Special Ad Category Toggle with allowed targeting."
     status: active

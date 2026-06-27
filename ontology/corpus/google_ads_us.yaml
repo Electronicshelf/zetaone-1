@@ -701,6 +701,42 @@ clauses:
       section: "Financial products and services > Location specific financial services verification"
       retrieved_at: 2026-06-27
 
+  # ===================== Housing & Employment (discrimination) =====================
+  - id: google.discrimination.restricted_targeting
+    source_id: google_ads_us
+    category_id: discrimination
+    text: >
+      Certain demographics (age, gender, marital status, parental status) may not
+      be used to target Housing, Employment, and Consumer Finance Ads in the
+      United States and Canada, and ZIP code location targeting cannot be used
+      for these ads. These restrictions are designed to help ensure equitable
+      access to opportunities in Housing, Employment, and Consumer finance.
+      Geographic targeting using radius (at least 1 km), city, and country is
+      allowed.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-02-01
+    version: "2024-personalized-advertising-hec"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [discrimination]
+    evidence:
+      quote: >-
+        Certain demographics (age, gender, marital status, parental status) may
+        not be used to target Housing, Employment, and Consumer Finance Ads in
+        the United States and Canada. ZIP code location targeting cannot be used
+        for Housing, Employment, and Consumer Finance Ads in the United States
+        and Canada. ... These restrictions are designed to help ensure equitable
+        access to opportunities in Housing, Employment, and Consumer finance in
+        the United States and Canada.
+      source_url: https://support.google.com/adspolicy/answer/143465
+      section: "Restricted targeting in Personalized advertising > Categories with targeting restrictions"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: google_unreliable_claims
     canonical_id: misleading.exaggerated_results
@@ -911,4 +947,19 @@ rules:
       licensing/registration verification.
     exceptions:
       - "Advertisers who completed financial-services verification."
+    status: active
+
+  # --- Housing & Employment (discrimination) ---
+  - id: google_discrimination_targeting
+    canonical_id: discrimination.restricted_targeting_protected_class
+    clause_ids: [google.discrimination.restricted_targeting]
+    category_id: discrimination
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 63
+    detection: >
+      Housing/employment/consumer-finance ads (US/Canada) targeting by restricted
+      demographics (age, gender, marital/parental status) or ZIP code.
+    exceptions:
+      - "Geographic targeting by radius (>=1 km), city, or country."
     status: active
