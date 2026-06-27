@@ -1,0 +1,172 @@
+# LinkedIn Ads (US) — canonical-ontology instance.
+# Vertical: Financial services & investments. Conforms to ontology/schema.yaml.
+# Clause text quoted from the official LinkedIn Advertising Policies and the
+# "Financial Products and Services Advertising" Marketing Solutions help article.
+# Each clause carries an `evidence` block (verbatim quote, deep link, section,
+# retrieved_at) and `last_reviewed_by` (ai until a human verifies live).
+
+source:
+  id: linkedin_ads_us
+  type: platform
+  name: LinkedIn Advertising Policies
+  jurisdiction: [US]
+  url: https://www.linkedin.com/legal/ads-policy
+  status: active
+  retrieved_at: 2026-06-27
+  last_verified_at: 2026-06-27
+
+clauses:
+  # ===================== Financial =====================
+  - id: linkedin.finance.restricted
+    source_id: linkedin_ads_us
+    category_id: financial
+    text: >
+      Ads promoting financial products and services are restricted. This
+      includes ads promoting products and services related to lending,
+      mortgages, credit, investments and investment advising, financial trading
+      and exchanges, insurance, and pensions.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-05-28
+    version: "linkedin-ads-policy-2024"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Financial Services. Ads promoting financial products and services are
+        restricted. This includes ads promoting products and services related to
+        lending, mortgages, credit, investments and investment advising,
+        financial trading and exchanges, insurance, and pensions.
+      source_url: https://www.linkedin.com/legal/ads-policy
+      section: "LinkedIn Advertising Policies > Financial Services"
+      retrieved_at: 2026-06-27
+
+  - id: linkedin.finance.requirements
+    source_id: linkedin_ads_us
+    category_id: financial
+    text: >
+      Ads promoting financial trading and exchanges, banking, mortgage, credit,
+      insurance, lending, pension or investment products or services must
+      include a privacy policy, provide current and accurate contact
+      information, contain all required disclosures under applicable local laws
+      and regulations, avoid any misleading, deceptive, or unsupported
+      competitive claims, not target members under the age of 18, and not
+      promote products or services on LinkedIn's prohibited list.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-05-28
+    version: "linkedin-financial-guidelines-2024"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads promoting financial trading and exchanges, banking, mortgage,
+        credit, insurance, lending, pension or investment products or services,
+        must comply with LinkedIn's Advertising Policies, including the following
+        requirements: Include a Privacy Policy. Provide current and accurate
+        contact information. Contain all required disclosures under applicable
+        local laws and regulations. Avoid any misleading, deceptive, or
+        unsupported competitive claims. Do not target members under the age of
+        18. Do not promote products or services on our prohibited list.
+      source_url: https://www.linkedin.com/help/lms/answer/a9357023
+      section: "Financial Products and Services Advertising > Requirements"
+      retrieved_at: 2026-06-27
+
+  - id: linkedin.finance.prohibited
+    source_id: linkedin_ads_us
+    category_id: financial
+    text: >
+      Ads promoting the following financial products and services are
+      prohibited: payday loans; reverse mortgages; peer-to-peer (P2P) lending;
+      binary options; financial products or services designed to facilitate
+      illegal purposes; services that guarantee financial return; services that
+      guarantee foreclosure prevention; services that guarantee loan
+      modification; penny auctions; and penny stocks.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-05-28
+    version: "linkedin-financial-guidelines-2024"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads promoting the following financial products and services are
+        prohibited: Payday loans; Reverse mortgages; Peer-to-Peer (P2P) Lending;
+        Binary options; Financial products or services designed to facilitate
+        illegal purposes; Services that guarantee financial return; Services
+        that guarantee foreclosure prevention; Services that guarantee loan
+        modification; Penny auctions; Penny stocks.
+      source_url: https://www.linkedin.com/help/lms/answer/a9357023
+      section: "Financial Products and Services Advertising > Prohibited"
+      retrieved_at: 2026-06-27
+
+rules:
+  - id: linkedin_finance_misleading
+    canonical_id: finance.misleading_or_unbalanced_claims
+    clause_ids: [linkedin.finance.requirements]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 60
+    detection: >
+      Financial ads with misleading, deceptive, or unsupported competitive
+      claims, or missing required disclosures / privacy policy / contact info.
+    exceptions:
+      - "Claims with factual support and all required local-law disclosures."
+    status: active
+
+  - id: linkedin_finance_licensing
+    canonical_id: finance.licensing_registration_required
+    clause_ids: [linkedin.finance.restricted]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Restricted financial products/services advertised without meeting
+      LinkedIn's financial-services restrictions (incl. 18+ targeting).
+    exceptions:
+      - "Authorized advertisers meeting LinkedIn's financial-services requirements."
+    status: active
+
+  - id: linkedin_finance_prohibited
+    canonical_id: finance.prohibited_predatory_products
+    clause_ids: [linkedin.finance.prohibited]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Promotion of LinkedIn-prohibited financial products: payday loans, reverse
+      mortgages, P2P lending, binary options, penny auctions, penny stocks, or
+      products to facilitate illegal purposes.
+    exceptions: []
+    status: active
+
+  - id: linkedin_finance_guarantees
+    canonical_id: finance.guaranteed_returns_or_risk_free
+    clause_ids: [linkedin.finance.prohibited]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Services that guarantee financial return, guarantee foreclosure
+      prevention, or guarantee loan modification.
+    exceptions: []
+    status: active

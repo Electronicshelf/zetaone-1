@@ -25,6 +25,33 @@ sources:
     retrieved_at: 2026-06-24
     last_verified_at: 2026-06-24
 
+  - id: sec_us
+    type: regulator
+    name: US Securities and Exchange Commission
+    jurisdiction: [US]
+    url: https://www.sec.gov/
+    status: active
+    retrieved_at: 2026-06-27
+    last_verified_at: 2026-06-27
+
+  - id: finra_us
+    type: regulator
+    name: Financial Industry Regulatory Authority
+    jurisdiction: [US]
+    url: https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210
+    status: active
+    retrieved_at: 2026-06-27
+    last_verified_at: 2026-06-27
+
+  - id: cfpb_us
+    type: regulator
+    name: US Consumer Financial Protection Bureau
+    jurisdiction: [US]
+    url: https://www.consumerfinance.gov/
+    status: active
+    retrieved_at: 2026-06-27
+    last_verified_at: 2026-06-27
+
 clauses:
   # ===================== FTC: Misleading backbone =====================
   - id: ftc.misleading.reasonable_basis
@@ -316,6 +343,310 @@ clauses:
       section: "Drug Advertising: A Glossary of Terms > Benefit"
       retrieved_at: 2026-06-24
 
+  # ===================== FTC: Financial (earnings claims) =====================
+  - id: ftc.finance.earnings_claims
+    source_id: ftc_us
+    category_id: financial
+    text: >
+      It is an unfair or deceptive trade practice to make false, misleading or
+      deceptive representations concerning the profits or earnings that may be
+      anticipated by a participant in a money-making opportunity, or to
+      misrepresent that purchasing a money-making opportunity is risk-free or
+      involves little risk. Earnings claims must have a reasonable basis and
+      written substantiation in the seller's possession at the time the claim is
+      made.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2021-12-01
+    version: "ftc-penalty-offenses-mmo-2021"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        It is an unfair or deceptive trade practice to make false, misleading or
+        deceptive representations concerning the profits or earnings that may be
+        anticipated by a participant in a money-making opportunity ... It is an
+        unfair or deceptive trade practice to misrepresent, explicitly or
+        implicitly, that purchasing a money-making opportunity is risk-free or
+        involves little risk.
+      source_url: https://www.ftc.gov/system/files/attachments/penalty-offenses-concerning-money-making-opportunities/mmo-notice.pdf
+      section: "Notice of Penalty Offenses Concerning Money Making Opportunities (§ 5(a)(1) FTC Act)"
+      retrieved_at: 2026-06-27
+
+  # ===================== SEC: Financial (Marketing Rule) =====================
+  - id: sec.finance.untrue_or_unbalanced
+    source_id: sec_us
+    category_id: financial
+    text: >
+      An advertisement may not include any untrue statement of a material fact,
+      or omit to state a material fact necessary in order to make the statement
+      made not misleading; and may not discuss any potential benefits without
+      providing fair and balanced treatment of any material risks or material
+      limitations associated with the potential benefits.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2021-05-04
+    version: "17cfr275.206(4)-1"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (a) General prohibitions. An advertisement may not: (1) Include any
+        untrue statement of a material fact, or omit to state a material fact
+        necessary in order to make the statement made, in the light of the
+        circumstances under which it was made, not misleading; ... (4) Discuss
+        any potential benefits to clients or investors connected with or
+        resulting from the investment adviser's services or methods of operation
+        without providing fair and balanced treatment of any material risks or
+        material limitations associated with the potential benefits.
+      source_url: https://www.law.cornell.edu/cfr/text/17/275.206(4)-1
+      section: "17 CFR 275.206(4)-1(a)(1) and (a)(4) — General prohibitions"
+      retrieved_at: 2026-06-27
+
+  - id: sec.finance.performance_fair_balanced
+    source_id: sec_us
+    category_id: financial
+    text: >
+      An advertisement may not include or exclude performance results, or
+      present performance time periods, in a manner that is not fair and
+      balanced.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2021-05-04
+    version: "17cfr275.206(4)-1"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (6) Include or exclude performance results, or present performance time
+        periods, in a manner that is not fair and balanced.
+      source_url: https://www.law.cornell.edu/cfr/text/17/275.206(4)-1
+      section: "17 CFR 275.206(4)-1(a)(6) — General prohibitions (performance)"
+      retrieved_at: 2026-06-27
+
+  - id: sec.finance.testimonials
+    source_id: sec_us
+    category_id: financial
+    text: >
+      An advertisement may not include any testimonial or endorsement, and an
+      adviser may not provide compensation for a testimonial or endorsement,
+      unless the adviser discloses whether the person giving it is a current
+      client or investor, whether compensation was provided, and any material
+      conflicts of interest on the part of the person giving the testimonial or
+      endorsement.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2021-05-04
+    version: "17cfr275.206(4)-1"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (b) Testimonials and endorsements. An advertisement may not include any
+        testimonial or endorsement, and an adviser may not provide compensation,
+        directly or indirectly, for a testimonial or endorsement, unless the
+        investment adviser complies with the conditions in paragraphs (b)(1)
+        through (3) of this section ... (A) That the testimonial was given by a
+        current client or investor, and the endorsement was given by a person
+        other than a current client or investor ...; (B) That cash or non-cash
+        compensation was provided for the testimonial or endorsement, if
+        applicable; and (C) A brief statement of any material conflicts of
+        interest on the part of the person giving the testimonial or endorsement.
+      source_url: https://www.law.cornell.edu/cfr/text/17/275.206(4)-1
+      section: "17 CFR 275.206(4)-1(b) — Testimonials and endorsements"
+      retrieved_at: 2026-06-27
+
+  # ===================== FINRA: Financial (Rule 2210) =====================
+  - id: finra.finance.fair_balanced
+    source_id: finra_us
+    category_id: financial
+    text: >
+      All member communications must be based on principles of fair dealing and
+      good faith, must be fair and balanced, and must provide a sound basis for
+      evaluating the facts; no member may omit any material fact or qualification
+      if the omission would cause the communications to be misleading. No member
+      may make any false, exaggerated, unwarranted, promissory or misleading
+      statement or claim, and communications must provide balanced treatment of
+      risks and potential benefits.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2013-02-04
+    version: "finra-rule-2210"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        All member communications must be based on principles of fair dealing
+        and good faith, must be fair and balanced, and must provide a sound basis
+        for evaluating the facts in regard to any particular security or type of
+        security, industry, or service. No member may omit any material fact or
+        qualification if the omission, in light of the context of the material
+        presented, would cause the communications to be misleading. ... No member
+        may make any false, exaggerated, unwarranted, promissory or misleading
+        statement or claim in any communication. ... Members must ensure that
+        statements ... provide balanced treatment of risks and potential
+        benefits.
+      source_url: https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210
+      section: "FINRA Rule 2210(d)(1)(A), (B), (D) — Content Standards"
+      retrieved_at: 2026-06-27
+
+  - id: finra.finance.no_performance_projection
+    source_id: finra_us
+    category_id: financial
+    text: >
+      Communications may not predict or project performance, imply that past
+      performance will recur, or make any exaggerated or unwarranted claim,
+      opinion or forecast (subject to limited exceptions for certain hypothetical
+      and projected illustrations permitted by the rule).
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2013-02-04
+    version: "finra-rule-2210"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Communications may not predict or project performance, imply that past
+        performance will recur or make any exaggerated or unwarranted claim,
+        opinion or forecast; provided, however, that this paragraph (d)(1)(F)
+        does not prohibit [certain hypothetical and projected illustrations].
+      source_url: https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210
+      section: "FINRA Rule 2210(d)(1)(F) — Content Standards (performance)"
+      retrieved_at: 2026-06-27
+
+  # ===================== CFPB: Financial (Reg Z / TILA, 12 CFR 1026.24) =====================
+  - id: cfpb.finance.actually_available_terms
+    source_id: cfpb_us
+    category_id: financial
+    text: >
+      If an advertisement for credit states specific credit terms, it shall
+      state only those terms that actually are or will be arranged or offered by
+      the creditor. Disclosures required by this section shall be made clearly
+      and conspicuously, and if an advertisement states a rate of finance charge,
+      it shall state the rate as an "annual percentage rate," using that term.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2011-12-30
+    version: "12cfr1026.24"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (a) Actually available terms. If an advertisement for credit states
+        specific credit terms, it shall state only those terms that actually are
+        or will be arranged or offered by the creditor. (b) Clear and conspicuous
+        standard. Disclosures required by this section shall be made clearly and
+        conspicuously. (c) Advertisement of rate of finance charge. If an
+        advertisement states a rate of finance charge, it shall state the rate as
+        an "annual percentage rate," using that term.
+      source_url: https://www.law.cornell.edu/cfr/text/12/1026.24
+      section: "12 CFR 1026.24(a)–(c) — Advertising"
+      retrieved_at: 2026-06-27
+
+  - id: cfpb.finance.trigger_terms
+    source_id: cfpb_us
+    category_id: financial
+    text: >
+      If an advertisement sets forth any triggering term — the amount or
+      percentage of any downpayment, the number of payments or period of
+      repayment, the amount of any payment, or the amount of any finance charge —
+      the advertisement must also state the amount or percentage of the
+      downpayment, the terms of repayment over the full term of the loan, and the
+      annual percentage rate (using that term).
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2011-12-30
+    version: "12cfr1026.24"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (d) Advertisement of terms that require additional disclosures—(1)
+        Triggering terms. If any of the following terms is set forth in an
+        advertisement, the advertisement shall meet the requirements of paragraph
+        (d)(2) ...: (i) The amount or percentage of any downpayment. (ii) The
+        number of payments or period of repayment. (iii) The amount of any
+        payment. (iv) The amount of any finance charge. (2) ... shall state the
+        following terms ...: (i) The amount or percentage of the downpayment.
+        (ii) The terms of repayment ... over the full term of the loan ... (iii)
+        The "annual percentage rate," using that term ...
+      source_url: https://www.law.cornell.edu/cfr/text/12/1026.24
+      section: "12 CFR 1026.24(d) — Triggering terms / additional disclosures"
+      retrieved_at: 2026-06-27
+
+  - id: cfpb.finance.mortgage_prohibited_acts
+    source_id: cfpb_us
+    category_id: financial
+    text: >
+      In advertisements for credit secured by a dwelling, it is prohibited to
+      misleadingly advertise "fixed" rates or payments, make misleading
+      comparisons, misrepresent government endorsement, misuse the consumer's
+      current lender's name, make misleading claims of debt elimination, or
+      misuse the term "counselor."
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2011-12-30
+    version: "12cfr1026.24"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [financial]
+    evidence:
+      quote: >-
+        (i) Prohibited acts or practices in advertisements for credit secured by
+        a dwelling. The following acts or practices are prohibited ...: (1)
+        Misleading advertising of "fixed" rates and payments ...; (2) Misleading
+        comparisons in advertisements ...; (3) Misrepresentations about
+        government endorsement ...; (4) Misleading use of the current lender's
+        name ...; (5) Misleading claims of debt elimination ...; (6) Misleading
+        use of the term "counselor".
+      source_url: https://www.law.cornell.edu/cfr/text/12/1026.24
+      section: "12 CFR 1026.24(i) — Prohibited acts (dwelling-secured credit)"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: ftc_unsubstantiated_objective_claims
@@ -387,4 +718,115 @@ rules:
       benefit, or missing the major statement / adequate provision.
     exceptions:
       - "Reminder ads (no claims) and help-seeking ads outside product-claim scope."
+    status: active
+
+  # --- Financial ---
+  - id: ftc_finance_earnings
+    canonical_id: finance.performance_claims_substantiation
+    clause_ids: [ftc.finance.earnings_claims]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 95
+    detection: >
+      False/misleading profit or earnings representations, or risk-free/low-risk
+      claims, for a money-making opportunity without a reasonable basis and
+      written substantiation held at the time of the claim.
+    exceptions:
+      - "Earnings claims with a reasonable basis and contemporaneous written substantiation."
+    status: active
+
+  - id: sec_finance_misleading
+    canonical_id: finance.misleading_or_unbalanced_claims
+    clause_ids: [sec.finance.untrue_or_unbalanced]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 92
+    detection: >
+      Untrue/omitted material facts, or benefits discussed without fair and
+      balanced treatment of material risks/limitations (investment adviser ads).
+    exceptions: []
+    status: active
+
+  - id: sec_finance_performance
+    canonical_id: finance.performance_claims_substantiation
+    clause_ids: [sec.finance.performance_fair_balanced]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 92
+    detection: >
+      Performance results included/excluded or time periods presented in a
+      manner that is not fair and balanced.
+    exceptions: []
+    status: active
+
+  - id: sec_finance_testimonials
+    canonical_id: finance.testimonials_endorsements_disclosure
+    clause_ids: [sec.finance.testimonials]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 92
+    detection: >
+      Testimonials/endorsements without required disclosures (client status,
+      compensation, material conflicts of interest).
+    exceptions:
+      - "Testimonials/endorsements meeting all 206(4)-1(b) disclosure conditions."
+    status: active
+
+  - id: finra_finance_fair_balanced
+    canonical_id: finance.misleading_or_unbalanced_claims
+    clause_ids: [finra.finance.fair_balanced]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 90
+    detection: >
+      Communications that are not fair and balanced, omit material facts, make
+      false/exaggerated/promissory claims, or lack balanced risk vs benefit.
+    exceptions: []
+    status: active
+
+  - id: finra_finance_performance
+    canonical_id: finance.performance_claims_substantiation
+    clause_ids: [finra.finance.no_performance_projection]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 90
+    detection: >
+      Predicting/projecting performance, implying past performance will recur,
+      or making exaggerated/unwarranted claims, opinions, or forecasts.
+    exceptions:
+      - "Hypothetical/projected illustrations permitted under Rule 2210(d)(1)(F)."
+    status: active
+
+  - id: cfpb_finance_trigger_terms
+    canonical_id: finance.credit_advertising_trigger_terms
+    clause_ids: [cfpb.finance.actually_available_terms, cfpb.finance.trigger_terms]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 92
+    detection: >
+      Credit ads stating terms not actually available, omitting the APR (as
+      "annual percentage rate"), or stating a triggering term without the
+      required additional disclosures (downpayment, repayment terms, APR).
+    exceptions: []
+    status: active
+
+  - id: cfpb_finance_mortgage
+    canonical_id: finance.mortgage_advertising_prohibited_acts
+    clause_ids: [cfpb.finance.mortgage_prohibited_acts]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 92
+    detection: >
+      Dwelling-secured credit ads with misleading "fixed" rates, misleading
+      comparisons, false government endorsement, misuse of the current lender's
+      name, debt-elimination claims, or misuse of "counselor."
+    exceptions: []
     status: active

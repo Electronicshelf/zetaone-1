@@ -1,7 +1,8 @@
-# Evaluation dataset — Misleading / Deceptive + Health / Medical verticals.
-# 90 examples total:
+# Evaluation dataset — Misleading / Deceptive + Health / Medical + Financial verticals.
+# 150 examples total:
 #   Misleading: 30 (10 non_compliant, 10 compliant, 10 borderline)
 #   Health:     60 (20 non_compliant, 20 compliant, 20 borderline)
+#   Financial:  60 (20 non_compliant, 20 compliant, 20 borderline)
 # Labeled examples linked to clauses/categories. Compute precision/recall PER
 # category_id and PER canonical_id from these. Conforms to entities.example.
 # labeled_by: expert here = seed authoring; replace with reviewed labels as the
@@ -1031,3 +1032,681 @@ examples:
     labeled_by: expert
     split: dev
     note: "'Backed by science' implies a substantiation level that must actually be held (FTC)."
+
+  # =========================================================================
+  # FINANCIAL — NON-COMPLIANT (20)
+  # =========================================================================
+  - id: fin_nc_001
+    content: "Invest now — guaranteed 30% monthly returns, absolutely zero risk!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - tiktok.finance.prohibited_general
+      - linkedin.finance.prohibited
+      - finra.finance.no_performance_projection
+      - ftc.finance.earnings_claims
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_002
+    content: "Make $10,000 a week trading forex — get rich quick with our system!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - tiktok.finance.prohibited_general
+      - ftc.finance.earnings_claims
+      - finra.finance.no_performance_projection
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_003
+    content: "Payday loans approved in minutes — get cash today, repay next paycheck!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - meta.finance.prohibited_products
+      - linkedin.finance.prohibited
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_004
+    content: "Trade binary options and double your money in 60 seconds!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - google.finance.binary_options
+      - linkedin.finance.prohibited
+      - tiktok.finance.us_prohibited
+      - meta.finance.prohibited_products
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_005
+    content: "Fix your credit score fast — guaranteed deletion of all bad marks!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - google.finance.credit_repair
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_006
+    content: "Personal loan, no hassle — APR only 199%! Apply now (US)."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - google.finance.high_apr_us
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_007
+    content: "Buy our new ICO token before it 100x's — limited coins left!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - meta.finance.prohibited_products
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_008
+    content: "We guarantee we'll stop your foreclosure — just pay a small upfront fee."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - google.finance.loan_modification
+      - linkedin.finance.prohibited
+      - cfpb.finance.mortgage_prohibited_acts
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_009
+    content: "Fixed 2.9% mortgage rate forever!" 
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - cfpb.finance.mortgage_prohibited_acts
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Uses 'fixed' for what is a variable-rate product without the required ARM disclosures."
+
+  - id: fin_nc_010
+    content: "Apply for this government-backed loan program today — endorsed by the feds!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - cfpb.finance.mortgage_prohibited_acts
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+    note: "Misrepresents government endorsement; not an actual FHA/VA program."
+
+  - id: fin_nc_011
+    content: "Auto loan: just $99/month! (no APR, term, or other terms shown)"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - cfpb.finance.trigger_terms
+      - cfpb.finance.actually_available_terms
+      - google.finance.personal_loans
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_012
+    content: "Start trading on our crypto exchange now — no account verification needed!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - meta.finance.crypto_permission
+      - google.finance.crypto
+      - tiktok.finance.us_allowed
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_013
+    content: "Our fund returned 200% last year — you'll make the same!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - finra.finance.no_performance_projection
+      - sec.finance.performance_fair_balanced
+      - ftc.finance.earnings_claims
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_014
+    content: "\"Best advisor ever — I tripled my savings!\" — paid testimonial, no disclosures."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - sec.finance.testimonials
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_015
+    content: "Invest in our fund — only upside, you simply can't lose money."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - sec.finance.untrue_or_unbalanced
+      - finra.finance.fair_balanced
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_016
+    content: "CFD trading platform — leverage up to 500x and win big! (unlicensed)"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - google.finance.complex_speculative
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_017
+    content: "These penny stocks are about to explode — buy before everyone else!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - linkedin.finance.prohibited
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_018
+    content: "Bail bonds — fast release, available 24/7, call now."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - meta.finance.prohibited_products
+      - tiktok.finance.us_prohibited
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_019
+    content: "Reverse mortgage — get free money from your home, no strings attached!"
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - linkedin.finance.prohibited
+      - cfpb.finance.mortgage_prohibited_acts
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: fin_nc_020
+    content: "Risk-free passive income — our trading system literally cannot lose."
+    modality: text
+    label: non_compliant
+    category_ids: [financial]
+    violated_clause_ids:
+      - ftc.finance.earnings_claims
+      - tiktok.finance.prohibited_general
+      - finra.finance.fair_balanced
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  # =========================================================================
+  # FINANCIAL — COMPLIANT (20)
+  # =========================================================================
+  - id: fin_c_001
+    content: "Open a checking account with no monthly fee. Member FDIC. Terms apply."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_002
+    content: "Auto loan from 6.9% APR. Representative example: $20,000 over 60 months at 6.9% APR = $395/mo."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_003
+    content: "Work with a registered investment adviser. Investing involves risk, including possible loss of principal."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_004
+    content: "Compare insurance quotes online. Coverage subject to underwriting and eligibility."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_005
+    content: "Personal loan: 8.99% APR, 24–60 month terms, no prepayment penalty. Repayment period 24–60 months."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_006
+    content: "Licensed crypto exchange (registered MSB). Cryptocurrency is volatile; you may lose money. 18+."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_007
+    content: "Mortgage refinance. 7.1% APR. NMLS #123456. Equal Housing Lender."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_008
+    content: "Past performance does not guarantee future results. Please read the prospectus before investing."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_009
+    content: "High-yield savings account, 4.0% APY. Rate is variable and may change after account opening."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_010
+    content: "Schedule a retirement planning consultation with one of our registered advisors."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_011
+    content: "Credit card with 19.99% APR (variable). See terms for fees and conditions."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_012
+    content: "Brokerage account with commission-free stock trades. Other fees may apply; see fee schedule."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_013
+    content: "A budgeting app that helps you track spending and set savings goals."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_014
+    content: "Term life insurance from $20/month. Premiums depend on age and health; subject to eligibility."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_015
+    content: "Business line of credit for qualified applicants. Subject to credit approval."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_016
+    content: "Free financial literacy webinar — educational content, not investment advice."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_017
+    content: "30-year fixed-rate mortgage at 6.5% APR. The rate is fixed for the full term."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_018
+    content: "Money market fund. Not FDIC insured. May lose value. No bank guarantee."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_019
+    content: "Robo-advisor portfolios. Advisory fee 0.25%/year. Investing involves risk, including loss of principal."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: fin_c_020
+    content: "Student loan refinancing. Rates 5–9% APR; actual rate and term vary by creditworthiness."
+    modality: text
+    label: compliant
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  # =========================================================================
+  # FINANCIAL — BORDERLINE (20)
+  # =========================================================================
+  - id: fin_b_001
+    content: "Grow your wealth with our investing app."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "No guarantee, but lacks any risk disclosure (SEC/FINRA balanced-treatment expectation)."
+
+  - id: fin_b_002
+    content: "Our investors saw great returns last year."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Performance claim that must be presented fair and balanced; depends on disclosures."
+
+  - id: fin_b_003
+    content: "Low rates on personal loans!"
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Rates' may be a triggering term; borderline pending APR/repayment disclosures."
+
+  - id: fin_b_004
+    content: "Crypto made easy — start in minutes."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Allowed only with licensing/certification + disclaimers + 18+; borderline pending those."
+
+  - id: fin_b_005
+    content: "Beat the market with smart investing."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Implied performance/outperformance claim; needs substantiation and balance."
+
+  - id: fin_b_006
+    content: "Refinance and save thousands."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Savings claim requires substantiation; borderline without representative example."
+
+  - id: fin_b_007
+    content: "Trusted by thousands of investors."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Testimonial-adjacent social proof; borderline depending on substantiation."
+
+  - id: fin_b_008
+    content: "Get approved fast — flexible loan options."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Approval/speed claim; borderline pending terms and actually-available-terms check."
+
+  - id: fin_b_009
+    content: "Build credit responsibly with our secured card."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Credit-building (allowed) vs prohibited credit-repair framing; depends on specifics."
+
+  - id: fin_b_010
+    content: "Invest your spare change automatically."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Micro-investing; borderline without risk disclosure."
+
+  - id: fin_b_011
+    content: "Financial freedom starts here."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Lifestyle/earnings implication; borderline get-rich-quick adjacency."
+
+  - id: fin_b_012
+    content: "Earn up to 5% cash back on every purchase."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "'Up to' rate requires conditions/disclosure to avoid being misleading."
+
+  - id: fin_b_013
+    content: "Our fund outperformed the S&P 500 last quarter."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Cherry-picked period; fair-and-balanced performance presentation required."
+
+  - id: fin_b_014
+    content: "No-fee trading on our platform."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Possible omission if other fees apply (CFPB/FTC material-info concern)."
+
+  - id: fin_b_015
+    content: "Secure your retirement with gold and silver."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Precious metals trading is prohibited on TikTok US but allowed elsewhere; platform-dependent."
+
+  - id: fin_b_016
+    content: "Earn passive income with real estate crowdfunding."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "P2P-style/earnings framing; LinkedIn bans P2P lending, others allow with disclosures."
+
+  - id: fin_b_017
+    content: "Lock in this rate before it's gone!"
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Urgency framing; borderline against actually-available-terms unless rate is real/available."
+
+  - id: fin_b_018
+    content: "AI-powered trading signals to guide your trades."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Signals for speculative products are disallowed by Google; borderline by product type."
+
+  - id: fin_b_019
+    content: "Buy now, pay later — 0% interest."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Credit terms may trigger TILA additional-disclosure requirements; depends on terms."
+
+  - id: fin_b_020
+    content: "Join our exclusive investor community and learn our methods."
+    modality: text
+    label: borderline
+    category_ids: [financial]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Could shade into pyramid/MLM or get-rich-quick depending on the offer structure."

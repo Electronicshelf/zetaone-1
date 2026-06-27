@@ -294,6 +294,141 @@ clauses:
       section: "Advertising Policies > Healthcare and Pharmaceuticals > United States"
       retrieved_at: 2026-06-24
 
+  # ===================== Financial =====================
+  - id: tiktok.finance.requirements
+    source_id: tiktok_ads_us
+    category_id: financial
+    text: >
+      The financial services policy requires enhanced transparency from
+      advertisers promoting financial products and services. Generally,
+      advertisers must comply with relevant local laws and regulations, be
+      licensed by local and regional authorities, include proper disclaimers
+      where applicable, and restrict the ad to audiences aged 18 years and older.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        This policy requires enhanced transparency from you, as an advertiser,
+        that promotes financial products and services ... Generally, the
+        following requirements must be met ...: Comply with relevant local laws
+        and regulations; Be licensed by local and regional authorities; Include
+        proper disclaimers where applicable; The ad must be restricted to
+        audiences aged 18 years and older.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-financial-services
+      section: "Advertising Policies > Financial Services > Policy"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.finance.prohibited_general
+    source_id: tiktok_ads_us
+    category_id: financial
+    text: >
+      Get-rich-quick offers, pyramid schemes, and too-good-to-be-true financial
+      offers are not allowed.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Examples of what is not allowed: Get-rich-quick offers; Pyramid schemes;
+        Too-good-to-be-true financial offers.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-financial-services
+      section: "Advertising Policies > Financial Services > Policy > Examples of what is not allowed"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.finance.us_allowed
+    source_id: tiktok_ads_us
+    category_id: financial
+    text: >
+      In the United States, ads for financial services and products may be
+      allowed if they comply with relevant laws, comply with disclosure
+      requirements (including disclaimers; evidence of appropriate regulator and
+      third-party accreditations or certifications may be required), are licensed
+      by local and regional authorities, and are restricted to viewers aged 18
+      years and older. Examples of what may be allowed: cryptocurrencies; the
+      exchange, management, or investment of funds (fiat or virtual); loans;
+      non-fungible tokens (NFTs) (without implying NFTs are an investment or
+      tradable); and virtual currencies.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads for financial services and products may be allowed if the following
+        requirements are met: Comply with relevant laws and regulations; Comply
+        with disclosure requirements, including disclaimers, disclosure and
+        evidence of appropriate regulator and third-party accreditations or
+        certifications may be required; Be licensed by local and regional
+        authorities; Restrict ads to viewers aged 18 years and older. Examples of
+        what may be allowed: Cryptocurrencies; The exchange, management, or
+        investment of funds, such as fiat or virtual; Loans; Non-fungible tokens
+        (NFTs)* [*Do not imply that NFTs are a form of investment or that they
+        can be traded in the market]; Virtual currencies.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-financial-services
+      section: "Advertising Policies > Financial Services > Market-specific requirements > Canada, United States of America > Examples of what may be allowed"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.finance.us_prohibited
+    source_id: tiktok_ads_us
+    category_id: financial
+    text: >
+      In the United States, ads are not allowed for: bail bonds; complex
+      speculative investments such as contracts for differences (CFDs), financial
+      spread betting, penny stocks, binary options, and mini-bonds; credit repair
+      services; cryptocurrency ATMs; cryptocurrency mining devices;
+      get-rich-quick schemes; initial coin offerings (ICOs); payday loans;
+      pawnbroker loans; penny auctions; precious metals trading; pyramid schemes;
+      single securities; and unaccredited digital banks mimicking traditional
+      bank functions.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Examples of what is not allowed: Bail bonds; Complex speculative
+        investments such as contracts for differences (CFDs), financial spread
+        betting, penny stocks, binary options, and mini-bonds; Credit repair
+        services; Cryptocurrency ATMs; Cryptocurrency mining devices;
+        Get-rich-quick schemes; Initial coin offerings (ICOs); Payday loans;
+        Pawnbroker loans; Penny auctions; Precious metals trading; Pyramid
+        schemes; Single securities; Unaccredited digital banks mimicking
+        traditional bank functions.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-financial-services
+      section: "Advertising Policies > Financial Services > Market-specific requirements > Canada, United States of America > Examples of what is not allowed"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: tiktok_absolute_terms
     canonical_id: misleading.guaranteed_outcomes
@@ -376,4 +511,62 @@ rules:
       LegitScript cert, under-25 targeting).
     exceptions:
       - "Topical hemp <0.3% THC, LegitScript-certified, 25+, via TikTok rep."
+    status: active
+
+  # --- Financial ---
+  - id: tiktok_finance_requirements
+    canonical_id: finance.licensing_registration_required
+    clause_ids: [tiktok.finance.requirements]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Financial-services ads run without being licensed by local/regional
+      authorities, without required disclaimers, or not restricted to 18+.
+    exceptions:
+      - "Licensed advertisers with disclaimers and 18+ targeting."
+    status: active
+
+  - id: tiktok_finance_guaranteed
+    canonical_id: finance.guaranteed_returns_or_risk_free
+    clause_ids: [tiktok.finance.prohibited_general]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Get-rich-quick offers, pyramid schemes, or too-good-to-be-true financial
+      offers (implied guaranteed/outsized returns).
+    exceptions: []
+    status: active
+
+  - id: tiktok_finance_crypto
+    canonical_id: finance.crypto_restricted
+    clause_ids: [tiktok.finance.us_allowed, tiktok.finance.us_prohibited]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 60
+    detection: >
+      Crypto ads outside the US allowance (unlicensed, no certification, no
+      disclaimers, under-18) or prohibited types (ICOs, crypto ATMs, mining
+      devices).
+    exceptions:
+      - "Licensed/certified crypto, exchange, or NFT ads with disclaimers, 18+."
+    status: active
+
+  - id: tiktok_finance_prohibited
+    canonical_id: finance.prohibited_predatory_products
+    clause_ids: [tiktok.finance.us_prohibited]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      US-prohibited financial products: bail bonds, CFDs/spread betting/penny
+      stocks/binary options/mini-bonds, credit repair, payday/pawnbroker loans,
+      penny auctions, precious metals trading, single securities, unaccredited
+      digital banks.
+    exceptions: []
     status: active

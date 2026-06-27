@@ -325,6 +325,106 @@ clauses:
       section: "Advertising Standards > Privacy Violations and Personal Attributes"
       retrieved_at: 2026-06-24
 
+  # ===================== Financial =====================
+  - id: meta.finance.prohibited_products
+    source_id: meta_ads_us
+    category_id: financial
+    text: >
+      Advertisers can't run ads for financial products and services that are
+      frequently associated with misleading or deceptive promotional practices,
+      including payday loans, paycheck advances, bail bonds, short-term loans of
+      90 days or less, penny auctions, binary options, initial coin offerings
+      (ICO), contract for difference trading, and misleading student loan
+      consolidation, forgiveness or refinancing services.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-05-01
+    version: "2025-05-01"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads can't promote: Payday loans ... Paycheck advances ... Bail bonds ...
+        Short-term loans of 90 days or less ... Penny auctions, bidding fee
+        auctions, or other similar business models ... Binary options ... Initial
+        coin offerings (ICO) ... Contract for difference trading ... Misleading
+        student loan consolidation, forgiveness or refinancing services.
+      source_url: https://transparency.meta.com/policies/ad-standards/deceptive-content/prohibited-financial-products-and-services
+      section: "Deceptive Content > Prohibited Financial Products and Services > Guidelines"
+      retrieved_at: 2026-06-27
+
+  - id: meta.finance.crypto_permission
+    source_id: meta_ads_us
+    category_id: financial
+    text: >
+      Ads may not promote cryptocurrency trading platforms, software and related
+      services and products that enable monetization, reselling, swapping or
+      staking of cryptocurrencies without prior written permission. Advertisers
+      must submit a recognized regulatory license or registration and obtain
+      written permission from Meta.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-05-01
+    version: "2025-05-01"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads may not promote cryptocurrency trading platforms, software and
+        related services and products that enable monetization, reselling,
+        swapping or staking of cryptocurrencies without prior written
+        permission. ... To advertise across our technologies, advertisers will
+        need to submit a recognized regulatory license or registration and
+        obtain written permission from Meta through the Authorizations and
+        Verifications tab in Meta Business Suite.
+      source_url: https://transparency.meta.com/policies/ad-standards/restricted-goods-services/cryptocurrency-products-and-services/
+      section: "Restricted Goods & Services > Cryptocurrency Products and Services"
+      retrieved_at: 2026-06-27
+
+  - id: meta.finance.licensing_disclosure
+    source_id: meta_ads_us
+    category_id: financial
+    text: >
+      Ads promoting credit cards, loans or insurance services must be targeted to
+      people 18 years or older. Advertisers promoting financial products and
+      services may be required to verify their business and/or individual
+      identity and demonstrate they are authorized by the relevant regulatory
+      authorities where this is a requirement, and are required to comply with
+      disclosure requirements set by law.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-05-01
+    version: "2025-05-01"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads promoting credit cards, loans or insurance services must be targeted
+        to people 18 years or older. ... Advertisers promoting financial products
+        and services may be required to verify their business and/or individual
+        identity and demonstrate they are authorized by the relevant regulatory
+        authorities where this is a requirement; and any such authorization may
+        be subject to review by Meta. Advertisers are also required to comply
+        with disclosure requirements set by law.
+      source_url: https://transparency.meta.com/policies/ad-standards/restricted-goods-services/financial-services/
+      section: "Restricted Goods & Services > Financial and Insurance Products and Services"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: meta_misleading_deceptive_practices
@@ -425,4 +525,48 @@ rules:
       condition (e.g. "Struggling with depression?").
     exceptions:
       - "General messaging that does not assert/imply an individual's condition."
+    status: active
+
+  # --- Financial ---
+  - id: meta_finance_prohibited_products
+    canonical_id: finance.prohibited_predatory_products
+    clause_ids: [meta.finance.prohibited_products]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Promotion of Meta-prohibited financial products: payday loans, paycheck
+      advances, bail bonds, short-term loans ≤90 days, penny auctions, binary
+      options, ICOs, contracts for difference, or misleading student-loan
+      consolidation/forgiveness/refinancing.
+    exceptions: []
+    status: active
+
+  - id: meta_finance_crypto
+    canonical_id: finance.crypto_restricted
+    clause_ids: [meta.finance.crypto_permission]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 60
+    detection: >
+      Cryptocurrency trading platforms / monetization / staking / swapping ads
+      run without prior written permission and a recognized regulatory license.
+    exceptions:
+      - "Advertisers with Meta written permission and a valid regulatory license."
+    status: active
+
+  - id: meta_finance_licensing
+    canonical_id: finance.licensing_registration_required
+    clause_ids: [meta.finance.licensing_disclosure]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Financial-product ads not targeted 18+, or run without required
+      authorization / identity verification / legally-required disclosures.
+    exceptions:
+      - "18+ targeted ads by authorized advertisers with lawful disclosures."
     status: active

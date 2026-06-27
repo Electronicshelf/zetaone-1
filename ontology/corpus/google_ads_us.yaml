@@ -420,6 +420,287 @@ clauses:
       section: "Healthcare and medicines > Clinical trial recruitment"
       retrieved_at: 2026-06-24
 
+  # ===================== Financial =====================
+  - id: google.finance.disclosures
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      When promoting financial products or services, advertisers must provide
+      the physical address for the business, all associated fees, and links to
+      third-party accreditation or endorsement where affiliation is asserted or
+      implied. Disclosures must be clearly and immediately visible without
+      needing to click or hover over anything.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-financial-products-services"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        If you're promoting financial products or services, you're required to
+        provide: The physical address for the business offering the financial
+        product or service; All associated fees; Links to third-party
+        accreditation or endorsement where affiliation is asserted or implied
+        ... Disclosures can't be posted as roll-over text or made available
+        through another link or tab. They must be clearly and immediately
+        visible without needing to click or hover over anything.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Financial products and services disclosures"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.personal_loans
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Only personal loans that require repayment in full in 61 days or longer
+      are allowed. Advertisers promoting personal loans must prominently
+      disclose the minimum and maximum period for repayment, the maximum Annual
+      Percentage Rate (APR), and a representative example of the total cost of
+      the loan, including all applicable fees.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-financial-products-services"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Only personal loans that require repayment in full in 61 days or longer
+        are allowed. ... If you promote personal loans, you're required to
+        prominently disclose all of the following additional information on your
+        ad's destination: Minimum and maximum period for repayment; Maximum
+        Annual Percentage Rate (APR) ...; A representative example of the total
+        cost of the loan, including all applicable fees.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Personal loans"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.high_apr_us
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Google doesn't allow ads for personal loans with an APR of 36% and above
+      in the US. This policy applies to advertisers who make loans directly,
+      lead generators, and those who connect consumers with third-party lenders.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-high-apr-personal-loans"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Google doesn't allow ads for personal loans with an APR of 36% and above
+        in the US. This policy applies to advertisers who make loans directly,
+        lead generators, and those who connect consumers with third-party
+        lenders.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > High APR personal loans (US specific)"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.binary_options
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Ads for binary options or equivalent financial products are not allowed,
+      including binary options brokers, and informational or educational sites
+      and blogs on binary options and equivalent products.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-binary-options"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads for binary options or equivalent financial products are not allowed.
+        Binary Options brokers: Sites that offer binary options and signals or
+        software for binary options with no other financial products are not
+        allowed. Binary Options informational or educational sites and blogs:
+        Educational sites or blogs on binary options and equivalent products are
+        not allowed.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Binary options"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.complex_speculative
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Google only allows advertisements for complex speculative financial
+      products (such as Contracts for Difference, financial spread betting, and
+      rolling spot forex) in select locations and only if the advertiser is a
+      licensed provider or aggregator, the products and ads comply with local
+      laws, the location is eligible, and the account has received approval.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-complex-speculative"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Due to the inherent complexities and risks involved in trading the
+        following types of complex speculative financial products, to protect
+        users, Google only allow advertisements for these products in select
+        locations and only if they meet all of the following criteria: The
+        advertiser is a licensed provider or aggregator; The products and ads
+        comply with local laws and industry standards; The targeted location is
+        eligible for advertising under this policy and; The account has received
+        approval from Google Ads to run ads about these products.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Complex speculative financial products"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.credit_repair
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Ads for credit repair services are not allowed. This policy applies to
+      advertisers who offer credit repair services directly, lead generators,
+      and those who connect consumers with third-party credit repair services.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-credit-repair"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Ads for credit repair services are not allowed.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Credit repair services"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.loan_modification
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Google restricts loan-modification products and services. The following
+      lead to disapproval: guaranteeing loan modification or foreclosure
+      prevention; charging an upfront fee (unless the service is provided by a
+      law firm); asking users to transfer or surrender property titles or
+      offering to buy a house below market price; asking users to bypass the
+      lender and pay the company directly; and encouraging users not to contact
+      their lender, lawyer, credit counselor, or housing counselor.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-loan-modification"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        ... the following scenarios would lead to disapproval for Loan
+        modification: Guaranteeing loan modification or foreclosure prevention;
+        Charging an upfront fee, unless service is being provided by a law firm;
+        Asking users to transfer or surrender property titles, or offering to
+        buy a house at a below-market price; Asking users to bypass the lender
+        and make payments directly to the company or other third party;
+        Encouraging users not to contact their lender, lawyer, credit counselor,
+        or housing counselor.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Loan modification"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.crypto
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Google Ads allows certain categories of cryptocurrency-related products
+      and services to be advertised with and without certification by Google in
+      limited circumstances. Advertisers must comply with state and local
+      regulations for any region or country that their ads target.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-cryptocurrencies"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        Due to the complex and evolving nature of regulations related to
+        cryptocurrencies and related products and services, Google Ads allows
+        certain categories of cryptocurrency-related products and services to be
+        advertised with and without certification by Google in limited
+        circumstances. When promoting cryptocurrencies and related products, you
+        must comply with state and local regulations for any region or country
+        that your ads target.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Cryptocurrencies and related products"
+      retrieved_at: 2026-06-27
+
+  - id: google.finance.verification
+    source_id: google_ads_us
+    category_id: financial
+    text: >
+      Advertisers are required to complete a verification process to advertise
+      financial services in some locations, providing information about the type
+      of services they provide, the licenses they hold, registration numbers,
+      and other relevant information about their business.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "2024-financial-services-verification"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [18+]
+      industries: [financial]
+    evidence:
+      quote: >-
+        You're required to complete a verification process to advertise
+        financial services in some locations. This verification usually involves
+        providing information about the type of services you provide, the
+        licenses you hold to provide those services, your registration numbers,
+        and any other relevant information about your business.
+      source_url: https://support.google.com/adspolicy/answer/2464998
+      section: "Financial products and services > Location specific financial services verification"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: google_unreliable_claims
     canonical_id: misleading.exaggerated_results
@@ -542,4 +823,92 @@ rules:
       Clinical-trial recruitment creating misleading expectations or implying
       the tested product is safe.
     exceptions: []
+    status: active
+
+  # --- Financial ---
+  - id: google_finance_prohibited
+    canonical_id: finance.prohibited_predatory_products
+    clause_ids:
+      - google.finance.binary_options
+      - google.finance.credit_repair
+      - google.finance.high_apr_us
+      - google.finance.complex_speculative
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Prohibited/heavily-restricted financial products: binary options, credit
+      repair, US personal loans with APR ≥36%, or unlicensed complex speculative
+      products (CFDs, spread betting, forex).
+    exceptions:
+      - "Complex speculative products by a licensed provider with Google approval."
+    status: active
+
+  - id: google_finance_disclosures
+    canonical_id: finance.required_cost_and_risk_disclosures
+    clause_ids: [google.finance.disclosures]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Financial ads missing clearly/immediately-visible disclosures (physical
+      address, all fees, accreditation links).
+    exceptions: []
+    status: active
+
+  - id: google_finance_credit_terms
+    canonical_id: finance.credit_advertising_trigger_terms
+    clause_ids: [google.finance.personal_loans]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 60
+    detection: >
+      Personal-loan ads under 61-day repayment, or missing required
+      min/max repayment period, max APR, and a representative cost example.
+    exceptions: []
+    status: active
+
+  - id: google_finance_crypto
+    canonical_id: finance.crypto_restricted
+    clause_ids: [google.finance.crypto]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 60
+    detection: >
+      Cryptocurrency-related ads without required certification or non-compliant
+      with state/local regulations.
+    exceptions:
+      - "Certified categories compliant with state/local regulations."
+    status: active
+
+  - id: google_finance_loan_modification
+    canonical_id: finance.loan_modification_foreclosure_restricted
+    clause_ids: [google.finance.loan_modification]
+    category_id: financial
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 62
+    detection: >
+      Loan-modification/foreclosure ads that guarantee outcomes, charge upfront
+      fees (non-law-firm), seek title transfer, or discourage lender contact.
+    exceptions:
+      - "Services provided by a law firm (for the upfront-fee restriction)."
+    status: active
+
+  - id: google_finance_verification
+    canonical_id: finance.licensing_registration_required
+    clause_ids: [google.finance.verification]
+    category_id: financial
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Financial-services ads run without completing required location-specific
+      licensing/registration verification.
+    exceptions:
+      - "Advertisers who completed financial-services verification."
     status: active

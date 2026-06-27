@@ -3,7 +3,7 @@
 # reproducible and benchmarkable alongside the evaluation dataset. Bump the
 # version and add a release entry whenever a category is completed/changed.
 
-current_version: "Ad Corpus v0.2"
+current_version: "Ad Corpus v0.3"
 
 releases:
   - version: "Ad Corpus v0.1"
@@ -47,3 +47,33 @@ releases:
       section (Rx/OTC/pharmacy/fillers may be allowed with FDA/NABP/LegitScript
       certification + 18+); the earlier blanket US weight-loss/invasive-cosmetic
       bans were not traceable to the official US section and were removed.
+
+  - version: "Ad Corpus v0.3"
+    date: 2026-06-27
+    status: frozen
+    categories: [misleading, health, financial]
+    sources: [meta_ads_us, google_ads_us, tiktok_ads_us, linkedin_ads_us, ftc_us, fda_us, sec_us, finra_us, cfpb_us]
+    canonical_rules_added:
+      - finance.prohibited_predatory_products
+      - finance.guaranteed_returns_or_risk_free
+      - finance.misleading_or_unbalanced_claims
+      - finance.performance_claims_substantiation
+      - finance.required_cost_and_risk_disclosures
+      - finance.credit_advertising_trigger_terms
+      - finance.licensing_registration_required
+      - finance.crypto_restricted
+      - finance.loan_modification_foreclosure_restricted
+      - finance.mortgage_advertising_prohibited_acts   # CFPB-only (single-source)
+      - finance.testimonials_endorsements_disclosure   # SEC-only (single-source)
+    eval_examples: 150       # 30 misleading + 60 health + 60 financial
+    schema_version: "1.0.0"  # unchanged; schema frozen
+    note: >
+      Adds Financial services & investments vertical (US only) from official
+      Meta, Google, TikTok, and LinkedIn ad policies and US regulators FTC, SEC
+      (Marketing Rule 17 CFR 275.206(4)-1), FINRA (Rule 2210), and CFPB (Reg Z /
+      TILA, 12 CFR 1026.24). Adds new sources linkedin_ads_us, sec_us, finra_us,
+      cfpb_us. Every clause carries an `evidence` block (verbatim quote, deep
+      link, section, retrieved_at) and `last_reviewed_by: ai`. Two canonicals are
+      intentionally single-source (CFPB mortgage prohibited acts; SEC testimonial
+      disclosures) and carry no `mapping` entry until a second official source
+      genuinely matches — keeping the corpus honest.

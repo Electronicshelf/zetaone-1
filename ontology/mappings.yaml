@@ -166,3 +166,154 @@ mappings:
       substances, opioids, experimental treatments); TikTok (CBD, allowed only
       within a narrow topical-hemp <0.3% THC exception). Overlapping, not
       identical, scope.
+
+  # =========================================================================
+  # Financial services & investments vertical canonical rules:
+  #   finance.prohibited_predatory_products      (Meta, Google, TikTok, LinkedIn)
+  #   finance.guaranteed_returns_or_risk_free     (TikTok, LinkedIn, FINRA, FTC)
+  #   finance.misleading_or_unbalanced_claims     (LinkedIn, FINRA, SEC)
+  #   finance.performance_claims_substantiation   (FINRA, SEC, FTC)
+  #   finance.required_cost_and_risk_disclosures  (Google, CFPB, TikTok, Meta)
+  #   finance.credit_advertising_trigger_terms    (CFPB, Google)
+  #   finance.licensing_registration_required     (Meta, Google, TikTok, LinkedIn)
+  #   finance.crypto_restricted                   (Meta, Google, TikTok)
+  #   finance.loan_modification_foreclosure_restricted (Google, LinkedIn, CFPB)
+  #   finance.mortgage_advertising_prohibited_acts (CFPB-only — no cross-source mapping yet)
+  #   finance.testimonials_endorsements_disclosure (SEC-only — no cross-source mapping yet)
+  # US jurisdiction only. Regulator clauses carry higher priority on conflict.
+  # =========================================================================
+  - canonical_id: finance.prohibited_predatory_products
+    category_id: financial
+    clause_ids:
+      - meta.finance.prohibited_products
+      - google.finance.binary_options
+      - google.finance.credit_repair
+      - google.finance.high_apr_us
+      - google.finance.complex_speculative
+      - tiktok.finance.us_prohibited
+      - linkedin.finance.prohibited
+    relation: related
+    confidence: high
+    note: >
+      Predatory / high-risk financial products banned across platforms: payday &
+      short-term loans, binary options, CFDs/spread betting, penny auctions,
+      penny stocks, credit repair, ICOs, bail bonds. Overlapping prohibited lists
+      with slightly different membership per platform.
+
+  - canonical_id: finance.guaranteed_returns_or_risk_free
+    category_id: financial
+    clause_ids:
+      - tiktok.finance.prohibited_general
+      - linkedin.finance.prohibited
+      - finra.finance.no_performance_projection
+      - ftc.finance.earnings_claims
+    relation: stricter
+    confidence: high
+    note: >
+      Guaranteed/risk-free returns and get-rich-quick claims: TikTok bans
+      get-rich-quick/too-good-to-be-true; LinkedIn bans services guaranteeing
+      financial return; FINRA bars promissory/exaggerated forecasts; FTC treats
+      risk-free/profit misrepresentations as deceptive. Regulators are stricter /
+      higher-precedence.
+
+  - canonical_id: finance.misleading_or_unbalanced_claims
+    category_id: financial
+    clause_ids:
+      - linkedin.finance.requirements
+      - finra.finance.fair_balanced
+      - sec.finance.untrue_or_unbalanced
+    relation: stricter
+    confidence: high
+    note: >
+      Fair, balanced, non-misleading financial communications: LinkedIn (avoid
+      misleading/deceptive/unsupported claims); FINRA 2210 (fair and balanced,
+      no false/exaggerated claims); SEC marketing rule (no untrue/omitted
+      material facts; balanced risk vs benefit). SEC/FINRA carry higher priority.
+
+  - canonical_id: finance.performance_claims_substantiation
+    category_id: financial
+    clause_ids:
+      - finra.finance.no_performance_projection
+      - sec.finance.performance_fair_balanced
+      - ftc.finance.earnings_claims
+    relation: stricter
+    confidence: high
+    note: >
+      Performance/earnings claims must be substantiated and fairly balanced:
+      FINRA bars performance prediction/projection; SEC requires fair-and-balanced
+      performance presentation; FTC requires reasonable basis + written
+      substantiation for earnings claims. Regulator-only backbone.
+
+  - canonical_id: finance.required_cost_and_risk_disclosures
+    category_id: financial
+    clause_ids:
+      - google.finance.disclosures
+      - cfpb.finance.actually_available_terms
+      - tiktok.finance.us_allowed
+      - meta.finance.licensing_disclosure
+    relation: related
+    confidence: medium
+    note: >
+      Clear, conspicuous cost/risk disclosures: Google (address, all fees,
+      accreditation); CFPB Reg Z (clear & conspicuous, APR as such); TikTok
+      (disclaimers + accreditation evidence); Meta (legally-required disclosures).
+      Overlapping but not identical disclosure obligations.
+
+  - canonical_id: finance.credit_advertising_trigger_terms
+    category_id: financial
+    clause_ids:
+      - cfpb.finance.actually_available_terms
+      - cfpb.finance.trigger_terms
+      - google.finance.personal_loans
+    relation: stricter
+    confidence: high
+    note: >
+      Credit-advertising trigger terms: CFPB Reg Z (actually-available terms;
+      triggering terms require downpayment/repayment/APR disclosures); Google
+      personal-loans policy operationalizes the same (min/max repayment, max APR,
+      representative example). CFPB is the higher-precedence regulatory source.
+
+  - canonical_id: finance.licensing_registration_required
+    category_id: financial
+    clause_ids:
+      - meta.finance.licensing_disclosure
+      - google.finance.verification
+      - tiktok.finance.requirements
+      - linkedin.finance.restricted
+    relation: related
+    confidence: high
+    note: >
+      Licensing/registration & advertiser verification before promoting
+      financial services: Meta (identity/authorization), Google (location-specific
+      verification), TikTok (licensed by authorities, 18+), LinkedIn (restricted,
+      18+). Equivalent intent; mechanics differ per platform.
+
+  - canonical_id: finance.crypto_restricted
+    category_id: financial
+    clause_ids:
+      - meta.finance.crypto_permission
+      - google.finance.crypto
+      - tiktok.finance.us_allowed
+      - tiktok.finance.us_prohibited
+    relation: related
+    confidence: high
+    note: >
+      Cryptocurrency restricted/gated: Meta (prior written permission + license);
+      Google (certification in limited circumstances); TikTok US (crypto/exchange
+      allowed with licensing + certification + 18+, but ICOs, crypto ATMs and
+      mining devices not allowed).
+
+  - canonical_id: finance.loan_modification_foreclosure_restricted
+    category_id: financial
+    clause_ids:
+      - google.finance.loan_modification
+      - linkedin.finance.prohibited
+      - cfpb.finance.mortgage_prohibited_acts
+    relation: related
+    confidence: medium
+    note: >
+      Loan-modification / foreclosure-relief restrictions: Google (no guaranteed
+      modification/foreclosure prevention, no upfront fees, etc.); LinkedIn (bans
+      services guaranteeing foreclosure prevention/loan modification); CFPB Reg Z
+      (misleading debt-elimination claims for dwelling-secured credit). Related,
+      not identical, scope.

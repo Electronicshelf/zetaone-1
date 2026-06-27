@@ -11,13 +11,15 @@ mappings + a labeled evaluation dataset with measured precision/recall.
 |------|---------|
 | `schema.yaml` | **Canonical schema v0** — entities, fields, allowed values, graph |
 | `categories.yaml` | Universal advertising-risk categories (the foundation axis) |
-| `corpus/meta_ads_us.yaml` | Meta Ads (US) — Misleading + Health clauses + rules |
-| `corpus/google_ads_us.yaml` | Google Ads (US) — Misrepresentation + Healthcare/Medicines clauses + rules |
-| `corpus/tiktok_ads_us.yaml` | TikTok Ads (US) — Misleading & false content + Healthcare/Pharmaceuticals |
-| `corpus/regulators_us.yaml` | FTC + FDA (US) clauses + rules (Misleading + Health) |
+| `corpus/meta_ads_us.yaml` | Meta Ads (US) — Misleading + Health + Financial clauses + rules |
+| `corpus/google_ads_us.yaml` | Google Ads (US) — Misrepresentation + Healthcare/Medicines + Financial clauses + rules |
+| `corpus/tiktok_ads_us.yaml` | TikTok Ads (US) — Misleading & false content + Healthcare/Pharmaceuticals + Financial |
+| `corpus/linkedin_ads_us.yaml` | LinkedIn Ads (US) — Financial services clauses + rules |
+| `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB (US) clauses + rules (Misleading + Health + Financial) |
 | `mappings.yaml` | Cross-source links: equivalent clauses → one `canonical_id` |
-| `examples/eval_seed.yaml` | Labeled evaluation dataset (90 examples: 30 misleading + 60 health) |
-| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1, v0.2, …) |
+| `examples/eval_seed.yaml` | Labeled evaluation dataset (150 examples: 30 misleading + 60 health + 60 financial) |
+| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1, v0.2, v0.3, …) |
+| `validate.py` | Validator: parse + referential integrity + evidence/applicability completeness |
 
 ## Entities
 
@@ -48,10 +50,10 @@ category ─< clause >── source
 
 ## Scope so far
 
-- **Categories:** `misleading` (deep), `health` (deep)
-- **Sources:** Meta Ads, Google Ads, TikTok Ads, FTC, FDA
+- **Categories:** `misleading` (deep), `health` (deep), `financial` (deep)
+- **Sources:** Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, FTC, FDA, SEC, FINRA, CFPB
 - **Jurisdiction:** US
-- **Current corpus version:** `Ad Corpus v0.2` (see `corpus_version.yaml`)
+- **Current corpus version:** `Ad Corpus v0.3` (see `corpus_version.yaml`)
 
 ### Misleading / Deceptive — canonical rules (vertical 1)
 
@@ -85,6 +87,33 @@ FTC carries higher `priority` than platform rules on conflict.
 FTC/FDA carry higher `priority` (95) than platform rules on conflict. Single-source
 canonicals have no `mapping` entry yet — they get one once a second source matches.
 
+### Financial services & investments — canonical rules (vertical 3)
+
+| `canonical_id` | Sources mapped |
+|----------------|----------------|
+| `finance.prohibited_predatory_products` | Meta, Google, TikTok, LinkedIn |
+| `finance.guaranteed_returns_or_risk_free` | TikTok, LinkedIn, FINRA, FTC |
+| `finance.misleading_or_unbalanced_claims` | LinkedIn, FINRA, SEC |
+| `finance.performance_claims_substantiation` | FINRA, SEC, FTC |
+| `finance.required_cost_and_risk_disclosures` | Google, CFPB, TikTok, Meta |
+| `finance.credit_advertising_trigger_terms` | CFPB, Google |
+| `finance.licensing_registration_required` | Meta, Google, TikTok, LinkedIn |
+| `finance.crypto_restricted` | Meta, Google, TikTok |
+| `finance.loan_modification_foreclosure_restricted` | Google, LinkedIn, CFPB |
+| `finance.mortgage_advertising_prohibited_acts` | CFPB (only — no cross-source map yet) |
+| `finance.testimonials_endorsements_disclosure` | SEC (only — no cross-source map yet) |
+
+SEC / FINRA / FTC / CFPB carry higher `priority` (90–95) than platform rules on
+conflict. Two canonicals are intentionally single-source and kept honest until a
+second official source genuinely matches.
+
+Financial sources: Meta Ad Standards (Prohibited Financial Products, Cryptocurrency,
+Financial & Insurance Services), Google Financial products and services, TikTok
+Financial Services (US market section), LinkedIn Advertising Policies (Financial
+Services), FTC (Penalty Offenses re money-making opportunities + 16 CFR 437.4), SEC
+Marketing Rule (17 CFR 275.206(4)-1), FINRA Rule 2210, CFPB Reg Z / TILA (12 CFR
+1026.24). Jurisdiction: US only.
+
 > **TikTok US note:** TikTok's healthcare policy is per-market. In the *United
 > States*, prescription/OTC meds, pharmacies, fillers, and microdermabrasion
 > *may be allowed* with FDA / NABP / LegitScript certification and 18+ targeting
@@ -102,22 +131,25 @@ Each completed category is **frozen** and assigned a version in
 the eval dataset:
 
 - **Ad Corpus v0.1** — Misleading / Deceptive (frozen)
-- **Ad Corpus v0.2** — adds Health / Medical (frozen, current)
+- **Ad Corpus v0.2** — adds Health / Medical (frozen)
+- **Ad Corpus v0.3** — adds Financial services & investments (frozen, current)
 
 ## Build order
 
 1. ✅ Canonical schema (this directory).
 2. ✅ Misleading / Deceptive vertical → **Ad Corpus v0.1** (30 eval examples).
 3. ✅ Health / Medical vertical: Meta + Google + TikTok + FTC + FDA, mapped → **Ad Corpus v0.2** (60 eval examples).
-4. Deepen each canonical rule (more clauses, edge cases) and grow the eval set toward thousands.
-5. Next vertical (Financial), then add jurisdictions (EU/UK) and platforms (LinkedIn, X, Amazon Ads).
-6. Measure precision/recall per `category_id` and per `canonical_id`.
+4. ✅ Financial vertical: Meta + Google + TikTok + LinkedIn + FTC + SEC + FINRA + CFPB, mapped → **Ad Corpus v0.3** (60 eval examples).
+5. Build the 1,000+ labeled evaluation dataset across the three frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
+6. Deepen each canonical rule (more clauses, edge cases); then add jurisdictions (EU/UK) and platforms (X, Amazon Ads). New domains (housing/employment, gambling, etc.) come after the eval dataset.
 
 > Clause text is sourced from official policy pages (Meta Transparency Center,
-> Google Ads Help, TikTok Business Help Center, FTC.gov, FDA.gov, 21 CFR 202.1).
-> Some pages are JS-heavy and were captured via official-source search snippets;
-> **verify verbatim text and effective dates against the cited URLs before using
-> metrics or decisions externally.**
+> Google Ads Help, TikTok Business Help Center, LinkedIn Advertising Policies,
+> FTC.gov, FDA.gov, SEC.gov / 17 CFR 275.206(4)-1, FINRA Rule 2210, CFPB / 12 CFR
+> 1026.24, 21 CFR 202.1). Some pages are JS-heavy and were captured via
+> official-source search snippets; **verify verbatim text and effective dates
+> against the cited URLs before using metrics or decisions externally.** Run
+> `python ontology/validate.py` after any change.
 
 ## Relationship to the engine policies
 
