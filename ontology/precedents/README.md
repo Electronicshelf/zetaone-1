@@ -63,16 +63,18 @@ Each precedent should link to **at least one** `violated_clause_id` or
 - `python ontology/validate.py` must pass (referential integrity on
   `violated_clause_ids`, `canonical_ids`, and `category_ids`).
 
-## Seed set (Precedents v0.1)
+## Seed set (Precedents v0.2 — 24 entries across 5 files)
 
-| `precedent_id` | Vertical | Outcome |
-|----------------|----------|---------|
-| `prec.ftc.google_youtube_coppa_2019` | Minors / Privacy | $170M settlement |
-| `prec.ftc.musically_tiktok_coppa_2019` | Minors / Privacy | $5.7M settlement |
-| `prec.ftc.epic_games_coppa_2022` | Minors / Privacy | $275M + $245M |
-| `prec.doj_hud.meta_fair_housing_2022` | Discrimination | $115,054 + VRS |
-| `prec.sec.kardashian_ethereummax_2022` | Financial / Misleading | $1.26M + 3-yr ban |
-| `prec.ftc.teami_health_influencers_2020` | Health / Misleading | $15.2M judgment |
+| File | Count | Focus |
+|------|-------|-------|
+| `precedents.yaml` | 6 | COPPA, Fair Housing, Kardashian, Teami (seed) |
+| `ftc.yaml` | 10 | Health/misleading/privacy/deceptive marketing |
+| `sec.yaml` | 4 | Crypto touting, BlockFi, Ripple |
+| `fda.yaml` | 2 | JUUL MDO, COVID fraud warnings |
+| `eeoc_hud.yaml` | 2 | Meta age discrimination, HUD FHA charge |
+
+**Target:** hundreds of entries over time. Add new files by agency (`fec.yaml`, `ttb.yaml`, …)
+or domain (`gambling_precedents.yaml`) — never invent facts; always link to corpus clauses/canonicals.
 
 ## Roadmap (expand incrementally, like the corpus)
 

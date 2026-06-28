@@ -19,6 +19,7 @@ AUDIENCE = {"all", "under_13", "minors", "13+", "16+", "18+", "21+", "25+"}
 REVIEW_ACTOR = {"human", "ai"}
 EXAMPLE_LABEL = {"compliant", "non_compliant", "borderline"}
 POLICY_STATUS = {"active", "deprecated", "superseded"}
+TIMELINE_EVENT = {"introduced", "modified", "deprecated", "superseded"}
 PRECEDENT_OUTCOME = {
     "warning_letter", "consent_order", "settlement", "civil_penalty", "fine",
     "suspension", "court_order", "injunction", "marketing_denial", "refund",
@@ -228,10 +229,36 @@ def main() -> int:
                     if not e.get("quote") or not e.get("source_url"):
                         err(f"{name}: precedent {pid} evidence[{i}] needs quote + source_url")
 
+    # ---- policy_timeline sidecar (optional; NOT part of frozen schema) ----
+    tl_path = os.path.join(ROOT, "policy_timeline.yaml")
+    tl_count = 0
+    if os.path.exists(tl_path):
+        tl = load(tl_path) or {}
+        seen_tl: set[str] = set()
+        for entry in tl.get("timeline", []) or []:
+            tl_count += 1
+            cid = entry.get("clause_id")
+            if not cid:
+                err("policy_timeline.yaml: entry missing clause_id")
+                continue
+            if cid in seen_tl:
+                err(f"policy_timeline.yaml: duplicate clause_id {cid}")
+            seen_tl.add(cid)
+            if cid not in clause_ids:
+                err(f"policy_timeline.yaml: unknown clause_id {cid}")
+            for ev in entry.get("events", []) or []:
+                if ev.get("event_type") not in TIMELINE_EVENT:
+                    err(f"policy_timeline.yaml: {cid} bad event_type {ev.get('event_type')!r}")
+                if not ev.get("date"):
+                    err(f"policy_timeline.yaml: {cid} event missing date")
+                if not ev.get("summary"):
+                    err(f"policy_timeline.yaml: {cid} event missing summary")
+
     # ---- report --------------------------------------------------------
     print(f"clauses: {len(clause_ids)}  sources: {len(source_ids)}  "
           f"canonicals: {len(canonical_ids)}  examples: {len(seen_ids)} {counts}  "
-          f"policy_versions: {pv_count}  precedents: {prec_count}")
+          f"policy_versions: {pv_count}  precedents: {prec_count}  "
+          f"policy_timeline: {tl_count}")
     for w in warnings:
         print(f"WARN  {w}")
     if errors:

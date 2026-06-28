@@ -15,13 +15,27 @@ mappings + a labeled evaluation dataset with measured precision/recall.
 | `corpus/google_ads_us.yaml` | Google Ads (US) — Misrepresentation + Healthcare/Medicines + Financial + Discrimination + Political clauses + rules |
 | `corpus/tiktok_ads_us.yaml` | TikTok Ads (US) — Misleading & false content + Healthcare/Pharmaceuticals + Financial + Discrimination + Political |
 | `corpus/linkedin_ads_us.yaml` | LinkedIn Ads (US) — Financial + Discrimination + Political clauses + rules |
+| `corpus/x_ads_us.yaml` | X Ads (US) — Misleading starter |
+| `corpus/amazon_ads_us.yaml` | Amazon Ads (US) — Misleading starter |
+| `corpus/snapchat_ads_us.yaml` | Snapchat Ads (US) — Misleading starter |
+| `corpus/pinterest_ads_us.yaml` | Pinterest Ads (US) — Misleading starter |
+| `corpus/reddit_ads_us.yaml` | Reddit Ads (US) — Misleading starter |
+| `corpus/microsoft_ads_us.yaml` | Microsoft Advertising (US) — Misleading starter |
+| `corpus/meta_ads_eu.yaml` | Meta Ads (EU) — Misleading starter |
+| `corpus/google_ads_eu.yaml` | Google Ads (EU) — Misrepresentation starter |
+| `corpus/regulators_uk.yaml` | ASA / CAP Code (UK) — Misleading starter |
+| `corpus/regulators_ca.yaml` | Competition Bureau (CA) — Misleading starter |
+| `corpus/regulators_au.yaml` | ACCC / ACL (AU) — Misleading starter |
 | `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB + HUD + EEOC + FEC + CCPA/CPRA + TTB (US) clauses + rules (Misleading + Health + Financial + Housing/Employment + Political + Minors/COPPA + Privacy + Alcohol/Tobacco) |
 | `mappings.yaml` | Cross-source links: equivalent clauses → one `canonical_id` |
 | `examples/eval_seed.yaml` | Labeled evaluation dataset (570 examples: 30 misleading + 60 health + 60 financial + 60 housing/employment + 60 political + 60 children/minors + 60 privacy + 60 alcohol/tobacco/cannabis + 60 gambling + 60 ip/counterfeit) |
-| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.10) |
+| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.11) |
 | `precedents/` | Phase 2 enforcement-precedent layer (Policy → Canonical Rule → Precedent → Evidence → Verdict) |
+| `policy_timeline.yaml` | Per-clause policy diff timeline: introduced / modified / deprecated + official change history |
 | `policy_versions.yaml` | Sidecar policy-metadata registry: per-source version / effective / last-updated / deprecated-superseded status / officially published change history (not part of the frozen schema) |
-| `validate.py` | Validator: parse + referential integrity + evidence/applicability completeness |
+| `benchmark/` | Retrieval tests + coverage statistics (`coverage.py`, `retrieval_tests.yaml`) |
+| `tools/build_policy_timeline.py` | Regenerate `policy_timeline.yaml` from corpus + `policy_versions.yaml` |
+| `validate.py` | Validator: parse + referential integrity + evidence/applicability + sidecars |
 
 ## Entities
 
@@ -55,7 +69,8 @@ category ─< clause >── source
 - **Categories:** `misleading` (deep), `health` (deep), `financial` (deep), `discrimination` (Housing/Employment, deep), `political` (deep), `minors` (Children / Minors, deep), `privacy` (deep), `alcohol` (deep), `drugs` (Tobacco/Nicotine/Cannabis, deep), `gambling` (deep), `ip_trademark` (IP / Counterfeit, deep)
 - **Sources:** Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, FTC, FDA, SEC, FINRA, CFPB, HUD, EEOC, FEC, CCPA/CPRA, TTB
 - **Jurisdiction:** US
-- **Current corpus version:** `Ad Corpus v0.10` (see `corpus_version.yaml`)
+- **Current corpus version:** `Ad Corpus v0.11` (see `corpus_version.yaml`)
+- **Sources:** 25 (12 platforms + 13 regulators) across US, EU, UK, CA, AU
 
 ### Misleading / Deceptive — canonical rules (vertical 1)
 
@@ -295,9 +310,22 @@ real-world enforcement, forming the regulatory knowledge graph
 the enforcing `source`, official `source_url`, `date`, `title`, factual `summary`,
 `outcome`, and verbatim `evidence`, and references existing corpus
 `violated_clause_ids` + `canonical_ids` so a verdict traces back to exact policy
-text. `validate.py` enforces referential integrity on those references. The seed
-(**Precedents v0.1**) holds six landmark US actions; see `precedents/README.md` for
-the entry shape and roadmap.
+text. `validate.py` enforces referential integrity on those references. Events with official: true cite published policy changes; auto-seeded
+introduced events use clause effective_date. Regenerate baseline with
+`python ontology/tools/build_policy_timeline.py` (preserves `manual: true` events).
+
+### Benchmark & coverage (`benchmark/`)
+
+Sidecar retrieval tests and coverage reporting — no schema change.
+
+```bash
+python ontology/benchmark/coverage.py          # human-readable gaps report
+python ontology/benchmark/run_retrieval_tests.py   # 21 keyword retrieval tests
+python ontology/validate.py                    # includes sidecar integrity
+```
+
+Coverage dimensions: **domain** (category), **platform** (source), **jurisdiction**,
+**canonical rule** (cross-source vs single-source), **precedent linkage gaps**.
 
 > **TikTok US note:** TikTok's healthcare policy is per-market. In the *United
 > States*, prescription/OTC meds, pharmacies, fillers, and microdermabrasion
@@ -324,7 +352,8 @@ the eval dataset:
 - **Ad Corpus v0.7** — adds Privacy & Personal Data (frozen)
 - **Ad Corpus v0.8** — adds Alcohol / Tobacco / Cannabis (frozen)
 - **Ad Corpus v0.9** — adds Gambling & Gaming (frozen)
-- **Ad Corpus v0.10** — adds Intellectual Property / Counterfeit (frozen, current; completes the 10-vertical corpus)
+- **Ad Corpus v0.10** — adds Intellectual Property / Counterfeit (frozen; completes 10-vertical US build)
+- **Ad Corpus v0.11** — enrichment: +6 platforms, +EU/UK/CA/AU starters, policy_timeline, benchmark, precedents 24 (frozen, current)
 
 ## Build order
 
@@ -339,8 +368,10 @@ the eval dataset:
 9. ✅ Alcohol / Tobacco / Cannabis vertical: Meta + Google + TikTok + TTB + FDA, mapped → **Ad Corpus v0.8** (60 eval examples).
 10. ✅ Gambling & Gaming vertical: Meta + Google + TikTok, mapped → **Ad Corpus v0.9** (60 eval examples).
 11. ✅ Intellectual Property / Counterfeit vertical: Meta + Google + TikTok, mapped → **Ad Corpus v0.10** (60 eval examples). **Domain expansion complete — 10 verticals frozen.**
-12. Build the 1,000+ labeled evaluation dataset across frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
-13. ✅ **Phase 2 started** — `ontology/precedents/` layer seeded (**Precedents v0.1**, 6 landmark actions: FTC v. Google/YouTube, Musical.ly/TikTok, Epic Games (COPPA); DOJ/HUD v. Meta (Fair Housing); SEC v. Kardashian (anti-touting); FTC v. Teami (health/influencer)). Each links to corpus `clause_id`s + `canonical_id`s with verbatim official citations; validator extended for referential integrity. See `precedents/README.md` for the roadmap (alcohol/tobacco, gambling, IP/counterfeit, political; then EU/UK and X/Amazon Ads).
+12. ✅ **Enrichment v0.11** — +6 US platforms, +EU/UK/CA/AU misleading starters, `policy_timeline.yaml`, `benchmark/`, precedents **6→24**. No schema change.
+13. ✅ **Phase 2 ongoing** — expand precedents to hundreds (official FTC/SEC/FDA/HUD/EEOC/DOJ/platform actions only).
+14. **Enrichment roadmap:** deepen all platforms/jurisdictions per vertical; grow policy-diff timeline; extend benchmark coverage.
+15. Build the 1,000+ labeled evaluation dataset across frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
 
 > Clause text is sourced from official policy pages (Meta Transparency Center,
 > Google Ads Help, TikTok Business Help Center, LinkedIn Advertising Policies,

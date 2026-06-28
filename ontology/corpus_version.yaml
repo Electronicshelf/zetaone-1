@@ -3,7 +3,7 @@
 # reproducible and benchmarkable alongside the evaluation dataset. Bump the
 # version and add a release entry whenever a category is completed/changed.
 
-current_version: "Ad Corpus v0.10"
+current_version: "Ad Corpus v0.11"
 
 releases:
   - version: "Ad Corpus v0.1"
@@ -260,3 +260,30 @@ releases:
       (15 U.S.C. § 1125) and the courts/CBP rather than an advertising regulator.
       Completes the 10-vertical corpus build; domain expansion stops here. Every
       clause carries an `evidence` block + `last_reviewed_by: ai`.
+
+  - version: "Ad Corpus v0.11"
+    date: 2026-06-27
+    status: frozen
+    categories: [misleading, health, financial, discrimination, political, minors, privacy, alcohol, drugs, gambling, ip_trademark]
+    sources:
+      - meta_ads_us, google_ads_us, tiktok_ads_us, linkedin_ads_us
+      - x_ads_us, amazon_ads_us, snapchat_ads_us, pinterest_ads_us, reddit_ads_us, microsoft_ads_us
+      - meta_ads_eu, google_ads_eu
+      - ftc_us, fda_us, sec_us, finra_us, cfpb_us, hud_us, eeoc_us, fec_us, ccpa_ca, ttb_us
+      - asa_uk, competition_bureau_ca, accc_au
+    enrichment:
+      platforms_added: [x_ads_us, amazon_ads_us, snapchat_ads_us, pinterest_ads_us, reddit_ads_us, microsoft_ads_us]
+      jurisdictions_added: [EU, UK, CA, AU]
+      platform_starter_files: [meta_ads_eu, google_ads_eu]
+      regulator_starter_files: [asa_uk, competition_bureau_ca, accc_au]
+      sidecars_added: [policy_timeline.yaml, benchmark/]
+      precedents_count: 24
+      policy_timeline_clauses: 157
+    eval_examples: 570
+    schema_version: "1.0.0"
+    note: >
+      Enrichment release (no schema change): +6 US platforms (misleading starter),
+      +EU/UK/CA/AU jurisdiction starters, policy_timeline.yaml sidecar (per-clause
+      introduced/modified events), benchmark suite (coverage.py + 21 retrieval
+      tests), precedents expanded 6→24 across FTC/SEC/FDA/EEOC/HUD files. Ten
+      US verticals remain frozen; deepen platforms/jurisdictions/precedents over time.

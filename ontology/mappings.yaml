@@ -18,12 +18,21 @@ mappings:
       - meta.misleading.deceptive_practices
       - meta.misleading.exaggerated_success_claims
       - google.misrep.unreliable_claims
+      - x.misleading.deceptive_marketing
+      - x.misleading.improbable_outcomes
+      - snap.misleading.deceptive_content
+      - pinterest.misleading.false_or_misleading
+      - pinterest.misleading.exaggerated_claims
+      - reddit.misleading.no_deception
+      - reddit.misleading.deceptive_ads_prohibited
+      - meta_eu.misleading.deceptive_practices
+      - meta_eu.misleading.exaggerated_success_claims
+      - google_eu.misrep.unreliable_claims
     relation: related
     confidence: high
     note: >
-      Meta prohibits exaggerated success claims; Google prohibits improbable
-      results presented as the likely outcome. FTC substantiation (separate
-      canonical) backs both.
+      Deceptive/exaggerated/improbable-outcome claims: Meta (US+EU), Google (US+EU),
+      X, Snap, Pinterest, Reddit. FTC substantiation (separate canonical) backs all.
 
   - canonical_id: misleading.guaranteed_outcomes
     category_id: misleading
@@ -42,11 +51,20 @@ mappings:
       - ftc.misleading.reasonable_basis
       - ftc.misleading.express_implied
       - tiktok.misleading.unsubstantiated_claims
+      - amazon.misleading.truthful_substantiated_claims
+      - microsoft.misleading.truthful_not_deceptive
+      - microsoft.misleading.no_unsubstantiated_claims
+      - asa.misleading.substantiation_required
+      - competition_bureau.misleading.false_or_misleading
+      - competition_bureau.misleading.section_52
+      - accc.misleading.section_18_acl
+      - accc.misleading.accurate_claims
     relation: stricter
     confidence: high
     note: >
-      FTC reasonable-basis doctrine is the regulatory backbone and is stricter /
-      higher-precedence; TikTok requires claims be realistic and substantiated.
+      Objective claims require substantiation: FTC reasonable-basis doctrine (US);
+      ASA CAP 3.7 (UK); Competition Act (CA); ACL s 18 (AU); Amazon/Microsoft
+      platform substantiation rules; TikTok realistic-claims requirement.
 
   - canonical_id: misleading.missing_or_inconsistent_material_info
     category_id: misleading
@@ -54,11 +72,17 @@ mappings:
       - google.misrep.dishonest_pricing
       - google.misrep.unavailable_offers
       - tiktok.misleading.landing_page_consistency
+      - x.misleading.pricing_omission
+      - amazon.misleading.landing_page_match
+      - snap.misleading.cloaking
+      - google_eu.misrep.dishonest_pricing
+      - asa.misleading.omit_material_info
     relation: related
     confidence: medium
     note: >
-      Omitted/inconsistent material info: Google pricing + unavailable offers;
-      TikTok ad-vs-landing-page consistency. Overlapping but not identical scope.
+      Omitted/inconsistent material info: pricing omissions (Google US+EU, X),
+      unavailable offers (Google), landing-page mismatch (Amazon, TikTok),
+      cloaking (Snap), CAP 3.3 material-information omission (UK ASA).
 
   - canonical_id: misleading.false_affiliation_or_endorsement
     category_id: misleading
@@ -79,11 +103,13 @@ mappings:
     clause_ids:
       - google.misrep.clickbait_ads
       - google.misrep.misleading_ad_design
+      - amazon.misleading.no_fake_functionality
     relation: related
     confidence: high
     note: >
-      Clickbait tactics and fake-UI / non-identifiable ad design. Google is the
-      most explicit source; Meta/TikTok cover via deceptive-practices clauses.
+      Clickbait tactics and fake-UI / non-interactive elements mimicking CTAs:
+      Google (clickbait + misleading ad design); Amazon (fake functionality in
+      Stores). Meta/TikTok/X cover via broader deceptive-practices clauses.
 
   - canonical_id: misleading.before_after_distortion
     category_id: misleading
