@@ -8,6 +8,50 @@ One unified corpus where every **platform** (Meta, Google, TikTok, …) and
 This is the foundation for ZataOne's moat: structured corpus + cross-source
 mappings + a labeled evaluation dataset with measured precision/recall.
 
+## Corpus at a glance
+
+```mermaid
+flowchart TB
+  subgraph sources["25 sources"]
+    P["12 ad platforms<br/>Meta · Google · TikTok · …"]
+    R["13 regulators<br/>FTC · FDA · SEC · …"]
+  end
+
+  subgraph policy["Policy layer"]
+    C["157 clauses · 11 categories"]
+    Ru["128 rules"]
+  end
+
+  subgraph unify["Unification"]
+    CR["52 canonical rules"]
+    M["37 cross-source mappings"]
+  end
+
+  subgraph learn["Learning & proof"]
+    E["570 labeled eval examples"]
+    PR["128 verified precedents"]
+  end
+
+  subgraph check["Quality"]
+    V["validate.py"]
+    B["benchmark · 21/21 retrieval tests"]
+  end
+
+  P --> C
+  R --> C
+  C --> Ru --> CR
+  CR --> M
+  CR --> E
+  CR --> PR
+  C --> V
+  E --> B
+  PR --> B
+```
+
+**Flow:** platform + regulator policies → clauses & rules → shared canonical
+rules → mappings, labeled evals, and enforcement precedents → validation &
+benchmarks. Full detail: [`ONTOLOGY_MAP.md`](ONTOLOGY_MAP.md).
+
 ## Files
 
 | File | Purpose |

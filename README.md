@@ -19,6 +19,54 @@ The platform follows a strict separation of concerns: AI extracts signals, the p
 
 ---
 
+## Compliance ontology corpus
+
+Structured ad-compliance knowledge base: every **platform** (Meta, Google, TikTok, …) and **regulator** (FTC, FDA, SEC, …) policy maps into one shared schema — cross-source canonical rules, labeled evals, and verified enforcement precedents.
+
+```mermaid
+flowchart TB
+  subgraph sources["25 sources"]
+    P["12 ad platforms<br/>Meta · Google · TikTok · …"]
+    R["13 regulators<br/>FTC · FDA · SEC · …"]
+  end
+
+  subgraph policy["Policy layer"]
+    C["157 clauses · 11 categories"]
+    Ru["128 rules"]
+  end
+
+  subgraph unify["Unification"]
+    CR["52 canonical rules"]
+    M["37 cross-source mappings"]
+  end
+
+  subgraph learn["Learning & proof"]
+    E["570 labeled eval examples"]
+    PR["128 verified precedents"]
+  end
+
+  subgraph check["Quality"]
+    V["validate.py"]
+    B["benchmark · 21/21 retrieval tests"]
+  end
+
+  P --> C
+  R --> C
+  C --> Ru --> CR
+  CR --> M
+  CR --> E
+  CR --> PR
+  C --> V
+  E --> B
+  PR --> B
+```
+
+**Flow:** policies → clauses & rules → canonical rules → mappings, evals, precedents → validation & benchmarks.
+
+Docs: [`ontology/README.md`](ontology/README.md) · full architecture map [`ontology/ONTOLOGY_MAP.md`](ontology/ONTOLOGY_MAP.md)
+
+---
+
 ## Architecture
 
 ### System schematic
