@@ -3,7 +3,7 @@
 # reproducible and benchmarkable alongside the evaluation dataset. Bump the
 # version and add a release entry whenever a category is completed/changed.
 
-current_version: "Ad Corpus v0.9"
+current_version: "Ad Corpus v0.10"
 
 releases:
   - version: "Ad Corpus v0.1"
@@ -235,3 +235,28 @@ releases:
       (US gambling advertising is state-regulated, outside the current US-federal
       regulator scope). Every clause carries an `evidence` block +
       `last_reviewed_by: ai`.
+
+  - version: "Ad Corpus v0.10"
+    date: 2026-06-27
+    status: frozen
+    categories: [misleading, health, financial, discrimination, political, minors, privacy, alcohol, drugs, gambling, ip_trademark]
+    sources: [meta_ads_us, google_ads_us, tiktok_ads_us, linkedin_ads_us, ftc_us, fda_us, sec_us, finra_us, cfpb_us, hud_us, eeoc_us, fec_us, ccpa_ca, ttb_us]
+    canonical_rules_added:
+      - ip.counterfeit_goods_prohibited                  # Meta, Google, TikTok
+      - ip.third_party_ip_infringement_prohibited        # Meta, Google, TikTok
+      - ip.unauthorized_copyrighted_works_prohibited      # Meta (single-source)
+    eval_examples: 570       # + 60 IP / counterfeit
+    schema_version: "1.0.0"  # unchanged; schema frozen
+    note: >
+      Adds Intellectual Property / Counterfeit vertical (category `ip_trademark`)
+      from official Meta (Third-Party Intellectual Property Infringement +
+      Copyrights and Trademarks — counterfeits/knockoffs/replicas, third-party
+      copyright/trademark, pirated copyrighted works), Google (Counterfeit goods
+      answer 176017 + Trademarks answer 6118), and TikTok (Intellectual Property
+      Policy — counterfeiting + copyright/trademark infringement). Two cross-source
+      canonicals (counterfeit goods; third-party IP infringement) plus one
+      single-source Meta canonical (unauthorized/pirated copyrighted works). No
+      federal regulator clause — US IP enforcement runs through the Lanham Act
+      (15 U.S.C. § 1125) and the courts/CBP rather than an advertising regulator.
+      Completes the 10-vertical corpus build; domain expansion stops here. Every
+      clause carries an `evidence` block + `last_reviewed_by: ai`.

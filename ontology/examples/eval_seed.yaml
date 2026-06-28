@@ -1,6 +1,7 @@
 # Evaluation dataset — Misleading + Health + Financial + Housing/Employment +
-# Political + Children/Minors + Privacy + Alcohol/Tobacco/Cannabis + Gambling.
-# 510 examples total:
+# Political + Children/Minors + Privacy + Alcohol/Tobacco/Cannabis + Gambling +
+# Intellectual Property/Counterfeit.
+# 570 examples total:
 #   Misleading:           30 (10 non_compliant, 10 compliant, 10 borderline)
 #   Health:               60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Financial:            60 (20 non_compliant, 20 compliant, 20 borderline)
@@ -10,6 +11,7 @@
 #   Privacy:              60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Alcohol/Tobacco/Cannabis: 60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Gambling/Gaming:      60 (20 non_compliant, 20 compliant, 20 borderline)
+#   IP/Counterfeit:       60 (20 non_compliant, 20 compliant, 20 borderline)
 # Labeled examples linked to clauses/categories. Compute precision/recall PER
 # category_id and PER canonical_id from these. Conforms to entities.example.
 # labeled_by: expert here = seed authoring; replace with reviewed labels as the
@@ -5737,6 +5739,651 @@ examples:
     modality: text
     label: borderline
     category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  # =========================================================================
+  # INTELLECTUAL PROPERTY / COUNTERFEIT (60)
+  # =========================================================================
+  # --- NON-COMPLIANT (20) ---
+  - id: ip_nc_001
+    content: "Replica Rolex watches — looks exactly like the real thing for 1/10th the price!"
+    modality: text
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_002
+    content: "AAA knockoff designer handbags — Gucci, LV, Chanel mirror-image quality!"
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_003
+    content: "Fake Nike Air Jordans — same logo, same box, nobody can tell the difference."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_004
+    content: "Imitation AirPods Pro with the Apple logo printed on — looks 100% authentic."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_005
+    content: "Clone Yeezy sneakers — adidas trefoil branding, factory-grade replica."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_006
+    content: "Faux Louis Vuitton belts with authentic-looking LV buckle logo."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_007
+    content: "Stream every Marvel movie free — full HD pirated copies, no subscription."
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.unauthorized_copyrighted_works
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_008
+    content: "Download the latest PlayStation games — cracked ISO copies, all titles."
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.unauthorized_copyrighted_works
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_009
+    content: "Bootleg Taylor Swift concert recordings — full albums, instant download."
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.unauthorized_copyrighted_works
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_010
+    content: "Official Apple Store deals — [ad by unaffiliated reseller using Apple logo and brand colors to imply affiliation]"
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.third_party_infringement
+      - tiktok.ip.infringement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_011
+    content: "[Ad copy by a direct competitor using a rival's registered trademark in the headline after a valid complaint]"
+    modality: text
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - google.ip.trademark
+      - meta.ip.third_party_infringement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_012
+    content: "[Video ad using a popular copyrighted song with no music license]"
+    modality: video
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.third_party_infringement
+      - tiktok.ip.infringement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_013
+    content: "Get Disney+ shows for free — full pirated library streaming here."
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.unauthorized_copyrighted_works
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_014
+    content: "Counterfeit Supreme tees — same box logo, indistinguishable from retail."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_015
+    content: "Mirror-image Cartier jewelry — buyers can't tell it from the genuine brand."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - google.ip.counterfeit_goods
+      - meta.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_016
+    content: "[Landing page selling phone cases titled 'iPhone 16 Pro' using Apple trademark to pass off generic goods]"
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - google.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_017
+    content: "Pirated e-books — every bestseller PDF, instant download, no DRM."
+    modality: landing_page
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.unauthorized_copyrighted_works
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_018
+    content: "[Ad creative reusing a competitor's copyrighted product photography without permission]"
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - tiktok.ip.infringement
+      - meta.ip.third_party_infringement
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_019
+    content: "Replica NFL jerseys — team logos and trademarks, fraction of official price."
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_nc_020
+    content: "[Storefront ad using a misspelled brand name 'Addidas' with the brand's stripes logo]"
+    modality: image
+    label: non_compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids:
+      - meta.ip.third_party_infringement
+      - google.ip.trademark
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  # --- COMPLIANT (20) ---
+  - id: ip_c_001
+    content: "Handmade leather watches by our own studio — original designs, our brand only."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_002
+    content: "Shop our independent sneaker label — fully original colorways and logo."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_003
+    content: "Authorized reseller of genuine Bose headphones — official warranty included."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_004
+    content: "Stream our originally produced indie film — licensed and owned by our studio."
+    modality: landing_page
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_005
+    content: "[Video ad set to a track fully licensed through the platform's commercial music library]"
+    modality: video
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_006
+    content: "Generic phone case for 6.1-inch devices — universal fit, our own brand."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_007
+    content: "Official merchandise store — licensed apparel with brand authorization on file."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_008
+    content: "Buy our self-published novel — written and owned by our author."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_009
+    content: "Compatible replacement bands for smartwatches — clearly marked 'not affiliated', our brand."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_010
+    content: "Original artwork prints by our illustrators — 100% our own copyright."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_011
+    content: "Authorized Samsung retailer — genuine devices, sealed in original packaging."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_012
+    content: "Stream our podcast — all music and clips cleared and licensed."
+    modality: landing_page
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_013
+    content: "Our in-house cosmetics line — original brand name, trademark registered to us."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_014
+    content: "Refurbished genuine iPhones, clearly described as refurbished — authorized program."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: ip_c_015
+    content: "Original board game we designed and published — our own IP."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_016
+    content: "Custom T-shirts with your own uploaded designs — you confirm you own the rights."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_017
+    content: "Licensed Marvel apparel — sold under an official Disney license agreement."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_018
+    content: "Our royalty-free stock-music subscription — every track cleared for ads."
+    modality: landing_page
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_019
+    content: "Original streetwear brand — our trademark, our designs, made in-house."
+    modality: image
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  - id: ip_c_020
+    content: "Officially licensed video game soundtrack on vinyl — publisher-authorized release."
+    modality: text
+    label: compliant
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: train
+
+  # --- BORDERLINE (20) ---
+  - id: ip_b_001
+    content: "Inspired-by designer fragrances — our own brand, smells similar to luxury scents."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_002
+    content: "Phone case compatible with iPhone — uses 'iPhone' descriptively in the listing."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_003
+    content: "[Parody ad spoofing a famous logo for commentary]"
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_004
+    content: "Vintage thrift find — authentic pre-owned designer bag, resold as-is."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_005
+    content: "Fan-art posters of popular characters — drawn by an independent artist."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_006
+    content: "Works with AirPods — third-party charging case, brand name used for compatibility."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_007
+    content: "Tribute cover band performance — promo ad mentions the original artist's name."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_008
+    content: "Dupe makeup — 'looks like' a luxury palette, sold under our own brand name."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_009
+    content: "Repair service for designer handbags — uses brand names to describe what we fix."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_010
+    content: "Custom embroidery — we'll stitch any logo you provide onto blank apparel."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_011
+    content: "Comparison ad: 'better than Brand X' — names a competitor's trademark factually."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_012
+    content: "Sampled beat in our track — claims it's transformative fair use."
+    modality: video
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_013
+    content: "Authorized-dealer claim — reseller says 'official' but authorization is unclear."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_014
+    content: "Replica prop from a movie — sold as a collectible 'inspired by' the film."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_015
+    content: "Print-on-demand shirt with a public-domain artwork from the 1800s."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_016
+    content: "Generic-brand cereal ad styled to resemble a famous brand's packaging."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_017
+    content: "Aftermarket car parts — 'fits BMW' listed for compatibility."
+    modality: text
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_018
+    content: "Streaming guide blog ad that links out to both official and unofficial sources."
+    modality: landing_page
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_019
+    content: "Logo-design service ad showing a portfolio that includes recognizable brand marks."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: ip_b_020
+    content: "Unlicensed-looking team scarf at a fan stall — provenance unclear from the ad."
+    modality: image
+    label: borderline
+    category_ids: [ip_trademark]
     violated_clause_ids: []
     jurisdiction: US
     labeled_by: expert

@@ -849,6 +849,98 @@ clauses:
       section: "About Meta's Online Gambling and Games advertising policy > Social casino"
       retrieved_at: 2026-06-27
 
+  # ===================== Intellectual Property / Counterfeit =====================
+  - id: meta.ip.counterfeit_goods
+    source_id: meta_ads_us
+    category_id: ip_trademark
+    text: >
+      Ads may not promote or sell counterfeit goods — products that copy the
+      trademark (name or logo) and/or distinctive features of another company's
+      products to imitate a genuine product. This includes counterfeits,
+      knockoffs, or replicas of another company's products.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-08-27
+    version: "2024-08-27"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Ads may not contain content that violates the intellectual property
+        rights of any third party, including copyright, trademark or other legal
+        rights. This includes, but is not limited to, the promotion or sale of
+        counterfeit goods, such as products that copy the trademark (name or
+        logo) and/or distinctive features of another company's products to
+        imitate a genuine product.
+      source_url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/third-party-infringement/
+      section: "Intellectual Property Infringement > Third-Party Intellectual Property Infringement"
+      retrieved_at: 2026-06-27
+
+  - id: meta.ip.third_party_infringement
+    source_id: meta_ads_us
+    category_id: ip_trademark
+    text: >
+      Ads may not contain content that infringes upon or violates the
+      intellectual property rights of any third party, including copyright,
+      trademark or other legal rights. Advertisers can't run ads that are likely
+      to confuse people about the source, sponsorship or affiliation of the goods
+      or services. If an ad contains music, the advertiser is required to secure
+      the necessary licenses.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-08-27
+    version: "2024-08-27"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Ads may not contain content that infringes upon or violates the
+        intellectual property rights of any third party, including copyright,
+        trademark or other legal rights. ... [advertisers can't run ads that] Are
+        likely to confuse people about the source, sponsorship or affiliation of
+        the goods or services.
+      source_url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/copyright-and-trademarks
+      section: "Intellectual Property Infringement > Copyrights and Trademarks"
+      retrieved_at: 2026-06-27
+
+  - id: meta.ip.unauthorized_copyrighted_works
+    source_id: meta_ads_us
+    category_id: ip_trademark
+    text: >
+      Advertisers can't run ads that promote, sell or attempt to circulate
+      unauthorized or pirated copies of copyrighted works, such as videos,
+      movies, TV shows and broadcasts, video games, CDs or other musical works,
+      books and more.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-08-27
+    version: "2024-08-27"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Promote, sell or attempt to circulate unauthorized or pirated copies of
+        copyrighted works, such as videos, movies, TV shows and broadcasts, video
+        games, CDs or other musical works, books and more.
+      source_url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/copyright-and-trademarks
+      section: "Intellectual Property Infringement > Copyrights and Trademarks"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: meta_misleading_deceptive_practices
@@ -1181,4 +1273,47 @@ rules:
       chance to win money/coins/anything of monetary value, or target under-18.
     exceptions:
       - "No monetary-value winnings and 18+ targeting."
+    status: active
+
+  # --- Intellectual Property / Counterfeit ---
+  - id: meta_ip_counterfeit
+    canonical_id: ip.counterfeit_goods_prohibited
+    clause_ids: [meta.ip.counterfeit_goods]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 70
+    detection: >
+      Ads or landing pages promoting/selling counterfeits, knockoffs, or replicas
+      that copy another company's trademark (name/logo) or distinctive features
+      to imitate a genuine product.
+    exceptions: []
+    status: active
+
+  - id: meta_ip_third_party_infringement
+    canonical_id: ip.third_party_ip_infringement_prohibited
+    clause_ids: [meta.ip.third_party_infringement]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: >
+      Ads using a third party's copyright or trademark, or likely to confuse
+      people about the source/sponsorship/affiliation of goods or services, or
+      using music without the necessary licenses.
+    exceptions:
+      - "Authorized/licensed use, nominative/descriptive use, or rights-holder permission."
+    status: active
+
+  - id: meta_ip_unauthorized_copyrighted_works
+    canonical_id: ip.unauthorized_copyrighted_works_prohibited
+    clause_ids: [meta.ip.unauthorized_copyrighted_works]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: >
+      Ads promoting/selling/circulating unauthorized or pirated copies of
+      copyrighted works (movies, TV, video games, music, books, etc.).
+    exceptions: []
     status: active

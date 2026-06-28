@@ -610,3 +610,42 @@ mappings:
       monetary value: Meta (no opportunity to win money/coins/anything of
       monetary value; 18+) and TikTok (no real money/financial rewards; ad must
       make clear players cannot win real money).
+
+  # =========================================================================
+  # Intellectual Property / Counterfeit vertical canonical rules.
+  # No federal regulator clause: US IP enforcement runs through the Lanham Act
+  # (15 U.S.C. § 1125) and the courts/CBP rather than an advertising regulator,
+  # so the platforms carry these rules. meta.ip.unauthorized_copyrighted_works
+  # (pirated copyrighted works) is single-source and intentionally unmapped.
+  # =========================================================================
+  - canonical_id: ip.counterfeit_goods_prohibited
+    category_id: ip_trademark
+    clause_ids:
+      - meta.ip.counterfeit_goods
+      - google.ip.counterfeit_goods
+      - tiktok.ip.counterfeit_goods
+    relation: equivalent
+    confidence: high
+    note: >
+      All three platforms prohibit promoting/selling counterfeit goods — products
+      bearing a trademark/logo identical or substantially indistinguishable from
+      another's and mimicking its brand features to pass as genuine: Meta
+      (counterfeits/knockoffs/replicas), Google (counterfeit goods policy), TikTok
+      (counterfeiting). Genuinely equivalent.
+
+  - canonical_id: ip.third_party_ip_infringement_prohibited
+    category_id: ip_trademark
+    clause_ids:
+      - meta.ip.third_party_infringement
+      - google.ip.trademark
+      - tiktok.ip.infringement
+    relation: equivalent
+    confidence: high
+    note: >
+      All three platforms prohibit ads that infringe a third party's intellectual
+      property (copyright and/or trademark): Meta (third-party copyright/trademark
+      infringement; no confusion as to source/affiliation), Google (no ads that
+      infringe trademark rights), TikTok (no content that violates someone else's
+      copyright or trademark; advertiser must hold the necessary rights). Genuinely
+      equivalent. Google's clause is trademark-specific while Meta/TikTok also
+      cover copyright; mapped at the shared third-party-infringement concept.

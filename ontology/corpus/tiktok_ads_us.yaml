@@ -830,6 +830,68 @@ clauses:
       section: "Advertising Policies > Gambling and Games > Market-specific requirements (non-casino / social games)"
       retrieved_at: 2026-06-27
 
+  # ===================== Intellectual Property / Counterfeit =====================
+  - id: tiktok.ip.counterfeit_goods
+    source_id: tiktok_ads_us
+    category_id: ip_trademark
+    text: >
+      Counterfeiting is dealing in goods under a trademark that is identical to
+      or substantially similar to a registered trademark, without the trademark
+      owner's permission. TikTok does not permit the purchase, sale, trade,
+      promotion, or solicitation of counterfeit goods, and will remove such
+      content.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "ip-policy-counterfeiting"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Counterfeiting is the illegal manufacturing, importing and exporting,
+        distributing, selling, facilitating the trade of, or otherwise dealing in
+        goods under a trademark that is identical to or substantially similar to a
+        registered trademark, without the trademark owner's permission ... we do
+        not permit the purchase, sale, trade, promotion, or solicitation of
+        counterfeit goods on TikTok, and will remove such content.
+      source_url: https://www.tiktok.com/legal/copyright-policy
+      section: "Intellectual Property Policy > Counterfeiting"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.ip.infringement
+    source_id: tiktok_ads_us
+    category_id: ip_trademark
+    text: >
+      TikTok does not allow content that violates or infringes someone else's
+      intellectual property rights, including copyright and trademark.
+      Advertisers must hold all necessary rights, licenses, and permissions for
+      content used in their advertisements.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "ip-policy"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        TikTok respects the intellectual property rights of others and requires
+        compliance with the Terms of Service and Community Guidelines which do
+        not allow content that violates or infringes someone else's intellectual
+        property rights, including copyright and trademark.
+      source_url: https://www.tiktok.com/legal/copyright-policy
+      section: "Intellectual Property Policy"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: tiktok_absolute_terms
     canonical_id: misleading.guaranteed_outcomes
@@ -1137,4 +1199,34 @@ rules:
       Permitted gambling-like/social game ads that involve real money/financial
       rewards or imply players can win real money.
     exceptions: []
+    status: active
+
+  # --- Intellectual Property / Counterfeit ---
+  - id: tiktok_ip_counterfeit
+    canonical_id: ip.counterfeit_goods_prohibited
+    clause_ids: [tiktok.ip.counterfeit_goods]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 70
+    detection: >
+      Ads that purchase/sell/trade/promote/solicit counterfeit goods — goods
+      under a trademark identical or substantially similar to a registered mark
+      without the owner's permission.
+    exceptions: []
+    status: active
+
+  - id: tiktok_ip_infringement
+    canonical_id: ip.third_party_ip_infringement_prohibited
+    clause_ids: [tiktok.ip.infringement]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: >
+      Ad creative or landing page that infringes a third party's copyright or
+      trademark, or uses content (images, music, video, trademarks) without the
+      necessary rights/licenses/permissions.
+    exceptions:
+      - "Advertiser holds the necessary rights, licenses, or permissions."
     status: active

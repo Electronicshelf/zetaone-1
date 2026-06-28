@@ -192,3 +192,57 @@ policies:
         version: "covered-tobacco warning compliance"
         summary: "Compliance date for required health-warning statements on covered tobacco / RYO / cigarette tobacco packages and advertisements."
         url: https://www.fda.gov/tobacco-products/products-guidance-regulations/labeling-and-warning-statements-tobacco-products
+
+  # ----------------------- Intellectual Property -----------------------
+  - source_id: meta_ads_us
+    policy_title: "Meta Ad Standards — Third-Party Intellectual Property Infringement / Copyrights and Trademarks"
+    url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/third-party-infringement/
+    policy_version: null            # Meta publishes a change log, not a numeric version
+    effective_date: null
+    last_updated: 2024-08-27        # latest entry shown in the page change log
+    status: active
+    superseded_by: null
+    retrieved_at: 2026-06-27
+    change_history:
+      - date: 2024-05-31
+        version: "change-log entry"
+        summary: "Third-Party Intellectual Property Infringement policy updated (per Meta Transparency Center change log)."
+        url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/third-party-infringement/
+      - date: 2024-08-27
+        version: "change-log entry"
+        summary: "Most recent Third-Party Intellectual Property Infringement policy update shown in the change log."
+        url: https://transparency.meta.com/policies/ad-standards/intellectual-property-infringement/third-party-infringement/
+
+  - source_id: google_ads_us
+    policy_title: "Google Ads — Counterfeit goods (176017) & Trademarks (6118)"
+    url: https://support.google.com/adspolicy/answer/176017
+    policy_version: null
+    effective_date: null
+    last_updated: 2023-07-24        # trademark policy revision effective date
+    status: active
+    superseded_by: null
+    retrieved_at: 2026-06-27
+    change_history:
+      - date: 2023-07-24
+        version: "trademark policy revision"
+        summary: "Trademark policy revised: industry-wide complaints removed; brand owners must file complaints against specific ads/advertisers."
+        url: https://support.google.com/adspolicy/answer/6118
+      - date: 2023-07-24
+        version: "counterfeit goods policy"
+        summary: "Counterfeit goods remain an egregious-violation policy (account suspension on a valid complaint); applies to ad content and website/app."
+        url: https://support.google.com/adspolicy/answer/176017
+
+  - source_id: tiktok_ads_us
+    policy_title: "TikTok Intellectual Property Policy (copyright, trademark, counterfeiting)"
+    url: https://www.tiktok.com/legal/copyright-policy
+    policy_version: null
+    effective_date: null
+    last_updated: null              # page does not publish a dated version for ads IP
+    status: active
+    superseded_by: null
+    retrieved_at: 2026-06-27
+    change_history:
+      - date: 2024-01-01
+        version: "IP policy (counterfeiting section)"
+        summary: "TikTok Intellectual Property Policy prohibits content infringing copyright/trademark and bars purchase/sale/promotion/solicitation of counterfeit goods."
+        url: https://www.tiktok.com/legal/copyright-policy

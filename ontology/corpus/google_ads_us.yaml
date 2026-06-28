@@ -1178,6 +1178,69 @@ clauses:
       section: "Advertising Policies > Gambling and games > Requirements"
       retrieved_at: 2026-06-27
 
+  # ===================== Intellectual Property / Counterfeit =====================
+  - id: google.ip.counterfeit_goods
+    source_id: google_ads_us
+    category_id: ip_trademark
+    text: >
+      Google Ads and Display & Video 360 prohibit the sale or promotion for sale
+      of counterfeit goods. Counterfeit goods are products that contain a
+      trademark or logo that is identical to or substantially indistinguishable
+      from the trademark of another. They mimic the brand features of the product
+      in an attempt to pass themselves off as a genuine product of the brand
+      owner. This policy applies to the content of your ad and your website or app.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "adspolicy-counterfeit-176017"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Google Ads and Display & Video 360 prohibit the sale or promotion for
+        sale of counterfeit goods. Counterfeit goods are products that contain a
+        trademark or logo that is identical to or substantially indistinguishable
+        from the trademark of another. They mimic the brand features of the
+        product in an attempt to pass themselves off as a genuine product of the
+        brand owner.
+      source_url: https://support.google.com/adspolicy/answer/176017
+      section: "Advertising Policies > Counterfeit goods"
+      retrieved_at: 2026-06-27
+
+  - id: google.ip.trademark
+    source_id: google_ads_us
+    category_id: ip_trademark
+    text: >
+      Google Ads and Display & Video 360 abide by local trademark laws and
+      protect the rights of trademark owners, so Google doesn't allow ads that
+      infringe trademark rights. If a trademark owner submits a complaint, Google
+      may restrict use of the trademark — including ads that use a trademark from
+      a direct competitor or in a confusing, deceptive, or misleading way.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2023-07-24
+    version: "adspolicy-trademarks-6118"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: [all]
+      industries: [all]
+    evidence:
+      quote: >-
+        Google Ads and Display & Video 360 abide by local trademark laws and
+        protects the rights of trademark owners, so we don't allow ads that
+        infringe trademark rights.
+      source_url: https://support.google.com/adspolicy/answer/6118
+      section: "Advertising Policies > Trademarks"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: google_unreliable_claims
     canonical_id: misleading.exaggerated_results
@@ -1582,4 +1645,35 @@ rules:
     detection: >
       Gambling ad landing pages lacking responsible-gambling information.
     exceptions: []
+    status: active
+
+  # --- Intellectual Property / Counterfeit ---
+  - id: google_ip_counterfeit
+    canonical_id: ip.counterfeit_goods_prohibited
+    clause_ids: [google.ip.counterfeit_goods]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 72
+    detection: >
+      Ad or website/app selling or promoting counterfeit goods — products with a
+      trademark/logo identical to or substantially indistinguishable from
+      another's, mimicking brand features to pass as genuine (incl. "knock off",
+      "replica", "fake", etc.).
+    exceptions: []
+    status: active
+
+  - id: google_ip_trademark
+    canonical_id: ip.third_party_ip_infringement_prohibited
+    clause_ids: [google.ip.trademark]
+    category_id: ip_trademark
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: >
+      Ads that infringe trademark rights — e.g. a direct competitor using the
+      mark, or use in a confusing, deceptive, or misleading way — following a
+      valid trademark-owner complaint.
+    exceptions:
+      - "Resellers/informational sites and other permitted uses per Google's trademark policy."
     status: active
