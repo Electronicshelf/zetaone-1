@@ -713,6 +713,123 @@ clauses:
       section: "Advertising Policies > Dangerous Products or Services > Drugs"
       retrieved_at: 2026-06-27
 
+  # ===================== Gambling & Gaming =====================
+  - id: tiktok.gambling.certification_license
+    source_id: tiktok_ads_us
+    category_id: gambling
+    text: >
+      To advertise gambling services on TikTok you must go through the
+      certification process and provide documents proving your licenses and legal
+      compliance in your target market. Gambling ads are only allowed in specified
+      markets where gambling is legal and when all local certifications and
+      requirements are met; ads promoting unlicensed or illegal gambling services
+      are not allowed.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        To advertise gambling services, you must go through our certification
+        process. ... Our certification process requires you to provide documents
+        that prove your licenses and legal compliance in your target market. ...
+        Gambling ads are only allowed in specified markets where gambling is legal
+        and when all local certifications and requirements are met. ... [Not
+        allowed:] Gambling ads that promote unlicensed or illegal gambling
+        services.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-gambling-and-games
+      section: "Advertising Policies > Gambling and Games > Certification requirements"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.gambling.minors
+    source_id: tiktok_ads_us
+    category_id: gambling
+    text: >
+      Gambling ads must be restricted to age-appropriate audiences; TikTok does
+      not allow gambling ads to be shown to minors, directed at underage
+      audiences, or to feature underage people.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Ads must be restricted to age-appropriate audiences; we do not allow
+        gambling ads to be shown to minors. ... [Not allowed:] Ads that are
+        directed at underage audiences. Ads that feature underage people.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-gambling-and-games
+      section: "Advertising Policies > Gambling and Games > Geographic and age restrictions"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.gambling.responsible
+    source_id: tiktok_ads_us
+    category_id: gambling
+    text: >
+      TikTok requires advertisers to promote responsible gambling: include clear
+      warnings about the risks and all legally mandated gambling disclaimers and
+      taglines, and provide links to resources or hotlines for gambling addiction
+      where possible.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Promote responsible gambling in your ads: Include clear warnings about the
+        risks; include all legally mandated gambling disclaimers and taglines.
+        Provide links to resources or hotlines for gambling addiction where
+        possible.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-gambling-and-games
+      section: "Advertising Policies > Gambling and Games > Promoting responsible gambling practices"
+      retrieved_at: 2026-06-27
+
+  - id: tiktok.gambling.social_casino_no_real_money
+    source_id: tiktok_ads_us
+    category_id: gambling
+    text: >
+      For permitted gambling-like / non-casino game ads, games must not involve
+      real money or financial rewards, and it should be clear from the
+      presentation of the ad that players cannot win real money.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2025-08-01
+    version: "2025-08-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["18+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Do not involve real money or financial rewards. It should be clear from
+        the presentation of the ad that players cannot win real money.
+      source_url: https://ads.tiktok.com/help/article/tiktok-ads-policy-gambling-and-games
+      section: "Advertising Policies > Gambling and Games > Market-specific requirements (non-casino / social games)"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: tiktok_absolute_terms
     canonical_id: misleading.guaranteed_outcomes
@@ -966,5 +1083,58 @@ rules:
     detection: >
       Ads/landing pages promoting or providing access to illegal/controlled/
       recreational drugs, prescription-drug abuse, or drug paraphernalia.
+    exceptions: []
+    status: active
+
+  # --- Gambling & Gaming ---
+  - id: tiktok_gambling_certification
+    canonical_id: gambling.realmoney_requires_license_and_authorization
+    clause_ids: [tiktok.gambling.certification_license]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 64
+    detection: >
+      Gambling ads without TikTok certification / license in a legal market, or
+      promoting unlicensed/illegal gambling services.
+    exceptions:
+      - "Certified advertisers with valid license in permitted markets."
+    status: active
+
+  - id: tiktok_gambling_minors
+    canonical_id: gambling.no_minors_targeting
+    clause_ids: [tiktok.gambling.minors]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: >
+      Gambling ads shown to / directed at minors, or featuring underage people.
+    exceptions: []
+    status: active
+
+  - id: tiktok_gambling_responsible
+    canonical_id: gambling.responsible_gambling_required
+    clause_ids: [tiktok.gambling.responsible]
+    category_id: gambling
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 58
+    detection: >
+      Gambling ads lacking risk warnings, legally mandated disclaimers/taglines,
+      or addiction-resource links.
+    exceptions: []
+    status: active
+
+  - id: tiktok_gambling_social_casino
+    canonical_id: gambling.social_casino_no_real_money
+    clause_ids: [tiktok.gambling.social_casino_no_real_money]
+    category_id: gambling
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 56
+    detection: >
+      Permitted gambling-like/social game ads that involve real money/financial
+      rewards or imply players can win real money.
     exceptions: []
     status: active

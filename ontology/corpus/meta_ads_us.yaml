@@ -758,6 +758,97 @@ clauses:
       section: "Restricted Goods and Services > Drugs and Pharmaceuticals > CBD"
       retrieved_at: 2026-06-27
 
+  # ===================== Gambling & Gaming =====================
+  - id: meta.gambling.authorization_and_license
+    source_id: meta_ads_us
+    category_id: gambling
+    text: >
+      Ads that promote online gambling and gaming (any product or service where
+      anything of monetary value is part of both the method of entry and the
+      prize) are only allowed once the ad account has obtained authorization from
+      Meta. Advertisers must provide evidence that the gambling activities are
+      appropriately licensed by a regulator or otherwise established as lawful in
+      the territory they want to target, and may not run ads in unsupported
+      gambling markets.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "ad-standards-online-gambling-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["18+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Ads that promote online gambling and gaming are only allowed once an ad
+        account has obtained authorization. ... advertisers will need to request
+        authorization from Meta through the Authorizations and Verifications tab
+        in Meta Business Suite (MBS) and provide evidence that the gambling
+        activities are appropriately licensed by a regulator or otherwise
+        established as lawful in the territory they want to target.
+      source_url: https://transparency.meta.com/policies/ad-standards/restricted-goods-services/gambling-games/
+      section: "Restricted Goods and Services > Online Gambling and Games"
+      retrieved_at: 2026-06-27
+
+  - id: meta.gambling.no_minors
+    source_id: meta_ads_us
+    category_id: gambling
+    text: >
+      Meta does not allow targeting of online gambling and gaming ads to people
+      under the age of 18.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "ad-standards-online-gambling-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["18+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        At a minimum, ads may not target to people under 18 years of age nor
+        unsupported gambling markets ... Additionally, Meta doesn't allow
+        targeting for online gambling and gaming ads to people under the age of
+        18.
+      source_url: https://transparency.meta.com/policies/ad-standards/restricted-goods-services/gambling-games/
+      section: "Restricted Goods and Services > Online Gambling and Games"
+      retrieved_at: 2026-06-27
+
+  - id: meta.gambling.social_casino
+    source_id: meta_ads_us
+    category_id: gambling
+    text: >
+      Advertisers can run ads for social casino games and free-to-play games with
+      no prior authorization from Meta as long as they don't offer the
+      opportunity to win money, coins, gifts, or anything of monetary value, and
+      don't target people under the age of 18.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "ad-standards-social-casino"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["18+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Advertisers can run ads for social casino games and free to play games
+        with no prior authorization from Meta as long as they: Don't offer the
+        opportunity to win money, coins, gifts or anything of monetary value. ...
+        Don't target people under the age of 18.
+      source_url: https://www.facebook.com/business/help/345214789920228
+      section: "About Meta's Online Gambling and Games advertising policy > Social casino"
+      retrieved_at: 2026-06-27
+
 rules:
   # --- Misleading ---
   - id: meta_misleading_deceptive_practices
@@ -1049,4 +1140,45 @@ rules:
       certification, outside the US, to under-18, or making health/medical claims.
     exceptions:
       - "LegitScript-certified + Meta-authorized CBD, US-only, 18+, no health claims."
+    status: active
+
+  # --- Gambling & Gaming ---
+  - id: meta_gambling_authorization
+    canonical_id: gambling.realmoney_requires_license_and_authorization
+    clause_ids: [meta.gambling.authorization_and_license]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 64
+    detection: >
+      Online/real-money gambling ads without Meta authorization or without
+      evidence of a license / lawful status in the targeted territory, or in
+      unsupported markets.
+    exceptions:
+      - "Authorized advertisers with valid license/lawful documentation."
+    status: active
+
+  - id: meta_gambling_no_minors
+    canonical_id: gambling.no_minors_targeting
+    clause_ids: [meta.gambling.no_minors]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: "Online gambling/gaming ads targeting people under 18."
+    exceptions: []
+    status: active
+
+  - id: meta_gambling_social_casino
+    canonical_id: gambling.social_casino_no_real_money
+    clause_ids: [meta.gambling.social_casino]
+    category_id: gambling
+    severity: medium
+    modalities: [text, image, video, landing_page]
+    priority: 56
+    detection: >
+      Social-casino / free-to-play ads (run without authorization) that offer a
+      chance to win money/coins/anything of monetary value, or target under-18.
+    exceptions:
+      - "No monetary-value winnings and 18+ targeting."
     status: active

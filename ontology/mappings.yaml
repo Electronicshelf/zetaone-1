@@ -544,3 +544,69 @@ mappings:
       apply for certification; only CA/CO/PR). Scope differs (Meta US-wide vs.
       Google three jurisdictions), but the allowed-only-with-certification intent
       is genuinely equivalent.
+
+  # =========================================================================
+  # Gambling & Gaming vertical canonical rules (all cross-source; US):
+  #   gambling.realmoney_requires_license_and_authorization (Meta, Google, TikTok)
+  #   gambling.no_minors_targeting                          (Meta, Google, TikTok)
+  #   gambling.responsible_gambling_required                (Google, TikTok)
+  #   gambling.social_casino_no_real_money                  (Meta, TikTok)
+  # No federal regulator clause: US gambling advertising is state-regulated and
+  # outside the current US-federal regulator scope, so platforms carry the rules.
+  # =========================================================================
+  - canonical_id: gambling.realmoney_requires_license_and_authorization
+    category_id: gambling
+    clause_ids:
+      - meta.gambling.authorization_and_license
+      - google.gambling.certification_license
+      - tiktok.gambling.certification_license
+    relation: equivalent
+    confidence: high
+    note: >
+      Real-money / online gambling ads are allowed only after the platform
+      authorizes/certifies the advertiser and the advertiser holds a valid
+      license (or is otherwise lawful) in the targeted market: Meta
+      (Authorizations & Verifications + license/lawful evidence), Google
+      (country-specific certification + maintained license), TikTok (certification
+      process + license documents; only legal markets). Genuinely equivalent.
+
+  - canonical_id: gambling.no_minors_targeting
+    category_id: gambling
+    clause_ids:
+      - meta.gambling.no_minors
+      - google.gambling.minors
+      - tiktok.gambling.minors
+    relation: equivalent
+    confidence: high
+    note: >
+      Gambling/gaming ads must never target or be shown to minors: Meta (no
+      under-18 targeting), Google (never target minors), TikTok (not shown to or
+      directed at minors; no underage people featured).
+
+  - canonical_id: gambling.responsible_gambling_required
+    category_id: gambling
+    clause_ids:
+      - google.gambling.responsible
+      - tiktok.gambling.responsible
+    relation: related
+    confidence: high
+    note: >
+      Gambling ads must promote responsible gambling: Google (landing page must
+      display responsible-gambling information) and TikTok (risk warnings,
+      legally mandated disclaimers/taglines, addiction-resource links). Meta's
+      quoted policy emphasizes authorization/age rather than a responsible-
+      gambling disclosure, so it is intentionally not mapped here.
+
+  - canonical_id: gambling.social_casino_no_real_money
+    category_id: gambling
+    clause_ids:
+      - meta.gambling.social_casino
+      - tiktok.gambling.social_casino_no_real_money
+    relation: related
+    confidence: high
+    note: >
+      Social-casino / gambling-like games may be advertised (without full
+      gambling authorization) only if they offer no real money or items of
+      monetary value: Meta (no opportunity to win money/coins/anything of
+      monetary value; 18+) and TikTok (no real money/financial rewards; ad must
+      make clear players cannot win real money).

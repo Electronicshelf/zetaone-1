@@ -85,6 +85,10 @@ policies:
         version: "personalized-advertising clarification"
         summary: "Clarified Demand Gen/Discovery use advertiser-curated audiences by default and may be restricted when promoting sensitive interest categories."
         url: https://support.google.com/adspolicy/answer/143465
+      - date: 2025-01-01
+        version: "Gambling and games (answer 15132179)"
+        summary: "Gambling and games policy: country-specific certification, maintained license, responsible-gambling landing page, never target minors."
+        url: https://support.google.com/adspolicy/answer/15132179
 
   - source_id: tiktok_ads_us
     policy_title: "TikTok Advertising Policies"

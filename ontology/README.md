@@ -17,8 +17,8 @@ mappings + a labeled evaluation dataset with measured precision/recall.
 | `corpus/linkedin_ads_us.yaml` | LinkedIn Ads (US) — Financial + Discrimination + Political clauses + rules |
 | `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB + HUD + EEOC + FEC + CCPA/CPRA + TTB (US) clauses + rules (Misleading + Health + Financial + Housing/Employment + Political + Minors/COPPA + Privacy + Alcohol/Tobacco) |
 | `mappings.yaml` | Cross-source links: equivalent clauses → one `canonical_id` |
-| `examples/eval_seed.yaml` | Labeled evaluation dataset (450 examples: 30 misleading + 60 health + 60 financial + 60 housing/employment + 60 political + 60 children/minors + 60 privacy + 60 alcohol/tobacco/cannabis) |
-| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.8) |
+| `examples/eval_seed.yaml` | Labeled evaluation dataset (510 examples: 30 misleading + 60 health + 60 financial + 60 housing/employment + 60 political + 60 children/minors + 60 privacy + 60 alcohol/tobacco/cannabis + 60 gambling) |
+| `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.9) |
 | `policy_versions.yaml` | Sidecar policy-metadata registry: per-source version / effective / last-updated / deprecated-superseded status / officially published change history (not part of the frozen schema) |
 | `validate.py` | Validator: parse + referential integrity + evidence/applicability completeness |
 
@@ -51,10 +51,10 @@ category ─< clause >── source
 
 ## Scope so far
 
-- **Categories:** `misleading` (deep), `health` (deep), `financial` (deep), `discrimination` (Housing/Employment, deep), `political` (deep), `minors` (Children / Minors, deep), `privacy` (deep), `alcohol` (deep), `drugs` (Tobacco/Nicotine/Cannabis, deep)
+- **Categories:** `misleading` (deep), `health` (deep), `financial` (deep), `discrimination` (Housing/Employment, deep), `political` (deep), `minors` (Children / Minors, deep), `privacy` (deep), `alcohol` (deep), `drugs` (Tobacco/Nicotine/Cannabis, deep), `gambling` (deep)
 - **Sources:** Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, FTC, FDA, SEC, FINRA, CFPB, HUD, EEOC, FEC, CCPA/CPRA, TTB
 - **Jurisdiction:** US
-- **Current corpus version:** `Ad Corpus v0.8` (see `corpus_version.yaml`)
+- **Current corpus version:** `Ad Corpus v0.9` (see `corpus_version.yaml`)
 
 ### Misleading / Deceptive — canonical rules (vertical 1)
 
@@ -232,6 +232,28 @@ services (Tobacco, Recreational drugs, CBD), TikTok Dangerous Products or
 Services, TTB (FAA Act; 27 CFR parts 4, 5, 7), FDA (21 CFR 1140.32). Jurisdiction:
 US only.
 
+### Gambling & Gaming — canonical rules (vertical 9, category `gambling`)
+
+| `canonical_id` | Sources mapped |
+|----------------|----------------|
+| `gambling.realmoney_requires_license_and_authorization` | Meta, Google, TikTok |
+| `gambling.no_minors_targeting` | Meta, Google, TikTok |
+| `gambling.responsible_gambling_required` | Google, TikTok |
+| `gambling.social_casino_no_real_money` | Meta, TikTok |
+
+All four canonicals are cross-source: real-money/online gambling requires platform
+authorization/certification + a valid license in the targeted market (Meta,
+Google, TikTok); gambling ads must never target minors (Meta, Google, TikTok);
+responsible-gambling information/warnings are required (Google landing page;
+TikTok warnings/disclaimers/hotlines); and social-casino / gambling-like games are
+allowed without full authorization only if they offer no real money or items of
+monetary value (Meta, TikTok). No federal regulator clause — US gambling
+advertising is **state-regulated** and outside the current US-federal regulator
+scope, so the platforms carry these rules.
+
+Gambling sources: Meta Online Gambling and Games, Google Gambling and games,
+TikTok Gambling and Games. Jurisdiction: US only.
+
 ### Policy-metadata registry (`policy_versions.yaml`)
 
 A **sidecar** (not part of the frozen schema) that records, per official source/
@@ -265,7 +287,8 @@ the eval dataset:
 - **Ad Corpus v0.5** — adds Political & Social Issues (frozen)
 - **Ad Corpus v0.6** — adds Children / Minors + `policy_versions.yaml` sidecar (frozen)
 - **Ad Corpus v0.7** — adds Privacy & Personal Data (frozen)
-- **Ad Corpus v0.8** — adds Alcohol / Tobacco / Cannabis (frozen, current)
+- **Ad Corpus v0.8** — adds Alcohol / Tobacco / Cannabis (frozen)
+- **Ad Corpus v0.9** — adds Gambling & Gaming (frozen, current)
 
 ## Build order
 
@@ -278,9 +301,10 @@ the eval dataset:
 7. ✅ Children / Minors vertical: Meta + Google + TikTok + FTC COPPA, mapped → **Ad Corpus v0.6** (60 eval examples). Adds `policy_versions.yaml` sidecar.
 8. ✅ Privacy & Personal Data vertical: Meta + Google + LinkedIn + TikTok + CCPA/CPRA, mapped → **Ad Corpus v0.7** (60 eval examples).
 9. ✅ Alcohol / Tobacco / Cannabis vertical: Meta + Google + TikTok + TTB + FDA, mapped → **Ad Corpus v0.8** (60 eval examples).
-10. Next domains (by business impact): Gambling & Gaming → Intellectual Property / Counterfeit.
-11. Build the 1,000+ labeled evaluation dataset across frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
-12. Phase 2 — Add the `ontology/precedents/` layer (enforcement actions, warning letters, consent orders, settlements, court cases, policy updates) linking policy → canonical rule → precedent → evidence → verdict. Begins only after the five remaining domains are complete + validated. Then add jurisdictions (EU/UK) and platforms (X, Amazon Ads).
+10. ✅ Gambling & Gaming vertical: Meta + Google + TikTok, mapped → **Ad Corpus v0.9** (60 eval examples).
+11. Next domain (by business impact): Intellectual Property / Counterfeit.
+12. Build the 1,000+ labeled evaluation dataset across frozen verticals; measure precision/recall per `category_id` and per `canonical_id`.
+13. Phase 2 — Add the `ontology/precedents/` layer (enforcement actions, warning letters, consent orders, settlements, court cases, policy updates) linking policy → canonical rule → precedent → evidence → verdict. Begins only after the five remaining domains are complete + validated. Then add jurisdictions (EU/UK) and platforms (X, Amazon Ads).
 
 > Clause text is sourced from official policy pages (Meta Transparency Center,
 > Google Ads Help, TikTok Business Help Center, LinkedIn Advertising Policies,

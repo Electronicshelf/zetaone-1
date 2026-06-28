@@ -1,6 +1,6 @@
 # Evaluation dataset — Misleading + Health + Financial + Housing/Employment +
-# Political/Social-Issues + Children/Minors + Privacy + Alcohol/Tobacco/Cannabis.
-# 450 examples total:
+# Political + Children/Minors + Privacy + Alcohol/Tobacco/Cannabis + Gambling.
+# 510 examples total:
 #   Misleading:           30 (10 non_compliant, 10 compliant, 10 borderline)
 #   Health:               60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Financial:            60 (20 non_compliant, 20 compliant, 20 borderline)
@@ -9,6 +9,7 @@
 #   Children/Minors:      60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Privacy:              60 (20 non_compliant, 20 compliant, 20 borderline)
 #   Alcohol/Tobacco/Cannabis: 60 (20 non_compliant, 20 compliant, 20 borderline)
+#   Gambling/Gaming:      60 (20 non_compliant, 20 compliant, 20 borderline)
 # Labeled examples linked to clauses/categories. Compute precision/recall PER
 # category_id and PER canonical_id from these. Conforms to entities.example.
 # labeled_by: expert here = seed authoring; replace with reviewed labels as the
@@ -5088,3 +5089,655 @@ examples:
     labeled_by: expert
     split: dev
     note: "Tobacco-free nicotine pouches still fall under platform nicotine bans."
+
+  # =========================================================================
+  # GAMBLING & GAMING (60)
+  # non_compliant = unlicensed/uncertified gambling, targeting minors, no
+  # responsible-gambling info, or social-casino offering real money. compliant =
+  # licensed+certified 21+ ads with responsible-gambling info, real-money-free
+  # social casino, or offline venues not promoting online gambling. borderline =
+  # fantasy sports / sweepstakes / loot boxes / skill-game edge cases.
+  # =========================================================================
+  # ---------------------- NON-COMPLIANT (20) ----------------------
+  - id: gmb_nc_001
+    content: "[Online casino ad with no gambling certification or license]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.authorization_and_license
+      - google.gambling.certification_license
+      - tiktok.gambling.certification_license
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_002
+    content: "[Sports-betting ad targeting users aged 16-20]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.no_minors
+      - google.gambling.minors
+      - tiktok.gambling.minors
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_003
+    content: "[Sportsbook ad with no responsible-gambling information on the landing page]"
+    modality: landing_page
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - google.gambling.responsible
+      - tiktok.gambling.responsible
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_004
+    content: "[Social casino app ad offering real cash jackpots, run without authorization]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.social_casino
+      - tiktok.gambling.social_casino_no_real_money
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_005
+    content: "Bet now on our offshore casino — no license needed!"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.authorization_and_license
+      - google.gambling.certification_license
+      - tiktok.gambling.certification_license
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_006
+    content: "[Lottery ad shown to a teenage audience]"
+    modality: image
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.minors
+      - meta.gambling.no_minors
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_007
+    content: "[Poker site ad in a US state without Google certification]"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - google.gambling.certification_license
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_008
+    content: "[Slots app ad featuring cartoon characters that appeal to children]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.minors
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_009
+    content: "[Casino ad with no risk warnings or addiction-hotline links]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.responsible
+      - google.gambling.responsible
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_010
+    content: "[Free-to-play 'social' slots ad promising real-money cashouts]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.social_casino
+      - tiktok.gambling.social_casino_no_real_money
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_011
+    content: "[Unlicensed crypto-casino ad]"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.authorization_and_license
+      - google.gambling.certification_license
+      - tiktok.gambling.certification_license
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_012
+    content: "[Betting ad targeting a 17-year-old gaming audience]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.no_minors
+      - google.gambling.minors
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_013
+    content: "[Gambling ad featuring an underage person]"
+    modality: image
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.minors
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_014
+    content: "[Online gambling ad running in an unsupported Meta market]"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.authorization_and_license
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_015
+    content: "[Sweepstakes-casino ad implying you can win real money, no certification]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.social_casino_no_real_money
+      - meta.gambling.social_casino
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_016
+    content: "[Sportsbook ad with no legally mandated disclaimers or taglines]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.responsible
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_017
+    content: "[Online gambling ad served without Google certification]"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - google.gambling.certification_license
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_018
+    content: "[Casino app ad targeting minors with flashy reward animations]"
+    modality: video
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.no_minors
+      - google.gambling.minors
+      - tiktok.gambling.minors
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_nc_019
+    content: "[Social casino ad offering coins redeemable for cash]"
+    modality: image
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - meta.gambling.social_casino
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_nc_020
+    content: "[Betting-platform ad promoting unlicensed gambling services]"
+    modality: text
+    label: non_compliant
+    category_ids: [gambling]
+    violated_clause_ids:
+      - tiktok.gambling.certification_license
+      - meta.gambling.authorization_and_license
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  # ---------------------- COMPLIANT (20) ----------------------
+  - id: gmb_c_001
+    content: "[Licensed, Google-certified sportsbook ad targeting 21+ in an approved state]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: test
+
+  - id: gmb_c_002
+    content: "[Casino ad with responsible-gambling info and a hotline on the landing page]"
+    modality: landing_page
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_003
+    content: "[Social casino app ad with no real-money winnings, targeting 18+]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_004
+    content: "[Brick-and-mortar Las Vegas casino ad not promoting online gambling]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_005
+    content: "[State-lottery ad targeting adults with a responsible-play message]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_006
+    content: "[Meta-authorized online gambling ad with a valid license, targeting 18+]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_007
+    content: "[Sportsbook ad including 'Gambling problem? Call 1-800-GAMBLER']"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_008
+    content: "[Free-to-play puzzle game ad with no monetary winnings]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_009
+    content: "[TikTok-certified gambling ad in a legal market with risk warnings]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_010
+    content: "[Poker-room ad targeting 21+ with a responsible-gambling link]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_011
+    content: "[Casino-entertainment concert ad not promoting online gambling]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_012
+    content: "[Licensed online casino ad excluding minors and unsupported markets]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_013
+    content: "[Social slots ad making clear that players cannot win real money]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_014
+    content: "[Sports-betting ad with legally mandated disclaimers and 21+ targeting]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_015
+    content: "[Certified gambling ad targeting only approved countries]"
+    modality: text
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_016
+    content: "[Amusement-arcade ad with no real-money gambling]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_017
+    content: "[Responsible-gambling PSA from a state regulator]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_018
+    content: "[Daily-fantasy ad where permitted, licensed, 21+, with disclaimers]"
+    modality: video
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_019
+    content: "[Online casino ad with valid license documentation on file]"
+    modality: text
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_c_020
+    content: "[Free mobile game ad with optional cosmetic purchases, no gambling]"
+    modality: image
+    label: compliant
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  # ---------------------- BORDERLINE (20) ----------------------
+  - id: gmb_b_001
+    content: "[Daily fantasy sports ad]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Legal status of DFS varies by state."
+
+  - id: gmb_b_002
+    content: "[Loot-box mobile game ad]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Gambling-adjacent mechanics; treatment varies."
+
+  - id: gmb_b_003
+    content: "[Sweepstakes promotion, no purchase necessary]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_004
+    content: "[Free-to-play casino game ad with in-app purchases but no cash payout]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_005
+    content: "[Sports-odds/statistics content from a betting affiliate]"
+    modality: text
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+    note: "Gambling-information content; certification may be required by platform."
+
+  - id: gmb_b_006
+    content: "[Skill-based cash tournament game ad]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_007
+    content: "[Crypto 'play-to-earn' game ad]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_008
+    content: "[Prize-draw raffle for a registered charity]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_009
+    content: "[Esports tournament ad with an entry fee and prize pool]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_010
+    content: "[Social poker app ad using virtual chips only]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_011
+    content: "[Gift-card giveaway requiring a follow and share]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_012
+    content: "[Horse-racing event ad]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_013
+    content: "[Arcade redemption game ad (tickets exchanged for prizes)]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_014
+    content: "[Stock-trading app ad gamified with 'win' language]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_015
+    content: "[Mobile game ad featuring a spin-the-wheel daily bonus]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_016
+    content: "[In-person bingo hall ad]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_017
+    content: "[Fantasy-league app ad with no entry fee]"
+    modality: video
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_018
+    content: "[Non-gambling brand ad using a slot-machine emoji in a giveaway]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_019
+    content: "[Scratch-card-style promo game offering discount prizes]"
+    modality: image
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev
+
+  - id: gmb_b_020
+    content: "[Betting-tips newsletter subscription ad]"
+    modality: text
+    label: borderline
+    category_ids: [gambling]
+    violated_clause_ids: []
+    jurisdiction: US
+    labeled_by: expert
+    split: dev

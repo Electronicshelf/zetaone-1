@@ -1091,6 +1091,93 @@ clauses:
       section: "Dangerous products or services > Recreational drugs > CBD"
       retrieved_at: 2026-06-27
 
+  # ===================== Gambling & Gaming =====================
+  - id: google.gambling.certification_license
+    source_id: google_ads_us
+    category_id: gambling
+    text: >
+      Google only allows advertising of online gambling and online
+      gambling-promoting content in listed countries where the country-specific
+      certification criteria are met. Advertisers must apply for and obtain
+      certification and maintain any required license, authorization, or
+      registration; serving gambling ads without a valid certification may result
+      in the account being prohibited from running ads.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "adspolicy-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        We only allow advertising of online gambling and online
+        gambling-promoting content in the countries listed below and where the
+        country-specific certification criteria are met. ... Advertisers must
+        maintain any license, authorization, registration or similar required
+        under this policy ... Serving gambling ads without a valid certification
+        may result in your account being prohibited from running ads until you
+        apply for and receive certification.
+      source_url: https://support.google.com/adspolicy/answer/15132179
+      section: "Advertising Policies > Gambling and games"
+      retrieved_at: 2026-06-27
+
+  - id: google.gambling.minors
+    source_id: google_ads_us
+    category_id: gambling
+    text: >
+      Gambling and online gambling-promoting content ads and destinations must
+      only target approved countries and must never target minors.
+    modalities: [text, image, video, landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "adspolicy-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Gambling and online gambling-promoting content ads and destinations must
+        also: only target approved countries, have a landing page that displays
+        information about responsible gambling and never target minors.
+      source_url: https://support.google.com/adspolicy/answer/15132179
+      section: "Advertising Policies > Gambling and games > Requirements"
+      retrieved_at: 2026-06-27
+
+  - id: google.gambling.responsible
+    source_id: google_ads_us
+    category_id: gambling
+    text: >
+      Gambling ads and destinations must have a landing page that displays
+      information about responsible gambling.
+    modalities: [landing_page]
+    jurisdiction: [US]
+    effective_date: 2024-01-01
+    version: "adspolicy-gambling-and-games"
+    status: active
+    last_verified_at: 2026-06-27
+    last_reviewed_by: ai
+    applicability:
+      countries: [US]
+      audience: ["21+"]
+      industries: [gambling]
+    evidence:
+      quote: >-
+        Gambling and online gambling-promoting content ads and destinations must
+        also: only target approved countries, have a landing page that displays
+        information about responsible gambling and never target minors.
+      source_url: https://support.google.com/adspolicy/answer/15132179
+      section: "Advertising Policies > Gambling and games > Requirements"
+      retrieved_at: 2026-06-27
+
 rules:
   - id: google_unreliable_claims
     canonical_id: misleading.exaggerated_results
@@ -1457,4 +1544,42 @@ rules:
       ingestible CBD (supplements, food additives, inhalants), or THC >0.3%.
     exceptions:
       - "Topical hemp-derived CBD <=0.3% THC, certified, targeting only CA/CO/PR."
+    status: active
+
+  # --- Gambling & Gaming ---
+  - id: google_gambling_certification
+    canonical_id: gambling.realmoney_requires_license_and_authorization
+    clause_ids: [google.gambling.certification_license]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 64
+    detection: >
+      Online gambling ads served without valid Google certification / license in
+      approved countries.
+    exceptions:
+      - "Certified advertisers with valid license, targeting approved countries."
+    status: active
+
+  - id: google_gambling_minors
+    canonical_id: gambling.no_minors_targeting
+    clause_ids: [google.gambling.minors]
+    category_id: gambling
+    severity: high
+    modalities: [text, image, video, landing_page]
+    priority: 66
+    detection: "Gambling ads targeting minors or unapproved countries."
+    exceptions: []
+    status: active
+
+  - id: google_gambling_responsible
+    canonical_id: gambling.responsible_gambling_required
+    clause_ids: [google.gambling.responsible]
+    category_id: gambling
+    severity: medium
+    modalities: [landing_page]
+    priority: 58
+    detection: >
+      Gambling ad landing pages lacking responsible-gambling information.
+    exceptions: []
     status: active

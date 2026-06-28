@@ -3,7 +3,7 @@
 # reproducible and benchmarkable alongside the evaluation dataset. Bump the
 # version and add a release entry whenever a category is completed/changed.
 
-current_version: "Ad Corpus v0.8"
+current_version: "Ad Corpus v0.9"
 
 releases:
   - version: "Ad Corpus v0.1"
@@ -210,3 +210,28 @@ releases:
       recreational drugs/THC prohibited; CBD restricted-with-certification) plus
       two single-source regulator canonicals (TTB statements; FDA tobacco format)
       kept honestly unmapped.
+
+  - version: "Ad Corpus v0.9"
+    date: 2026-06-27
+    status: frozen
+    categories: [misleading, health, financial, discrimination, political, minors, privacy, alcohol, drugs, gambling]
+    sources: [meta_ads_us, google_ads_us, tiktok_ads_us, linkedin_ads_us, ftc_us, fda_us, sec_us, finra_us, cfpb_us, hud_us, eeoc_us, fec_us, ccpa_ca, ttb_us]
+    canonical_rules_added:
+      - gambling.realmoney_requires_license_and_authorization   # Meta, Google, TikTok
+      - gambling.no_minors_targeting                            # Meta, Google, TikTok
+      - gambling.responsible_gambling_required                  # Google, TikTok
+      - gambling.social_casino_no_real_money                    # Meta, TikTok
+    eval_examples: 510       # + 60 gambling/gaming
+    schema_version: "1.0.0"  # unchanged; schema frozen
+    note: >
+      Adds Gambling & Gaming vertical (category `gambling`) from official Meta
+      (Online Gambling and Games — authorization + license/lawful; no under-18;
+      social-casino-without-monetary-value), Google (Gambling and games —
+      country-specific certification + maintained license; responsible-gambling
+      landing page; never target minors), and TikTok (Gambling and Games —
+      certification + license in legal markets; responsible-gambling warnings;
+      not shown to minors; social games must not involve real money). Four
+      cross-source canonicals, all honestly mapped; no federal regulator clause
+      (US gambling advertising is state-regulated, outside the current US-federal
+      regulator scope). Every clause carries an `evidence` block +
+      `last_reviewed_by: ai`.
