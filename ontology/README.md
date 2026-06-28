@@ -1,5 +1,8 @@
 # ZataOne Canonical Compliance Ontology
 
+**Architecture reference:** see [`ONTOLOGY_MAP.md`](ONTOLOGY_MAP.md) for the
+canonical system map (entities, stats, pipeline, commands, AI-agent summary).
+
 One unified corpus where every **platform** (Meta, Google, TikTok, …) and
 **regulator** (FTC, FDA, …) policy maps into the **same underlying ontology**.
 This is the foundation for ZataOne's moat: structured corpus + cross-source
