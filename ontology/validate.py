@@ -13,6 +13,9 @@ import sys
 
 import yaml
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from examples.load_eval import load_eval_with_sources  # noqa: E402
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 AUDIENCE = {"all", "under_13", "minors", "13+", "16+", "18+", "21+", "25+"}
@@ -132,27 +135,28 @@ def main() -> int:
                  f"({srcs_in_map}); fine if intentional.")
 
     # ---- examples ------------------------------------------------------
-    ex = load(os.path.join(ROOT, "examples", "eval_seed.yaml"))
+    ex_list, ex_sources = load_eval_with_sources(ROOT)
     counts: dict[str, int] = {}
     seen_ids: set[str] = set()
-    for e in ex.get("examples", []):
+    for e in ex_list:
         eid = e["id"]
+        src = ex_sources.get(eid, "eval")
         if eid in seen_ids:
-            err(f"eval_seed.yaml: duplicate example id {eid}")
+            err(f"{src}: duplicate example id {eid}")
         seen_ids.add(eid)
         if e.get("label") not in EXAMPLE_LABEL:
-            err(f"eval_seed.yaml: {eid} bad label {e.get('label')}")
+            err(f"{src}: {eid} bad label {e.get('label')}")
         counts[e.get("label", "?")] = counts.get(e.get("label", "?"), 0) + 1
         for cat in e.get("category_ids", []):
             if cat not in categories:
-                err(f"eval_seed.yaml: {eid} unknown category {cat}")
+                err(f"{src}: {eid} unknown category {cat}")
         for cid in e.get("violated_clause_ids", []) or []:
             if cid not in clause_ids:
-                err(f"eval_seed.yaml: {eid} unknown violated clause {cid}")
+                err(f"{src}: {eid} unknown violated clause {cid}")
         if e.get("label") == "compliant" and (e.get("violated_clause_ids") or []):
-            err(f"eval_seed.yaml: {eid} compliant but has violated_clause_ids")
+            err(f"{src}: {eid} compliant but has violated_clause_ids")
         if e.get("label") == "non_compliant" and not (e.get("violated_clause_ids") or []):
-            err(f"eval_seed.yaml: {eid} non_compliant but no violated_clause_ids")
+            err(f"{src}: {eid} non_compliant but no violated_clause_ids")
 
     # ---- policy_versions sidecar (optional; NOT part of frozen schema) -
     pv_path = os.path.join(ROOT, "policy_versions.yaml")

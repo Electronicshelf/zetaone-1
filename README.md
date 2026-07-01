@@ -41,7 +41,7 @@ flowchart TB
   end
 
   subgraph learn["Learning & proof"]
-    E["570 labeled eval examples"]
+    E["614 eval examples<br/>570 seed + 44 precedent"]
     PR["128 verified precedents"]
   end
 

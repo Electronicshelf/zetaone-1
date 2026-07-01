@@ -16,6 +16,8 @@ from collections import Counter, defaultdict
 import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+from examples.load_eval import load_eval_examples  # noqa: E402
 
 
 def load(path: str):
@@ -60,7 +62,7 @@ def collect_precedents():
 
 
 def collect_examples():
-    return load(os.path.join(ROOT, "examples", "eval_seed.yaml")).get("examples", []) or []
+    return load_eval_examples(ROOT)
 
 
 def source_jurisdiction_map(sources: dict[str, dict]) -> dict[str, list]:

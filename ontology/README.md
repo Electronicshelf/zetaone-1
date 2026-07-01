@@ -28,7 +28,7 @@ flowchart TB
   end
 
   subgraph learn["Learning & proof"]
-    E["570 labeled eval examples"]
+    E["614 eval examples<br/>570 seed + 44 precedent"]
     PR["128 verified precedents"]
   end
 
@@ -75,7 +75,10 @@ benchmarks. Full detail: [`ONTOLOGY_MAP.md`](ONTOLOGY_MAP.md).
 | `corpus/regulators_au.yaml` | ACCC / ACL (AU) — Misleading starter |
 | `corpus/regulators_us.yaml` | FTC + FDA + SEC + FINRA + CFPB + HUD + EEOC + FEC + CCPA/CPRA + TTB (US) clauses + rules (Misleading + Health + Financial + Housing/Employment + Political + Minors/COPPA + Privacy + Alcohol/Tobacco) |
 | `mappings.yaml` | Cross-source links: equivalent clauses → one `canonical_id` |
-| `examples/eval_seed.yaml` | Labeled evaluation dataset (570 examples: 30 misleading + 60 health + 60 financial + 60 housing/employment + 60 political + 60 children/minors + 60 privacy + 60 alcohol/tobacco/cannabis + 60 gambling + 60 ip/counterfeit) |
+| `examples/eval_seed.yaml` | Labeled evaluation dataset — **570 synthetic seed** examples (30 misleading + 60 per vertical × 9) |
+| `examples/eval_precedents.yaml` | **44 real-world** eval rows derived from verified enforcement precedents (all `non_compliant`, `test` split) |
+| `examples/load_eval.py` | Loader merging seed + precedent eval files for validate/coverage |
+| `tools/build_eval_precedents.py` | Regenerate `eval_precedents.yaml` from curated precedent list |
 | `corpus_version.yaml` | Frozen, versioned corpus releases (Ad Corpus v0.1 … v0.11) |
 | `precedents/` | Phase 2 enforcement-precedent layer (Policy → Canonical Rule → Precedent → Evidence → Verdict) |
 | `policy_timeline.yaml` | Per-clause policy diff timeline: introduced / modified / deprecated + official change history |

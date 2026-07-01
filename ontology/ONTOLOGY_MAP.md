@@ -200,7 +200,9 @@ erDiagram
 | Rule | `corpus/*.yaml` | **128** |
 | Mapping | `mappings.yaml` | **37** cross-source entries |
 | Canonical rule (unique ids) | `mappings.yaml` + corpus rules | **52** |
-| Example | `examples/eval_seed.yaml` | **570** |
+| Example (seed) | `examples/eval_seed.yaml` | **570** |
+| Example (precedent) | `examples/eval_precedents.yaml` | **44** |
+| Example (total) | merged via `load_eval.py` | **614** |
 | Precedent | `precedents/*.yaml` | **128** |
 
 Categories **defined but without clauses yet:** `adult`, `restricted_products`.
@@ -358,7 +360,15 @@ Mapping fields: `canonical_id`, `category_id`, `clause_ids[]`, `relation`
 
 ## Evaluation Dataset
 
-**File:** `examples/eval_seed.yaml`
+**Files:**
+
+| File | Role | Count |
+|------|------|------:|
+| `examples/eval_seed.yaml` | Synthetic seed (balanced labels) | **570** |
+| `examples/eval_precedents.yaml` | Real-world rows from enforcement precedents | **44** |
+| **Total** (merged by `load_eval.py`) | | **614** |
+
+### Seed set (`eval_seed.yaml`)
 
 | Metric | Value |
 |--------|------:|
@@ -369,7 +379,17 @@ Mapping fields: `canonical_id`, `category_id`, `clause_ids[]`, `relation`
 | Default jurisdiction | `US` |
 | `labeled_by` | `expert` (seed authoring) |
 
-**Examples per vertical** (from file header and coverage):
+### Precedent-derived set (`eval_precedents.yaml`)
+
+| Metric | Value |
+|--------|------:|
+| Total examples | **44** |
+| Label | all `non_compliant` |
+| Split | all `test` (real-world holdout) |
+| Provenance | `note: derived_from: prec.*` |
+| Regenerate | `python ontology/tools/build_eval_precedents.py` |
+
+**Examples per vertical** (seed only — from file header and coverage):
 
 | Vertical | Examples | Balance |
 |----------|--------:|---------|
@@ -505,7 +525,7 @@ flowchart TD
 | Tool | Purpose | Current result |
 |------|---------|----------------|
 | `validate.py` | Schema + referential integrity for corpus, eval, precedents, sidecars | **OK** |
-| `coverage.py` | Stats and gap report (human or `--json`) | 157 clauses, 128 precedents, 570 evals |
+| `coverage.py` | Stats and gap report (human or `--json`) | 157 clauses, 128 precedents, 614 evals |
 | `run_retrieval_tests.py` | Keyword retrieval baseline against corpus | **21/21 passed** |
 | `retrieval_tests.yaml` | Test definitions (query + required hits) | 21 tests |
 | `build_policy_timeline.py` | Regenerate `policy_timeline.yaml` from corpus + `policy_versions.yaml` | Manual |
@@ -634,7 +654,9 @@ ontology/
 │   └── hud_expansion.yaml   # HUD Facebook housing charge
 │
 ├── examples/
-│   └── eval_seed.yaml       ← 570 labeled evaluation examples
+│   ├── eval_seed.yaml       ← 570 synthetic seed eval examples
+│   ├── eval_precedents.yaml ← 44 precedent-derived eval (test holdout)
+│   └── load_eval.py         ← merges seed + precedent eval for validate/coverage
 │
 ├── policy_versions.yaml     ← 11 policy metadata entries (version/effective/status)
 ├── policy_timeline.yaml     ← 157 per-clause lifecycle events
@@ -650,7 +672,8 @@ ontology/
     ├── backfill_precedent_metadata.py
     ├── generate_phase1_precedents.py
     ├── generate_phase2_precedents.py
-    └── generate_phase3_precedents.py
+    ├── generate_phase3_precedents.py
+    └── build_eval_precedents.py
 ```
 
 ### Purpose of each major artifact
@@ -690,7 +713,7 @@ Derived from `validate.py` + `coverage.py --json` on 2026-06-27:
 | Canonical rules (unique) | 52 |
 | Cross-source canonicals | 37 |
 | Single-source canonicals | 15 |
-| Eval examples | 570 |
+| Eval examples | 614 (570 seed + 44 precedent-derived) |
 | Precedents | 128 |
 | Policy version entries | 11 |
 | Policy timeline entries | 157 |
@@ -709,7 +732,7 @@ Derived from `validate.py` + `coverage.py --json` on 2026-06-27:
 
 Ordered by current project priority after completing the US precedent layer (128 cases):
 
-1. **Large-scale evaluation dataset (10k–100k+ examples)** — expand beyond 570 seed
+1. **Large-scale evaluation dataset (10k–100k+ examples)** — expand beyond 614 (570 seed + 44 precedent-derived)
    examples; add multimodal (image/video) items; inter-annotator agreement before
    external metrics.
 2. **Embedding + retrieval benchmarks** — complement the 21-test keyword baseline
@@ -734,7 +757,7 @@ Paste this block as system context. Regenerate counts with the commands in
 
 ```yaml
 # ZetaOne Ontology — machine-readable map
-# Generated: 2026-06-27
+# Generated: 2026-07-01
 # Canonical doc: ontology/ONTOLOGY_MAP.md
 
 project: ZetaOne
@@ -756,9 +779,11 @@ counts:
   canonical_cross_source: 37
   canonical_single_source: 15
   mapping_entries: 37
-  eval_examples: 570
-  eval_labels: { compliant: 190, non_compliant: 190, borderline: 190 }
-  eval_splits: { train: 77, dev: 342, test: 151 }
+  eval_examples: 614
+  eval_seed: 570
+  eval_precedents: 44
+  eval_labels: { compliant: 190, non_compliant: 234, borderline: 190 }
+  eval_splits: { train: 77, dev: 342, test: 195 }
   precedents: 128
   precedent_confidence: verified
   policy_version_entries: 11

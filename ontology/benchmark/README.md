@@ -23,7 +23,7 @@ python ontology/tools/build_policy_timeline.py
 |------|---------|
 | `retrieval_tests.yaml` | Labeled queries with required hits in top_k |
 | `run_retrieval_tests.py` | Runs token-overlap retrieval benchmark |
-| `coverage.py` | Reports corpus/precedent/eval gaps |
+| `coverage.py` | Reports corpus/precedent/eval gaps (seed + precedent eval files) |
 
 ## Coverage dimensions
 
