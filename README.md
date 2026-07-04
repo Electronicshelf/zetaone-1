@@ -19,6 +19,54 @@ The platform follows a strict separation of concerns: AI extracts signals, the p
 
 ---
 
+## Compliance ontology corpus
+
+Structured ad-compliance knowledge base: every **platform** (Meta, Google, TikTok, …) and **regulator** (FTC, FDA, SEC, …) policy maps into one shared schema — cross-source canonical rules, labeled evals, and verified enforcement precedents.
+
+```mermaid
+flowchart TB
+  subgraph sources["25 sources"]
+    P["12 ad platforms<br/>Meta · Google · TikTok · …"]
+    R["13 regulators<br/>FTC · FDA · SEC · …"]
+  end
+
+  subgraph policy["Policy layer"]
+    C["157 clauses · 11 categories"]
+    Ru["128 rules"]
+  end
+
+  subgraph unify["Unification"]
+    CR["52 canonical rules"]
+    M["37 cross-source mappings"]
+  end
+
+  subgraph learn["Learning & proof"]
+    E["614 eval examples<br/>570 seed + 44 precedent"]
+    PR["128 verified precedents"]
+  end
+
+  subgraph check["Quality"]
+    V["validate.py"]
+    B["benchmark · 21/21 retrieval tests"]
+  end
+
+  P --> C
+  R --> C
+  C --> Ru --> CR
+  CR --> M
+  CR --> E
+  CR --> PR
+  C --> V
+  E --> B
+  PR --> B
+```
+
+**Flow:** policies → clauses & rules → canonical rules → mappings, evals, precedents → validation & benchmarks.
+
+Docs: [`ontology/README.md`](ontology/README.md) · full architecture map [`ontology/ONTOLOGY_MAP.md`](ontology/ONTOLOGY_MAP.md)
+
+---
+
 ## Architecture
 
 ### System schematic
@@ -265,6 +313,18 @@ Additional flags:
 | `ZATAONE_PIPELINE_ADVISORY` | Auto-run Gemini at end of pipeline | on when `GEMINI_API_KEY` set |
 
 API responses include `pipeline_mode`, `verdict_authority`, `policy_engine_ran`, `display_compliance_status`, and `deterministic_compliance_status` (when applicable).
+
+**Hybrid verdict model:** Quick and Full (engine off) use **LLM vs policy** for display. When `ZATAONE_POLICY_ENGINE_ENABLED=true`, the YAML engine is the audit authority and the LLM **explains / augments** (escalates on 0 signals or diverges).
+
+### Platform additions (merged)
+
+| Area | Notes |
+|------|--------|
+| **API keys** | `src/zataone/api/auth.py`, admin routes; migration `create_api_keys_table.sql` |
+| **Webhooks** | `webhook_service.py`; migration `create_webhooks_table.sql` |
+| **Jurisdiction** | `JurisdictionRouter` — US / EU / UK policy packs (`meta_ads_eu.yaml`, `meta_ads_uk.yaml`) |
+| **Text / video** | Expanded `TextExtractor`; `VideoExtractor` for video assets |
+| **Local smoke test** | `test_local.py` at repo root |
 
 ---
 
@@ -603,7 +663,24 @@ gcloud builds submit --config cloudbuild.yaml \
 
 ---
 
-## Future Roadmap
+## Strategic Roadmap (current priorities)
+
+Ordered by priority. The defensible moat is the combination of a deep policy corpus, a labeled evaluation dataset with measured precision/recall, and real-world enforcement data from pilot customers.
+
+| # | Priority | Status |
+|---|----------|--------|
+| 1 | **Deep ad policy corpus** (Meta / Google / TikTok first) | In progress |
+| 2 | **Large evaluation dataset + benchmarks** (clause-level labels, precision/recall per policy category) | Next |
+| 3 | **Pilot customers** (real content → labeled enforcement data flywheel) | Next |
+| 4 | **Government grants** (SBIR, innovation programs — non-dilutive, in parallel) | Planned |
+| 5 | **Government contracts** | Later (after pilots) |
+| 6 | **Additional domains** (finance, healthcare, etc.) | After proving ads |
+
+Items 1–3 run in parallel and feed each other: deepening the corpus, building the eval set, and onboarding pilots compound together.
+
+The canonical compliance ontology (schema, categories, cross-source mappings, eval seed) lives in [`ontology/`](ontology/README.md) — one unified corpus where every platform and regulator policy maps into the same schema.
+
+### Platform roadmap
 
 | Phase | Focus | Status |
 |-------|-------|--------|
